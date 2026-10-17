@@ -32,10 +32,10 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
    en mode Plan.
 2. **Ne jamais déplacer de soi-même** un élément que l'utilisateur place à la main (logos, textes,
    légende, date). Aucun repositionnement automatique non demandé.
-3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-68**), à mettre à
+3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-69**), à mettre à
    jour aux 3 endroits : la balise `<title>`, la puce `.brand .ver` du bandeau, le commentaire
    d'en-tête du `<script>`.
-   Attention : un remplacement global (`v2.1-68` → `v2.1-69` partout) modifie aussi les références
+   Attention : un remplacement global (`v2.1-69` → `v2.1-70` partout) modifie aussi les références
    historiques du journal et des commentaires ; les remettre ensuite à leur bonne valeur.
 4. **Journal des modifications** : ajouter une entrée dans le commentaire d'en-tête du `<script>`
    (à la fin de la liste des versions), avec la **cause racine** et le **correctif**.

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-68 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-69 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -387,7 +387,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-68</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-69</span></div>
   <div class="sep"></div>
   </div>
 
@@ -621,7 +621,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-68 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-69 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1361,6 +1361,17 @@
    légende était effacée par erreur (même nettoyage que les outils) ; elle est
    rétablie. Conséquence connue de (3) : plan sélectionné/déplacé/tourné
    seulement avec l'outil « Déplacer le plan ».
+   v2.1-69 : cause racine du retour de Mic (« ça continue à coller des pastilles
+   quand je change de tuile ») : depuis v2.1-68, « Placement classique » est
+   l'outil par défaut et il restait actif quelle que soit la tuile ouverte
+   (Page, Vue, Plan, Texte…), donc chaque toucher du plan posait une pastille.
+   Correctif : la dernière tuile choisie est mémorisée (activeTileId) ; choisir
+   une AUTRE tuile que Pastille décoche les outils de pose (classique et déporté)
+   — onTileChosen, appelé au clic sur une tuile ; revenir sur la tuile Pastille
+   remet Placement classique (sans écraser un Placement déporté déjà choisi). Le
+   repli automatique sur Placement classique (outil terminé, décoché, Échap) ne
+   vaut plus que sur la tuile Pastille. À l'ouverture et pour un nouveau projet,
+   inchangé : Placement classique sélectionné.
    ========================================================================= */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -4540,10 +4551,23 @@ document.getElementById('toolCutPoint').addEventListener('click', ()=>setTool('c
 // chaque nouveau projet, et rétabli dès qu'un autre outil se termine ou est décoché — il y a
 // toujours un outil actif. (Pour sélectionner, déplacer ou tourner le plan : outil « Déplacer le plan ».)
 const DEFAULT_TOOL = 'place-classic';
-function ensureDefaultTool(){ if (activeTool !== DEFAULT_TOOL) setTool(DEFAULT_TOOL); }
+// Tuile (tiroir) choisie en dernier : le repli sur "Placement classique" ne vaut que pour la tuile
+// Pastille (v2.1-69). Choisir une AUTRE tuile (Page, Vue, Plan, Texte…) désactive les outils de
+// pose de pastilles, sinon ils continuaient à coller des pastilles pendant qu'on travaillait ailleurs.
+let activeTileId = 'pastille';
+function ensureDefaultTool(){ activeTileId = 'pastille'; if (activeTool !== DEFAULT_TOOL) setTool(DEFAULT_TOOL); }
+function onTileChosen(tileId){
+  activeTileId = tileId;
+  const isPlacing = activeTool==='place-classic' || activeTool==='place-remote';
+  if (tileId === 'pastille'){
+    if (!isPlacing) setTool(DEFAULT_TOOL); // retour sur la tuile Pastille : Placement classique (ou le déporté s'il était choisi)
+  } else if (isPlacing){
+    setTool(activeTool); // décoche l'outil de pose : aucun repli, la tuile active n'est plus Pastille
+  }
+}
 function setTool(name){
   activeTool = (activeTool===name) ? null : name;
-  if (activeTool === null && name !== '__none__') activeTool = DEFAULT_TOOL;
+  if (activeTool === null && name !== '__none__' && activeTileId === 'pastille') activeTool = DEFAULT_TOOL;
   remoteAnchor = null; cutPoints=[]; cutRectStart=null; isErasing=false;
   remoteCursorDragActive = false; remoteCursorDragOnHandle = false;
   if (remoteCursorRAF){ cancelAnimationFrame(remoteCursorRAF); remoteCursorRAF = null; }
@@ -5111,6 +5135,7 @@ document.querySelectorAll('#mobileTileBar .mtile').forEach(btn=>{
   btn.addEventListener('pointerdown', (e)=>{ lastTilePointerType = e.pointerType || 'mouse'; });
   btn.addEventListener('click', (e)=>{
     e.stopPropagation();
+    onTileChosen(btn.dataset.tile); // une autre tuile désactive les outils de pose de pastilles (v2.1-69)
     // À la souris, le survol a déjà ouvert le tiroir : un clic ne doit pas le refermer
     // par erreur. Au doigt, le comportement reste la bascule habituelle (ouvrir/fermer).
     openTileDrawer(btn.dataset.tile, lastTilePointerType !== 'mouse');
@@ -5266,7 +5291,7 @@ window.addEventListener('keydown', (e)=>{
       document.getElementById('selDelete').click();
     }
   }
-  if (e.key==='Escape'){ setTool(DEFAULT_TOOL); /* Échap : retour à l'outil par défaut */ ghostGroup.destroyChildren(); uiLayer.batchDraw(); closeAllPopovers(); }
+  if (e.key==='Escape'){ if (activeTool) setTool(activeTool); /* Échap : décoche l'outil (retour au Placement classique si on est sur la tuile Pastille) */ ghostGroup.destroyChildren(); uiLayer.batchDraw(); closeAllPopovers(); }
 });
 
 /* ---------------------------- Sauvegarde / Ouverture de projet ------------------ */
