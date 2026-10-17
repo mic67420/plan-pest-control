@@ -14,7 +14,7 @@
 // CACHE_NAME : à incrémenter (v2, v3…) UNIQUEMENT si on change la liste des fichiers ci-dessous
 // ou la version d'une bibliothèque (changer index.html seul n'oblige PAS à l'incrémenter).
 
-const CACHE_NAME = "plan-pest-control-v1";
+const CACHE_NAME = "plan-pest-control-v2";
 
 const CORE_FILES = [
   "./",
@@ -40,8 +40,15 @@ self.addEventListener("install", (event) => {
     await cache.addAll(CORE_FILES);
     // Les bibliothèques sont mémorisées une par une : l'échec de l'une (pas de réseau au
     // moment de l'installation) ne doit pas empêcher l'installation des autres fichiers.
+    // On utilise fetch + put (et non cache.add) : le serveur des bibliothèques autorise la
+    // lecture depuis un autre site (CORS), la réponse est donc complète et mémorisable ; avec
+    // cache.add en mode "no-cors", la réponse « opaque » était refusée et rien n'était gardé
+    // (défaut constaté sur la v1 de ce fichier : les bibliothèques manquaient hors ligne).
     await Promise.all(LIB_URLS.map(async (url) => {
-      try { await cache.add(new Request(url, { mode: "no-cors" })); } catch (e) { /* réessayé plus tard par le cache d'exécution */ }
+      try {
+        const res = await fetch(url);
+        if (res && res.ok) await cache.put(url, res);
+      } catch (e) { /* réessayé plus tard par le cache d'exécution */ }
     }));
   })());
 });
