@@ -130,6 +130,10 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
 - Fichiers publiés : `index.html` (l'application), `manifest.json` + `icon-192.png` / `icon-512.png`
   / `apple-touch-icon.png` (installation sur l'écran d'accueil), `sw.js` (hors ligne + mise à jour).
   Les copies `*.sauvegarde.html` ne sont jamais publiées (voir `.gitignore`).
+- **ENVOI AUTOMATIQUE FORCÉ — TOUJOURS, SANS EXCEPTION** (consigne explicite de Mic) : à la fin
+  de CHAQUE livraison, même minime, et avant de répondre à Mic, l'envoi vers GitHub est fait
+  obligatoirement. Ne jamais attendre une demande, ne jamais le proposer, ne jamais l'oublier :
+  Mic doit toujours trouver la dernière version sur son téléphone.
 - **Workflow Git automatique** : après chaque modification terminée ET vérifiée (checks du §3),
   sans attendre que Mic le demande : `git add` des fichiers modifiés, `git commit` avec un message
   décrivant la version (ex. « v2.1-67 : correctif … »), puis `git push origin main`. Confirmer
