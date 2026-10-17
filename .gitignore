@@ -1,0 +1,3 @@
+# Copies de sécurité locales : ne jamais les publier
+*.sauvegarde.html
+*.backup.html
