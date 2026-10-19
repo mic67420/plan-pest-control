@@ -93,7 +93,8 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
   bornée 0,3–8 et recentrée si elle sort de la feuille.
 - **Plan importé** : rotation par **4 icônes main** (Main.svg de l'utilisateur, intégrées) au
   milieu de chaque côté ; aimant à 0/90/180/270° ; pas de ligne de mire. Au doigt, le plan ne se
-  déplace sur la feuille qu'avec l'outil « Déplacer le plan ».
+  déplace que s'il est SÉLECTIONNÉ et DÉVERROUILLÉ (outil « Déplacer le plan » supprimé en v2.1-78 ; la
+  v2.1-77, étiquette git `ref-v2.1-77`, est la référence fonctionnelle).
 - **Navigation au doigt** : maintenir puis glisser sur le plan ou une zone vide = faire défiler
   la vue, dans tous les modes ; un doigt sur une pastille la déplace, elle seule.
 - **Poignées** : dessinées en petits points, zone de saisie de 52 px conservée.

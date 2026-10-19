@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-77 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-78 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-77</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-78</span></div>
   <div class="sep"></div>
   </div>
 
@@ -457,7 +457,6 @@
 
   <div class="tb-group" data-tile="plan">
     <button class="tb-icon" id="toolImportPlan" title="Importer un plan"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="14" rx="1.3" fill="#E4EEF4" stroke="#0E6FA8" stroke-width="1.4"/><circle cx="7.5" cy="9" r="1.6" fill="#F0C447" stroke="none"/><path d="M4.2 17 9.5 12l3.5 3.5 3-3.5L20 17" fill="#BFE0F0" stroke="#0E6FA8" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
-    <button class="tb-icon" id="toolMovePlan" title="Déplacer le plan"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="#E4E8ED"/><path d="M12 4v16M4 12h16" stroke="#2B3242" stroke-width="1.6" stroke-linecap="round"/><path d="M12 4l-2 2.2M12 4l2 2.2M12 20l-2-2.2M12 20l2-2.2M4 12l2.2-2M4 12l2.2 2M20 12l-2.2-2M20 12l-2.2 2" stroke="#0E6FA8" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <button class="tb-icon" id="toolLockPlan" title="Verrouiller le plan"><svg class="icon" viewBox="0 0 24 24"><path d="M7.5 10.5V7.8a4.5 4.5 0 0 1 9 0v2.7" fill="none" stroke="#8A6A1F" stroke-width="1.7" stroke-linecap="round"/><rect x="5.5" y="10.3" width="13" height="9.7" rx="1.8" fill="#F0C447" stroke="#8A6A1F" stroke-width="1.3"/><circle cx="12" cy="14.5" r="1.5" fill="#8A6A1F" stroke="none"/><path d="M12 15.8v1.6" stroke="#8A6A1F" stroke-width="1.4" stroke-linecap="round"/></svg></button>
     <button class="tb-icon" id="toolCutRect" title="Découpe rectangulaire"><svg class="icon" viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="12" height="12" rx="1" fill="none" stroke="#0E6FA8" stroke-width="1.4" stroke-dasharray="2.6 2.2"/><path d="M18.5 3.5v3.2M18.5 3.5l2.4 1.6M18.5 3.5l-2.4 1.6" stroke="#8A93A3" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 15.5l6 5.5" stroke="#2B3242" stroke-width="1" fill="none"/><path d="M20 19.3c1 1 2 .9 2-.1s-1-1.9-2-.9" fill="#D6493E" stroke="#2B3242" stroke-width=".8"/></svg></button>
     <button class="tb-icon" id="toolCutPoint" title="Découpe point par point"><svg class="icon" viewBox="0 0 24 24"><path d="M4.5 8 9.5 4l8.5 3-2 8.5-7.5 3.5-4-5Z" fill="none" stroke="#0E6FA8" stroke-width="1.4" stroke-dasharray="2.4 2" stroke-linejoin="round"/><circle cx="4.5" cy="8" r="1.5" fill="#0E6FA8" stroke="#FFFFFF" stroke-width=".8"/><circle cx="9.5" cy="4" r="1.5" fill="#0E6FA8" stroke="#FFFFFF" stroke-width=".8"/><circle cx="18" cy="7" r="1.5" fill="#0E6FA8" stroke="#FFFFFF" stroke-width=".8"/></svg></button>
@@ -631,7 +630,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-77 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-78 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1441,6 +1440,14 @@
    Cause racine : v2.1-76 utilisait toast() (bas de l'écran), masqué par la barre de sélection.
    Correctif : showTimedBubble(msg, ms) (bulle orange sous les tuiles, disparaît seule après
    2,5 s) utilisée pour ce message.
+   v2.1-78 : demande de Mic (test, la v2.1-77 reste la référence fonctionnelle, étiquette git
+   ref-v2.1-77) — suppression de l'outil « Déplacer le plan » : le verrou décide. Cause :
+   un outil à part (+ bulle + déverrouillage automatique) alourdissait un geste qui doit
+   être intuitif. Nouveau fonctionnement (planCanBeDragged) : plan DÉVERROUILLÉ et SÉLECTIONNÉ
+   (un toucher sur le plan, outil « Plan » sans autre outil actif) = glisser le déplace
+   (cadre bleu épaissi + mains de rotation) ; plan non sélectionné ou verrouillé = figé, et le
+   doigt dessus fait défiler la vue comme avant. Retirés : bouton, bulle « Sélectionnez le plan
+   à déplacer », planUnlockPending, endMovePlanIfLocked, entrée 'move-plan' des listes d'outils.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -1603,8 +1610,7 @@ let zoom = 1;
 let isPinching = false;
 let selectedId = null;
 let updateReady = false;      // v2.1-73 : une nouvelle version a été détectée (déclaré tôt : hideBubble() peut être appelé dès l'initialisation)
-let planUnlockPending = false; // v2.1-70 : « Déplacer le plan » confirmé, le prochain plan touché sera déverrouillé
-let activeTool = null;        // 'place-classic' | 'place-remote' | 'move-plan' | 'pipette' | 'paint-bucket' | 'cut-rect' | 'cut-point' | 'eraser' | null
+let activeTool = null;        // 'place-classic' | 'place-remote' | 'pipette' | 'paint-bucket' | 'cut-rect' | 'cut-point' | 'eraser' | null
 let currentColor = '#0E6FA8';
 let bucketColor = '#FFFFFF'; // couleur utilisée par le pot de peinture ET la gomme, définie via la pipette
 let currentPastilleRadius = 16;
@@ -2083,7 +2089,7 @@ function renderPlan(){
       // plan" (v2.1-60) : sans outil, le doigt sur le plan sert à faire défiler la vue. À la
       // souris (ordinateur), le glisser du plan reste possible comme avant.
       node.on('dragstart', () => {
-        if (activeTool !== 'move-plan' && Date.now() - lastTouchStartTs < 1000){
+        if (selectedId !== p.id && Date.now() - lastTouchStartTs < 1000){
           node._cancelledTouchDrag = true;
           node.stopDrag();
         }
@@ -2106,12 +2112,7 @@ function renderPlan(){
         // ci-dessous) : sinon, une fois verrouillé et désélectionné, il deviendrait
         // impossible à resélectionner pour le déverrouiller — un blocage permanent.
         const pl = model.plans.find(x=>x.id===p.id);
-        if (pl && (activeTool===null || activeTool==='move-plan')){ selectNode(node, p.id); }
-        // v2.1-70 : l'utilisateur a validé « Déplacer le plan » ; le plan touché est déverrouillé.
-        if (pl && planUnlockPending && activeTool==='move-plan'){
-          planUnlockPending = false; hideBubble();
-          if (pl.locked){ pl.locked = false; toast('Plan déverrouillé, vous pouvez le déplacer.'); pushHistory(); render(); }
-        }
+        if (pl && activeTool===null){ selectNode(node, p.id); }
       });
       planImageNodes.set(p.id, node);
       planLayer.add(node);
@@ -2225,9 +2226,11 @@ function syncPastilleSelection(group, isSelected, radius){
 // plan. Désélectionner la pastille (toucher une zone vide) rend le plan à nouveau déplaçable.
 function planCanBeDragged(pl){
   if (pl.locked) return false;
-  if (!(activeTool===null || activeTool==='move-plan')) return false;
-  if (selectedId && model.pastilles.some(x=>x.id===selectedId)) return false;
-  return true;
+  if (activeTool!==null) return false;
+  // v2.1-78 : plus d'outil « Déplacer le plan » — seul le plan SÉLECTIONNÉ (et déverrouillé) se
+  // déplace ; sinon le doigt sur le plan fait défiler la vue. (Une pastille sélectionnée exclut
+  // de fait le plan, puisque selectedId est alors l'id de la pastille.)
+  return selectedId === pl.id;
 }
 function refreshPlansDraggable(){
   model.plans.forEach(pl=>{ const n = planImageNodes.get(pl.id); if (n) n.draggable(planCanBeDragged(pl)); });
@@ -2764,7 +2767,7 @@ function rotatablePlan(){
   if (!selectedId) return null;
   const pl = findPlanById(selectedId);
   if (!pl || pl.locked) return null;
-  if (!(activeTool===null || activeTool==='move-plan')) return null;
+  if (activeTool!==null) return null;
   return pl;
 }
 function planCenter(pl){
@@ -2989,6 +2992,10 @@ function updateLockIndicator(duringRotation){
   // Position calculée directement sur le CONTOUR RÉEL de l'élément affiché (v2.1-58) : coin
   // supérieur droit de sa boîte englobante, un peu à l'extérieur. Recalculée à chaque
   // mouvement (voir stage.on('dragmove') plus bas), pour tous les types d'éléments.
+  // v2.1-78 : cadre du PLAN sélectionné plus épais et plus lumineux (épaisseur constante à l'écran).
+  const isPlanSel = !!findPlanById(selectedId);
+  transformer.borderStrokeWidth(isPlanSel ? 3/zoom : 1.5);
+  transformer.borderStroke(isPlanSel ? '#2FA8F5' : '#0E6FA8');
   const box = node.getClientRect({ relativeTo: uiLayer });
   const off = 16/zoom;
   const pastille = model.pastilles.find(p=>p.id===selectedId);
@@ -3136,17 +3143,12 @@ function findSelectedModelObject(){
       || model.logos.find(l=>l.id===selectedId)
       || null;
 }
-// v2.1-74 : un plan verrouillé ne peut plus être déplacé, l'outil « Déplacer le plan » est donc décoché.
-function endMovePlanIfLocked(obj){
-  if (obj && obj.locked && activeTool==='move-plan' && model.plans.includes(obj)) setTool('move-plan');
-}
 document.getElementById('selLock').addEventListener('click', ()=>{
   const obj = findSelectedModelObject();
   if (!obj) return;
   obj.locked = !obj.locked;
   document.getElementById('selLock').textContent = obj.locked ? '🔒' : '🔓';
   toast(obj.locked ? 'Élément verrouillé (déplacement bloqué).' : 'Élément déverrouillé.');
-  endMovePlanIfLocked(obj);
   pushHistory(); render();
 });
 document.getElementById('selDup').addEventListener('click', ()=>{
@@ -3699,7 +3701,7 @@ stage.on('click tap', (e)=>{
 // TOUJOURS naviguer dans un plan zoomé en maintenant le doigt puis en glissant — avant, ce
 // défilement n'existait qu'avec certains outils actifs. (Les outils à glissement continu —
 // pastille déportée, découpes, gomme — ont leur propre équivalent, voir plus bas.)
-const TAP_TOOLS_WITH_LONGPRESS_PAN = ['place-classic','pipette','paint-bucket', null, 'move-plan'];
+const TAP_TOOLS_WITH_LONGPRESS_PAN = ['place-classic','pipette','paint-bucket', null];
 const PASTILLE_LONGPRESS_MS = 380;
 const PASTILLE_LONGPRESS_MOVE_PX = 10; // au-delà, on bascule aussi en déplacement avant même la fin du délai
 let pastilleLongPressTimer = null;
@@ -3729,9 +3731,12 @@ stage.on('touchstart', (e)=>{
   // qui doit se déplacer, pas la vue (v2.1-59). Le défilement de la vue n'est déclenché que
   // depuis une zone vide de la feuille ou depuis le plan importé.
   if (e.target !== stage && e.target.getLayer() !== planLayer) return;
-  // Outil "Déplacer le plan" : un doigt posé SUR le plan sert à le déplacer sur la feuille
-  // (c'est le but de cet outil) ; le défilement de la vue reste possible depuis une zone vide.
-  if (activeTool==='move-plan' && e.target.getLayer() === planLayer) return;
+  // v2.1-78 : un doigt posé sur le plan SÉLECTIONNÉ et déverrouillé le déplace (glisser Konva) ;
+  // sinon (plan non sélectionné ou verrouillé) il fait défiler la vue.
+  if (activeTool===null && e.target.getLayer() === planLayer){
+    const spl = findPlanById(e.target.id());
+    if (spl && planCanBeDragged(spl)) return;
+  }
   justPannedPlan = false; // évite qu'un drapeau resté bloqué (tap non déclenché après un déplacement) ne bloque le prochain appui bref
   const t = touches[0];
   pastilleLongPressStart = {x:t.clientX, y:t.clientY};
@@ -4605,16 +4610,6 @@ async function autoInsertClientLogoPlaceholder(){
 }
 
 /* ---------------------------- Outils plan (déplacer/verrouiller) -------------- */
-// "Déplacer le plan" reste un mode global : en mode PC/souris comme en tactile, chaque plan
-// devient alors individuellement déplaçable/redimensionnable (voir renderPlan()).
-// v2.1-70/71 : à chaque activation, une bulle indique que le plan touché sera déverrouillé. Un second
-// clic sur l'outil déjà actif le désactive sans question.
-document.getElementById('toolMovePlan').addEventListener('click', ()=>{
-  if (activeTool==='move-plan'){ setTool('move-plan'); return; }
-  setTool('move-plan');
-  planUnlockPending = true;
-  showBubble('Sélectionnez le plan à déplacer');
-});
 // "Verrouiller" agit sur le plan actuellement SÉLECTIONNÉ (il peut y en avoir plusieurs par
 // page désormais) : on sélectionne un plan en cliquant dessus, puis on bascule son verrou.
 document.getElementById('toolLockPlan').addEventListener('click', ()=>{
@@ -4622,7 +4617,6 @@ document.getElementById('toolLockPlan').addEventListener('click', ()=>{
   if (!pl){ toast('Sélectionnez d\'abord un plan à verrouiller.'); return; }
   pl.locked = !pl.locked;
   toast(pl.locked ? 'Plan verrouillé.' : 'Plan déverrouillé.');
-  endMovePlanIfLocked(pl);
   pushHistory(); render();
 });
 document.getElementById('toolPipette').addEventListener('click', ()=>setTool('pipette'));
@@ -4667,7 +4661,7 @@ function onTileChosen(tileId){
   }
 }
 function setTool(name){
-  planUnlockPending = false; hideBubble(); // changer d'outil annule le déverrouillage en attente (v2.1-70)
+  hideBubble(); // une bulle de message ne survit pas à un changement d'outil
   activeTool = (activeTool===name) ? null : name;
   if (activeTool === null && name !== '__none__' && activeTileId === 'pastille') activeTool = DEFAULT_TOOL;
   remoteAnchor = null; cutPoints=[]; cutRectStart=null; isErasing=false;
@@ -4688,7 +4682,7 @@ function setTool(name){
   updateOrientButtons();
   document.getElementById('toolToggleLegend').classList.toggle('active', model.legend.visible);
   const map = {
-    'move-plan':'toolMovePlan','pipette':'toolPipette','paint-bucket':'toolPaintBucket','eraser':'toolEraser',
+    'pipette':'toolPipette','paint-bucket':'toolPaintBucket','eraser':'toolEraser',
     'cut-rect':'toolCutRect','cut-point':'toolCutPoint',
     'place-classic':'toolPlaceClassic','place-remote':'toolPlaceRemote'
   };
@@ -5151,7 +5145,7 @@ function layoutHeader(){
 // Une seule tuile est mise en avant à la fois (jamais deux en même temps) : en priorité
 // celle dont le tiroir est ouvert, sinon celle qui correspond à l'outil actuellement actif.
 const TILE_TOOL_CATEGORIES = {
-  plan: ['move-plan','pipette','paint-bucket','eraser','cut-rect','cut-point'],
+  plan: ['pipette','paint-bucket','eraser','cut-rect','cut-point'],
   pastille: ['place-classic','place-remote'],
   // La tuile "Texte" n'a volontairement aucun outil associé ici : ajouter un texte/logo
   // est une action immédiate (pas un mode persistant comme les autres outils), donc rien
