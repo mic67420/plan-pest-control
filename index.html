@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-87 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-88 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-87</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-88</span></div>
   <div class="sep"></div>
   </div>
 
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-87 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-88 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1499,6 +1499,11 @@
    drawRemoteCursor() (tactile) et updateGhost() (souris) tracent un trait du point réel
    (remoteAnchor, repéré par un petit rond) jusqu'à la pastille d'aperçu, avec la couleur et
    l'épaisseur du trait définitif.
+   v2.1-88 : demande de Mic — le trait définitif d'une pastille déportée différait de celui vu
+   pendant le placement. Cause : l'aperçu (v2.1-87) s'arrêtait à la position BRUTE du doigt
+   alors que la pastille posée est calée sur le quadrillage (snapToGrid), avec la taille du poste
+   (effectiveNextRadius) et un trait légèrement ombré. Correctif : l'aperçu (tactile et souris)
+   utilise la même position calée, la même taille de pastille et la même ombre que le rendu final.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -3440,7 +3445,10 @@ function updateGhost(pos){
       const c = new Konva.Circle({x:pos.x,y:pos.y,radius:r, fill:type.color, opacity:0.55, stroke:'#000', strokeWidth:1.5});
       // v2.1-87 : placement déporté à la souris, 2e clic en attente : trait en direct depuis le point réel.
       if (activeTool==='place-remote' && remoteAnchor){
-        ghostGroup.add(new Konva.Line({points:[remoteAnchor.x, remoteAnchor.y, pos.x, pos.y], stroke:type.color, strokeWidth:2, lineCap:'round', listening:false}));
+        const gx = snapToGrid(pos.x), gy = snapToGrid(pos.y); // même calage que la pastille posée
+        c.position({x:gx, y:gy});
+        ghostGroup.add(new Konva.Line({points:[remoteAnchor.x, remoteAnchor.y, gx, gy], stroke:type.color, strokeWidth:2,
+          shadowColor:'rgba(0,0,0,0.25)', shadowBlur:2, shadowOffset:{x:0,y:1}, listening:false}));
         ghostGroup.add(new Konva.Circle({x:remoteAnchor.x, y:remoteAnchor.y, radius:4.5, fill:type.color, stroke:'#fff', strokeWidth:1.5, listening:false}));
       }
       ghostGroup.add(c);
@@ -4039,14 +4047,17 @@ function drawRemoteCursor(){
   const color = remoteCursorColor();
 
   // Aperçu de la pastille à venir (outil pastille, phase 'pastille' uniquement)
+  // Position réellement utilisée à la validation : calée sur le quadrillage (v2.1-88).
+  const sx = snapToGrid(tx), sy = snapToGrid(ty);
   if (remoteCursor.tool==='pastille' && remoteCursor.phase==='pastille' && remoteAnchor){
-    nodes.previewLine.setAttrs({ points:[remoteAnchor.x, remoteAnchor.y, tx, ty], stroke:color, visible:true });
+    nodes.previewLine.setAttrs({ points:[remoteAnchor.x, remoteAnchor.y, sx, sy], stroke:color, strokeWidth:2, lineCap:'butt',
+      shadowColor:'rgba(0,0,0,0.25)', shadowBlur:2, shadowOffset:{x:0,y:1}, visible:true });
     nodes.anchorDot.setAttrs({ x:remoteAnchor.x, y:remoteAnchor.y, radius:4.5, fill:color, stroke:'#ffffff', strokeWidth:1.5, visible:true });
   } else {
     nodes.previewLine.visible(false); nodes.anchorDot.visible(false);
   }
   if (remoteCursor.tool==='pastille' && remoteCursor.phase==='pastille'){
-    nodes.previewCircle.setAttrs({ x:tx, y:ty, radius:currentPastilleRadius, fill:color, opacity:0.35, stroke:color, strokeWidth:1.5, visible:true });
+    nodes.previewCircle.setAttrs({ x:sx, y:sy, radius:effectiveNextRadius(), fill:color, opacity:0.35, stroke:color, strokeWidth:1.5, visible:true });
   } else {
     nodes.previewCircle.visible(false);
   }
