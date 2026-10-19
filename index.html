@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-83 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-84 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-83</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-84</span></div>
   <div class="sep"></div>
   </div>
 
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-83 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-84 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1475,6 +1475,13 @@
    updatePlanLockButton() (appelée depuis updateLockIndicator, donc à chaque sélection /
    verrouillage / annulation) change l'icône (cadenas ouvert / fermé) et le texte dessous
    (« Plan verrouillé » / « Plan déverrouillé ») d'après le plan sélectionné, à défaut le 1er plan.
+   v2.1-84 : demande de Mic — pour le PLAN, la barre noire du bas (texte d'aide, Dupliquer,
+   Supprimer) est retirée : redimensionner par les coins est évident, Dupliquer inutilisé.
+   Suppression : croix blanche sur pastille rouge, même style que le cadenas, placée juste
+   dessous, directement sur le plan ; elle demande une confirmation (askYesNo, bulle orange
+   Oui / Non) puis réutilise la suppression existante (bouton selDelete, annulable). La bulle
+   − / + de rotation passe tout en bas de l'écran (plus de chevauchement avec les tuiles ni
+   leurs tiroirs). Les autres éléments (pastille, texte, logo, légende) gardent leur barre.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -2880,7 +2887,7 @@ let rotFineEl = null, rotFineLabel = null, rotFineTimer = null, rotFineChanged =
 function ensureRotFine(){
   if (rotFineEl) return;
   rotFineEl = document.createElement('div');
-  rotFineEl.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);z-index:790;display:none;align-items:center;gap:6px;'
+  rotFineEl.style.cssText = 'position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:790;display:none;align-items:center;gap:6px;'
     + 'background:#F59E0B;color:#1c2230;padding:5px 8px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.25);'
     + 'font-size:13px;font-weight:600;touch-action:none;user-select:none;-webkit-user-select:none;';
   const mk = (txt, dir)=>{
@@ -2909,9 +2916,6 @@ function ensureRotFine(){
 function refreshRotFine(pl){
   ensureRotFine();
   if (!pl){ rotFineEl.style.display = 'none'; return; }
-  const bar = document.getElementById('mobileTileBar');
-  const r = bar ? bar.getBoundingClientRect() : null;
-  rotFineEl.style.top = ((r && r.height ? r.bottom : 58) + 6)+'px';
   const a = (((pl.rotation||0)%360)+360)%360;
   rotFineLabel.textContent = (Math.round(a*10)/10).toFixed(1).replace('.',',')+'°';
   rotFineEl.style.display = 'flex';
@@ -3061,8 +3065,23 @@ function ensureLockBadge(){
   g.on('mouseenter', ()=>{ stage.container().style.cursor = 'pointer'; });
   g.on('mouseleave', ()=>{ stage.container().style.cursor = ''; });
   lockIndicatorGroup.add(g);
+  // v2.1-84 : croix de SUPPRESSION (plan uniquement), même style que le cadenas, placée dessous.
+  const del = new Konva.Group({ name:'delete-badge', visible:false });
+  del.add(new Konva.Circle({ x:0, y:0, radius:13, fill:'#D6493E', stroke:'#ffffff', strokeWidth:2, hitStrokeWidth:22,
+    shadowColor:'rgba(0,0,0,0.35)', shadowBlur:4, shadowOffset:{x:0,y:1}, shadowForStrokeEnabled:false, perfectDrawEnabled:false }));
+  del.add(new Konva.Line({ points:[-5,-5,5,5], stroke:'#ffffff', strokeWidth:2.4, lineCap:'round' }));
+  del.add(new Konva.Line({ points:[5,-5,-5,5], stroke:'#ffffff', strokeWidth:2.4, lineCap:'round' }));
+  del.on('mousedown touchstart', (e)=>{ e.cancelBubble = true; });
+  del.on('click tap', (e)=>{
+    e.cancelBubble = true;
+    if (!findPlanById(selectedId)) return;
+    askYesNo('Supprimer le plan ?').then(ok=>{ if (ok && findPlanById(selectedId)) document.getElementById('selDelete').click(); });
+  });
+  del.on('mouseenter', ()=>{ stage.container().style.cursor = 'pointer'; });
+  del.on('mouseleave', ()=>{ stage.container().style.cursor = ''; });
+  lockIndicatorGroup.add(del);
   uiLayer.add(lockIndicatorGroup);
-  lockBadge = { g, path, locked:false };
+  lockBadge = { g, path, del, locked:false };
 }
 // v2.1-83 : icône + texte du bouton cadenas de la tuile Plan selon l'état du plan (sélectionné, sinon le 1er).
 const PLAN_LOCK_SHACKLE_CLOSED = 'M7.5 10.5V7.8a4.5 4.5 0 0 1 9 0v2.7';
@@ -3112,6 +3131,14 @@ function updateLockIndicator(duringRotation){
     lockBadge.g.position({ x: box.x + box.width + off, y: box.y - off });
   }
   lockBadge.g.scale({ x:1/zoom, y:1/zoom });
+  // Croix de suppression : seulement pour un plan, juste sous le cadenas (v2.1-84).
+  const isPlanSel2 = !!findPlanById(selectedId);
+  lockBadge.del.visible(isPlanSel2);
+  if (isPlanSel2){
+    const gp = lockBadge.g.position();
+    lockBadge.del.position({ x:gp.x, y:gp.y + 32/zoom });
+    lockBadge.del.scale({ x:1/zoom, y:1/zoom });
+  }
   const locked = !!obj.locked;
   if (lockBadge.locked !== locked){
     lockBadge.locked = locked;
@@ -3132,7 +3159,7 @@ function refreshSelectionUI(){
   // positionnée près de l'élément sélectionné : elle pouvait sinon atterrir en plein
   // milieu du plan et y rester figée par-dessus le contenu, sans repère fixe pour la
   // retrouver ni moyen de la déplacer.
-  bar.style.display = 'flex';
+  bar.style.display = findPlanById(selectedId) ? 'none' : 'flex'; // v2.1-84 : plus de barre pour le plan (cadenas + croix sur le plan)
   scheduleBottomReserve();
   document.getElementById('selInfo').textContent = describeSelection();
   const selObj = findSelectedModelObject();
@@ -5525,6 +5552,25 @@ function askDocName(prefill){
     input.value = prefill || '';
     document.body.appendChild(card);
     input.focus(); input.select();
+  });
+}
+// Petite carte orange Oui / Non (résout true / false) — v2.1-84.
+function askYesNo(msg){
+  return new Promise(resolve=>{
+    const card = document.createElement('div');
+    card.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);max-width:calc(100vw - 32px);'
+      + 'background:#F59E0B;color:#1c2230;padding:10px 14px;border-radius:18px;box-shadow:0 4px 14px rgba(0,0,0,.3);'
+      + 'z-index:950;font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;';
+    const bar = document.getElementById('mobileTileBar');
+    const r = bar ? bar.getBoundingClientRect() : null;
+    card.style.top = ((r && r.height ? r.bottom : 58) + 6)+'px';
+    const done = (v)=>{ card.remove(); resolve(v); };
+    const b = (txt, bg, fg, v)=>{ const x = document.createElement('button'); x.type='button'; x.textContent = txt;
+      x.style.cssText = 'font:inherit;padding:8px 16px;border:none;border-radius:12px;background:'+bg+';color:'+fg+';';
+      x.addEventListener('click', ()=>done(v)); return x; };
+    const t = document.createElement('span'); t.textContent = msg;
+    card.append(t, b('Oui','#1c2230','#fff',true), b('Non','#fff7e6','#1c2230',false));
+    document.body.appendChild(card);
   });
 }
 async function ensureDocName(){
