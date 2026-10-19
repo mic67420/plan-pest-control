@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-89 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-90 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-89</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-90</span></div>
   <div class="sep"></div>
   </div>
 
@@ -434,7 +434,6 @@
     <span id="zoomLabel" class="mono" title="Niveau de zoom">100%</span>
     <button class="tb-icon" id="btnZoomIn" title="Zoom avant"><svg class="icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="#E4EEF4" stroke="#0E6FA8" stroke-width="1.8"/><path d="M15.3 15.3 20 20" stroke="#2B3242" stroke-width="2" stroke-linecap="round"/><path d="M10.5 7.5v6M7.5 10.5h6" stroke="#0E6FA8" stroke-width="1.8" stroke-linecap="round"/></svg></button>
     <button class="tb-icon" id="btnZoomFit" title="Ajuster à l'écran"><svg class="icon" viewBox="0 0 24 24"><rect x="5.5" y="5.5" width="13" height="13" rx="1" fill="#FBE6BF" stroke="#E8A83C" stroke-width="1.4"/><path d="M4 8V5.5a1.5 1.5 0 0 1 1.5-1.5H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16" stroke="#2B3242" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <button class="tb-icon" id="btnGrid" title="Afficher/masquer le quadrillage"><svg class="icon" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="1.3" fill="#E4F1F8" stroke="#0E6FA8" stroke-width="1.4"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17" stroke="#8FC2DC" stroke-width="1.1"/></svg></button>
   </div>
   <div class="sep"></div>
 
@@ -533,6 +532,7 @@
     </div>
     <button class="tb-icon" id="toolPlaceClassic" title="Placement classique (1 clic)"><svg class="icon" viewBox="0 0 24 24"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12Z" fill="#D6493E" stroke="#8f2c24" stroke-width="1.2" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.6" fill="#FFFFFF" stroke="#8f2c24" stroke-width="1"/></svg></button>
     <button class="tb-icon" id="toolPlaceRemote" title="Placement déporté (point réel + pastille)"><svg class="icon" viewBox="0 0 24 24"><path d="M10 18.5s5.5-5.7 5.5-9.6A5.5 5.5 0 1 0 4.5 8.9c0 2.5 1.8 5.2 3.4 7.1" fill="#0E6FA8" stroke="#08425f" stroke-width="1.1" stroke-linejoin="round"/><circle cx="10" cy="8.4" r="2.1" fill="#FFFFFF" stroke="#08425f" stroke-width=".9"/><path d="M14.5 15.5l5.5 5.5M20.5 21H16v-4.5" stroke="#2B3242" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="tb-icon" id="btnGrid" title="Grille d'accroche"><svg class="icon" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="1.3" fill="#E4F1F8" stroke="#0E6FA8" stroke-width="1.4"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17" stroke="#8FC2DC" stroke-width="1.1"/></svg></button>
     <div class="pop-wrap">
       <button class="tb-icon" id="btnAddTypeMenu" title="Ajouter / retirer un poste"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="#4C9A6A"/><path d="M12 7.5v9M7.5 12h9" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/></svg></button>
       <div class="popover" id="popAddType">
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-89 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-90 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1514,6 +1514,10 @@
    GRID_STEP, actif seulement quand la grille est affichée (le placement déporté l'affiche
    d'office), appliqué à la pose (classique et déportée, y compris le point réel), à
    l'aperçu et au glissement d'une pastille existante (dragBoundFunc : accroche en direct).
+   v2.1-90 : demande de Mic — la grille ne sert plus qu'à placer les pastilles : le bouton quitte la
+   tuile Vue pour la tuile Pastille (à côté des deux modes de placement), renommé « Grille
+   d'accroche », avec son état dessous (« activée » / « désactivée », updateGridButton).
+   Aucun changement de fonctionnement (accroche, affichage auto en placement déporté).
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -4893,6 +4897,7 @@ function setTool(name){
     gridVisible = false; gridAutoShown = false;
   }
   document.getElementById('btnGrid').classList.toggle('active', gridVisible);
+  updateGridButton();
   setGridVisible(gridVisible);
   if (activeTool !== 'paint-bucket') document.getElementById('bucketToleranceRow').style.display='none';
   if (activeTool !== 'eraser') document.getElementById('eraserSizeRow').style.display='none';
@@ -5587,6 +5592,7 @@ document.getElementById('btnGrid').addEventListener('click', ()=>{
   gridVisible = !gridVisible;
   gridAutoShown = false; // dès qu'on touche à l'icône, l'état devient manuel (plus de masquage auto au changement d'outil)
   document.getElementById('btnGrid').classList.toggle('active', gridVisible);
+  updateGridButton();
   setGridVisible(gridVisible);
 });
 document.getElementById('btnUndo').addEventListener('click', undo);
@@ -5982,6 +5988,15 @@ function addIconLabels(){
 }
 addIconLabels();
 updatePlanLockButton();
+// v2.1-90 : état de la grille d'accroche écrit sous l'icône (comme le cadenas du plan).
+function updateGridButton(){
+  const btn = document.getElementById('btnGrid');
+  const txt = gridVisible ? "Grille d'accroche activée" : "Grille d'accroche désactivée";
+  const lbl = btn.querySelector('.tb-icon-label');
+  if (lbl && lbl.textContent !== txt) lbl.textContent = txt;
+  btn.title = txt;
+}
+updateGridButton();
 // Un seul écouteur "resize" (regroupé sur requestAnimationFrame), au lieu de 4 séparés :
 // évite de refaire 4 fois le travail de mise en page à chaque frame d'un redimensionnement
 // continu (rotation d'écran, ouverture du clavier virtuel, redimensionnement de fenêtre…).
