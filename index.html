@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-75 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-76 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-75</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-76</span></div>
   <div class="sep"></div>
   </div>
 
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-75 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-76 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1428,6 +1428,15 @@
    direction « 10 h » (à 300° dans le sens horaire depuis le haut) du centre, à la
    distance rayon du halo (r+9, +2 pour le liseré) + rayon du cadenas (13 px écran) + 2 px
    d'écart. Les autres éléments (plan, texte, logo, légende) gardent le coin supérieur droit.
+   v2.1-76 : demande de Mic — « je n'arrive pas à déplacer les pastilles, elles reviennent à
+   leur place » et « verrouillée, je ne dois pas pouvoir la bouger, même en transparence ».
+   Cause racine : avec un outil de pose actif (Placement classique par défaut), l'aperçu
+   fantôme (pastille semi-transparente, updateGhost) suivait le doigt PAR-DESSUS une pastille
+   verrouillée : on croyait la déplacer alors que la vraie pastille restait en place.
+   (Une pastille déverrouillée se déplace normalement : vérifié en test navigateur, souris et
+   tactile.) Correctif : aucun fantôme quand le pointeur est sur une pastille
+   (pastilleUnderPointer, positions des nodes en direct) ; et un appui sur une pastille
+   verrouillée affiche « Pastille verrouillée : touchez le cadenas pour la déverrouiller ».
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -2354,6 +2363,10 @@ function renderContent(){
         // référence capturée), pour rester corrects même après un undo/redo qui remplace
         // l'objet model entier, ou si la pastille a depuis été supprimée.
         group.on('click tap', ()=>selectNode(group, p.id));
+        group.on('mousedown touchstart', ()=>{
+          const pp = model.pastilles.find(x=>x.id===p.id);
+          if (pp && pp.locked) toast('Pastille verrouillée : touchez le cadenas pour la déverrouiller.');
+        });
         group.on('dragend', ()=>{
           const pp = model.pastilles.find(x=>x.id===p.id); if (!pp) return;
           let nx = group.x(), ny = group.y();
@@ -3238,12 +3251,34 @@ document.getElementById('selFontSize').addEventListener('input', (e)=>{
 document.getElementById('selFontSize').addEventListener('change', ()=>pushHistory());
 
 /* ---------------------------- Ghost preview -------------------------------- */
+// v2.1-76 : pastille sous le pointeur (positions des nodes en direct, donc aussi pendant un glissement).
+function pastilleUnderPointer(pos){
+  for (const p of model.pastilles){
+    const n = pastilleNodes.get(p.id);
+    const x = n ? n.x() : p.x, y = n ? n.y() : p.y;
+    if (Math.hypot(pos.x-x, pos.y-y) <= p.radius + 9) return p;
+  }
+  return null;
+}
+// Appui commencé SUR une pastille : pas d'aperçu de pose jusqu'au relâchement, même si le doigt
+// s'éloigne (pastille verrouillée qui ne bouge pas : le fantôme donnait l'illusion de la déplacer).
+let ghostBlockedByPastille = false;
+stage.on('mousedown touchstart', ()=>{
+  const pos = stage.getPointerPosition();
+  ghostBlockedByPastille = !!(pos && pastilleUnderPointer(pos));
+});
+window.addEventListener('mouseup', ()=>{ ghostBlockedByPastille = false; });
+window.addEventListener('touchend', ()=>{ ghostBlockedByPastille = false; });
+window.addEventListener('touchcancel', ()=>{ ghostBlockedByPastille = false; });
 function updateGhost(pos){
   // Aucun aperçu à montrer et rien à effacer (aucun outil de pose/gomme actif) : on ne
   // redessine surtout pas toute la couche à chaque mouvement du doigt pour rien (v2.1-61).
   if (ghostGroup.children.length === 0 && !pastilleLongPressActive && activeTool!=='place-classic' && activeTool!=='place-remote' && activeTool!=='eraser') return;
   ghostGroup.destroyChildren();
   if (pastilleLongPressActive){ uiLayer.batchDraw(); return; } // en cours de déplacement du plan : pas d'aperçu de pastille
+  if (pos && (activeTool==='place-classic' || activeTool==='place-remote') && (ghostBlockedByPastille || pastilleUnderPointer(pos))){
+    uiLayer.batchDraw(); return; // sur une pastille existante : aucun aperçu de pose (v2.1-76)
+  }
   if (activeTool==='place-classic' || activeTool==='place-remote'){
     const type = model.deviceTypes.find(t=>t.id===selectedTypeId);
     if (type && pos){
