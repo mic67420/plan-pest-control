@@ -37,8 +37,8 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
    d'en-tête du `<script>`.
    Attention : un remplacement global (`v2.1-69` → `v2.1-70` partout) modifie aussi les références
    historiques du journal et des commentaires ; les remettre ensuite à leur bonne valeur.
-4. **Journal des modifications** : ajouter une entrée dans le commentaire d'en-tête du `<script>`
-   (à la fin de la liste des versions), avec la **cause racine** et le **correctif**.
+4. **Journal des modifications** : ajouter une entrée à la FIN du fichier `JOURNAL.md` (depuis v2.1-102, il n'est
+   plus dans `index.html`), avec la **cause racine** et le **correctif**.
 5. **Vérifications après chaque modification** :
    - syntaxe JavaScript valide (extraire le contenu du `<script>` et lancer `node --check`) ;
    - aucun `id` HTML en double ;
