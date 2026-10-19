@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-69 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-70 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -387,7 +387,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-69</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-70</span></div>
   <div class="sep"></div>
   </div>
 
@@ -621,7 +621,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-69 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-70 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1372,7 +1372,17 @@
    repli automatique sur Placement classique (outil terminé, décoché, Échap) ne
    vaut plus que sur la tuile Pastille. À l'ouverture et pour un nouveau projet,
    inchangé : Placement classique sélectionné.
-   ========================================================================= */
+   =========================================================================    v2.1-70 : demande de Mic — « Déplacer le plan » doit demander « Sélectionnez le
+   plan : il sera automatiquement déverrouillé. OK ? ». Cause racine : un plan
+   verrouillé ne bouge pas (planCanBeDragged), et il fallait penser à utiliser
+   l'outil « Verrouiller » à part, sans que rien ne l'explique. Correctif : au clic
+   sur « Déplacer le plan » (à chaque fois qu'on l'active), une confirmation est
+   affichée ; si OK, l'outil s'active et planUnlockPending est armé ; le prochain
+   plan touché (et lui seul, les autres gardent leur verrou) est déverrouillé
+   (pushHistory pour l'annulation). Annuler = rien ne change. setTool() désarme
+   planUnlockPending dès qu'on change d'outil. Un second clic sur l'outil actif le
+   désactive sans question.
+*/
 
 /* ---------------------------- Constantes ------------------------------- */
 // Police unique utilisée pour TOUT ce qui est dessiné sur le plan (textes, légende,
@@ -1533,6 +1543,7 @@ function newProject(){
 let zoom = 1;
 let isPinching = false;
 let selectedId = null;
+let planUnlockPending = false; // v2.1-70 : « Déplacer le plan » confirmé, le prochain plan touché sera déverrouillé
 let activeTool = null;        // 'place-classic' | 'place-remote' | 'move-plan' | 'pipette' | 'paint-bucket' | 'cut-rect' | 'cut-point' | 'eraser' | null
 let currentColor = '#0E6FA8';
 let bucketColor = '#FFFFFF'; // couleur utilisée par le pot de peinture ET la gomme, définie via la pipette
@@ -2036,6 +2047,11 @@ function renderPlan(){
         // impossible à resélectionner pour le déverrouiller — un blocage permanent.
         const pl = model.plans.find(x=>x.id===p.id);
         if (pl && (activeTool===null || activeTool==='move-plan')){ selectNode(node, p.id); }
+        // v2.1-70 : l'utilisateur a validé « Déplacer le plan » ; le plan touché est déverrouillé.
+        if (pl && planUnlockPending && activeTool==='move-plan'){
+          planUnlockPending = false;
+          if (pl.locked){ pl.locked = false; toast('Plan déverrouillé, vous pouvez le déplacer.'); pushHistory(); render(); }
+        }
       });
       planImageNodes.set(p.id, node);
       planLayer.add(node);
@@ -4514,7 +4530,15 @@ async function autoInsertClientLogoPlaceholder(){
 /* ---------------------------- Outils plan (déplacer/verrouiller) -------------- */
 // "Déplacer le plan" reste un mode global : en mode PC/souris comme en tactile, chaque plan
 // devient alors individuellement déplaçable/redimensionnable (voir renderPlan()).
-document.getElementById('toolMovePlan').addEventListener('click', ()=>setTool('move-plan'));
+// v2.1-70 : à chaque activation, on prévient que le plan touché sera déverrouillé. Un second
+// clic sur l'outil déjà actif le désactive sans question.
+document.getElementById('toolMovePlan').addEventListener('click', ()=>{
+  if (activeTool==='move-plan'){ setTool('move-plan'); return; }
+  if (!confirm('Sélectionnez le plan : il sera automatiquement déverrouillé. OK ?')) return;
+  setTool('move-plan');
+  planUnlockPending = true;
+  toast('Touchez le plan à déplacer.');
+});
 // "Verrouiller" agit sur le plan actuellement SÉLECTIONNÉ (il peut y en avoir plusieurs par
 // page désormais) : on sélectionne un plan en cliquant dessus, puis on bascule son verrou.
 document.getElementById('toolLockPlan').addEventListener('click', ()=>{
@@ -4566,6 +4590,7 @@ function onTileChosen(tileId){
   }
 }
 function setTool(name){
+  planUnlockPending = false; // changer d'outil annule le déverrouillage en attente (v2.1-70)
   activeTool = (activeTool===name) ? null : name;
   if (activeTool === null && name !== '__none__' && activeTileId === 'pastille') activeTool = DEFAULT_TOOL;
   remoteAnchor = null; cutPoints=[]; cutRectStart=null; isErasing=false;
