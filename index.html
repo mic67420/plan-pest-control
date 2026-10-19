@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-94 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-95 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -401,7 +401,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-94</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-95</span></div>
   <div class="sep"></div>
   </div>
 
@@ -550,10 +550,6 @@
         <button class="pop-btn danger" id="btnDelType">✕ Retirer le poste sélectionné</button>
       </div>
     </div>
-    <details class="tb-hint">
-      <summary>ℹ️ Astuce</summary>
-      <p>Double-cliquez (ou double-tapez) une pastille déjà posée pour la <b>verrouiller en place</b> une fois son emplacement définitif — un second double-clic la déverrouille. Le bouton 🔓 de la barre de sélection fait la même chose.</p>
-    </details>
   </div>
   <div class="sep"></div>
 
@@ -636,7 +632,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-94 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-95 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1544,6 +1540,9 @@
    (MAX_D, rayon 20), mention « aperçu réduit » passée en infobulle ; puis equalizeDrawerHeights()
    mesure le plus haut tiroir et impose cette hauteur à tous (variable CSS --drawer-h, recalculée à
    chaque ouverture car elle dépend de la largeur de l'écran).
+   v2.1-95 : demande de Mic — suppression de la ligne « Astuce » (double-tap = verrouiller) du tiroir
+   Pastille pour réduire sa hauteur, donc celle de tous les tiroirs (--drawer-h). Le geste
+   reste actif ; il est documenté dans CLAUDE.md.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
