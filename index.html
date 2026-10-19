@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-99 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-100 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -109,7 +109,9 @@
     color:#2a3142;font-size:26px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;
     touch-action:manipulation;user-select:none;-webkit-user-select:none;
   }
-  .step-btn:active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  /* v2.1-100 : boutons − / + en orange (lisibilité) */
+  .step-btn{background:#F59E0B;border-color:#D98400;color:#1c2230;font-weight:700;}
+  .step-btn:active{background:#D98400;border-color:#D98400;color:#1c2230;}
   .size-preview{
     flex:none;width:52px;height:52px;border:none;background:transparent; /* v2.1-94 : plus de cadre pointillé */
     display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
@@ -118,6 +120,7 @@
   .size-preview-shape{display:flex;align-items:center;justify-content:center;}
   .size-preview-note{display:none;position:absolute;left:0;right:0;bottom:3px;text-align:center;font-size:9.5px;color:#8890a0;line-height:1.1;pointer-events:none;}
   #selectionBar .step-btn-dark{
+    background:#F59E0B;border-color:#D98400;color:#1c2230;font-weight:700;
     width:40px;height:36px;flex:none;padding:0;font-size:22px;line-height:1;touch-action:manipulation;
     display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;
   }
@@ -402,7 +405,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-99</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-100</span></div>
   <div class="sep"></div>
   </div>
 
@@ -499,9 +502,8 @@
         <div class="pop-row" id="bucketColorRow"><label>Couleur du pot</label><span class="dd-swatch" id="bucketColorSwatch" style="background:#FFFFFF;border-radius:50%;border:1.5px solid #000;"></span><input type="color" id="bucketColorPicker" value="#FFFFFF" style="width:26px;height:26px;border:none;padding:0;"></div>
         <div class="pop-row" id="bucketToleranceRow"><label>Tolérance pot</label><input type="range" id="rngTolerance" min="4" max="120" value="32"></div>
         <div class="pop-row" id="eraserSizeRow" style="flex-wrap:nowrap;gap:6px;align-items:center;">
-          <label style="width:auto;min-width:0;flex:none;">Gomme</label>
-          <button type="button" class="pop-btn" id="btnEraserSquare" title="Gomme carrée" style="width:36px;height:36px;margin:0;padding:0;flex:none;font-size:20px;line-height:1;">■</button>
-          <button type="button" class="pop-btn" id="btnEraserRound" title="Gomme ronde" style="width:36px;height:36px;margin:0;padding:0;flex:none;font-size:20px;line-height:1;">●</button>
+          <button type="button" class="pop-btn" id="btnEraserSquare" title="Gomme carrée" style="width:auto;height:36px;margin:0;padding:0 8px;flex:none;font-size:12.5px;font-weight:600;line-height:1;">■ Carré</button>
+          <button type="button" class="pop-btn" id="btnEraserRound" title="Gomme ronde" style="width:auto;height:36px;margin:0;padding:0 8px;flex:none;font-size:12.5px;font-weight:600;line-height:1;">● Rond</button>
           <button type="button" class="step-btn" id="btnEraserSizeMinus" aria-label="Réduire la gomme" style="width:36px;height:36px;font-size:22px;">−</button>
           <input type="range" id="rngEraserSize" min="4" max="120" value="24" style="flex:1 1 auto;width:auto;min-width:40px;">
           <button type="button" class="step-btn" id="btnEraserSizePlus" aria-label="Agrandir la gomme" style="width:36px;height:36px;font-size:22px;">+</button>
@@ -641,7 +643,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-99 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-100 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1576,6 +1578,13 @@
    « Tolérance »). Cause : v2.1-97 les avait mis sur deux lignes (forme, puis taille). Correctif :
    une ligne unique « Gomme ■ ● − curseur + valeur témoin » (boutons de forme et − / + de 36 px,
    témoin de 30 px plafonné à 26 px de diamètre), forme choisie mise en surbrillance.
+   v2.1-100 : demande de Mic — (1) choisir la Gomme (ou le Pot) refermait aussitôt le tiroir, avant qu'on
+   puisse régler forme / taille / tolérance. Cause : setTool() appelle closeAllTileDrawers() à chaque
+   changement d'outil. Correctif : pour 'eraser' et 'paint-bucket', le tiroir Plan reste ouvert et se
+   referme après 5 s d'inactivité (minuteur relancé par chaque appui ou réglage dans le tiroir).
+   (2) Boutons de forme illisibles (■ ●) : remplacés par « ■ Carré » et « ● Rond » (étiquette
+   « Gomme » retirée pour garder la ligne unique). (3) Boutons − et + en orange (.step-btn : tiroir
+   Pastille et Gomme ; .step-btn-dark : barre de sélection) pour la lisibilité.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -5046,7 +5055,14 @@ function setTool(name){
   // suite, le zoom retombait à chaque fois à son niveau le plus large).
   layoutHeader();
   if (typeof updateMobileTileActiveState === 'function') updateMobileTileActiveState();
-  if (typeof closeAllTileDrawers === 'function') closeAllTileDrawers();
+  // v2.1-100 : Gomme et Pot ont des réglages (forme, taille, tolérance) : le tiroir Plan reste ouvert pour
+  // les régler, et se referme seul après 5 s d'inactivité.
+  if ((activeTool==='eraser' || activeTool==='paint-bucket') && document.querySelector('.tb-group[data-tile="plan"].mobile-open')){
+    if (typeof tileRepeatCloseTimer !== 'undefined'){
+      clearTimeout(tileRepeatCloseTimer);
+      tileRepeatCloseTimer = setTimeout(closeAllTileDrawers, TILE_REPEAT_CLICK_DELAY_MS);
+    }
+  } else if (typeof closeAllTileDrawers === 'function') closeAllTileDrawers();
 }
 document.getElementById('toolPlaceClassic').addEventListener('click', ()=>setTool('place-classic'));
 document.getElementById('toolPlaceRemote').addEventListener('click', ()=>setTool('place-remote'));
@@ -5626,6 +5642,13 @@ const TILE_REPEAT_CLICK_TILES = ['page','vue','historique','plan','pastille'];
 const TILE_REPEAT_CLICK_DELAY_MS = 5000; // à ajuster selon le retour utilisateur (test)
 let tileRepeatCloseTimer = null;
 document.querySelectorAll('.tb-group[data-tile]').forEach(group=>{
+  // v2.1-100 : tout appui ou réglage (curseur) dans le tiroir Plan relance le délai de fermeture.
+  ['pointerdown','input'].forEach(ev=>group.addEventListener(ev, ()=>{
+    if (group.dataset.tile==='plan' && tileRepeatCloseTimer){
+      clearTimeout(tileRepeatCloseTimer);
+      tileRepeatCloseTimer = setTimeout(closeAllTileDrawers, TILE_REPEAT_CLICK_DELAY_MS);
+    }
+  }, true));
   group.addEventListener('click', (e)=>{
     if (!document.body.classList.contains('mobile-mode')) return;
     const btn = e.target.closest('button, .dd-btn');
