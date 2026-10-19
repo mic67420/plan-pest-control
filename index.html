@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-84 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-85 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-84</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-85</span></div>
   <div class="sep"></div>
   </div>
 
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-84 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-85 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1482,6 +1482,11 @@
    Oui / Non) puis réutilise la suppression existante (bouton selDelete, annulable). La bulle
    − / + de rotation passe tout en bas de l'écran (plus de chevauchement avec les tuiles ni
    leurs tiroirs). Les autres éléments (pastille, texte, logo, légende) gardent leur barre.
+   v2.1-85 : demande de Mic — sur n'importe quelle tuile autre que « Plan » (Texte, Page, Vue…),
+   le plan sélectionné gardait son cadre bleu, ses mains de rotation et la bulle − / +.
+   Cause : v2.1-83 ne désélectionnait le plan que pour la tuile Pastille. Correctif :
+   onTileChosen() désélectionne le plan pour toute tuile ≠ « plan » ; non sélectionné, il est
+   figé (planCanBeDragged exige la sélection), comme verrouillé.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -4785,8 +4790,9 @@ let activeTileId = 'pastille';
 function ensureDefaultTool(){ activeTileId = 'pastille'; if (activeTool !== DEFAULT_TOOL) setTool(DEFAULT_TOOL); }
 function onTileChosen(tileId){
   activeTileId = tileId;
-  // v2.1-83 : sur la tuile Pastille, un plan resté sélectionné ne doit plus afficher son cadre bleu.
-  if (tileId === 'pastille' && selectedId && findPlanById(selectedId)) selectNode(null, null);
+  // v2.1-83/85 : hors de la tuile Plan, un plan resté sélectionné ne doit plus afficher son cadre bleu,
+  // ses mains ni la bulle − / + ; il est alors figé.
+  if (tileId !== 'plan' && selectedId && findPlanById(selectedId)) selectNode(null, null);
   const isPlacing = activeTool==='place-classic' || activeTool==='place-remote';
   if (tileId === 'pastille'){
     if (!isPlacing) setTool(DEFAULT_TOOL); // retour sur la tuile Pastille : Placement classique (ou le déporté s'il était choisi)
