@@ -19,10 +19,11 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
 
 - Mic, responsable qualité, **non-développeur, novice total**.
 - Toujours répondre **en français**.
-- Explications **ultra détaillées, étape par étape, sans jargon**, sans rien présumer de ses
-  connaissances techniques. Expliquer la **cause** d'un bug en langage simple, puis la correction.
-- Terminer chaque livraison par une courte liste **« À tester »** concrète (quel bouton, quel geste,
-  quel résultat attendu).
+- **Réponse après chaque modification : ULTRA CONDENSÉE** (consigne de Mic) : sans jargon, mais pas de
+  texte à rallonge. Format : 1 ligne = ce qui a été fait + version publiée ; 1 ligne = la cause (si
+  correction de bug) ; puis « À tester » en 2-3 puces courtes maximum. Aucun détail technique, aucune
+  liste de vérifications. Développer uniquement si Mic le demande.
+- Pour les questions et explications demandées par Mic : clair, étape par étape, sans jargon.
 - Mic travaille sous **Windows** (pas de Mac : ne jamais parler du Finder, de Cmd, etc.).
 
 ## 3. Règles de travail (OBLIGATOIRES)
