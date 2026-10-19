@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-78 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-79 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-78</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-79</span></div>
   <div class="sep"></div>
   </div>
 
@@ -630,7 +630,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-78 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-79 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1448,6 +1448,12 @@
    (cadre bleu épaissi + mains de rotation) ; plan non sélectionné ou verrouillé = figé, et le
    doigt dessus fait défiler la vue comme avant. Retirés : bouton, bulle « Sélectionnez le plan
    à déplacer », planUnlockPending, endMovePlanIfLocked, entrée 'move-plan' des listes d'outils.
+   v2.1-79 : demande de Mic — les exports (PDF, PPTX, PNG, JPEG, .json) portent le nom du document
+   ouvert. Cause racine : l'application n'avait aucune notion de « nom de document » ; tous
+   les fichiers s'appelaient « plan-pest-control ». Correctif : docName, repris du fichier de
+   projet ouvert (sans .ppcx.json), mémorisé dans la sauvegarde automatique et le .json ;
+   pour un nouveau projet, ensureDocName() affiche une petite carte orange qui demande le nom
+   au premier export/enregistrement (Annuler = pas d'export). newProject() l'efface.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -1563,7 +1569,7 @@ function setAutoSaveIndicator(text, isError){
 async function doAutoSave(){
   if (!autoSaveDirty) return; // rien n'a changé depuis la dernière sauvegarde
   autoSaveDirty = false;
-  const snapshot = { docVersion:2, pages, currentPageIndex, savedAt: Date.now() };
+  const snapshot = { docVersion:2, pages, currentPageIndex, docName, savedAt: Date.now() };
   const ok = await idbSave(snapshot);
   if (ok){
     const t = new Date(snapshot.savedAt);
@@ -1588,6 +1594,7 @@ window.addEventListener('beforeunload', (e)=>{
 function newProject(){
   if (!confirm("Créer un nouveau projet ? Le projet actuel sera définitivement remplacé (pensez à l'exporter avant si besoin).")) return;
   idbClear();
+  docName = null; // nouveau projet : le nom sera demandé au premier export (v2.1-79)
   pages = [createEmptyModel()];
   currentPageIndex = 0;
   model = pages[0];
@@ -1609,6 +1616,7 @@ function newProject(){
 let zoom = 1;
 let isPinching = false;
 let selectedId = null;
+let docName = null;           // v2.1-79 : nom du document ouvert, utilisé pour tous les fichiers exportés
 let updateReady = false;      // v2.1-73 : une nouvelle version a été détectée (déclaré tôt : hideBubble() peut être appelé dès l'initialisation)
 let activeTool = null;        // 'place-classic' | 'place-remote' | 'pipette' | 'paint-bucket' | 'cut-rect' | 'cut-point' | 'eraser' | null
 let currentColor = '#0E6FA8';
@@ -5391,12 +5399,46 @@ window.addEventListener('keydown', (e)=>{
 });
 
 /* ---------------------------- Sauvegarde / Ouverture de projet ------------------ */
-document.getElementById('btnSave').addEventListener('click', ()=>{
-  const doc = { docVersion:2, pages, currentPageIndex };
+// Nom de fichier sûr (v2.1-79) : sans caractères interdits sous Windows.
+function cleanFileName(n){ return (n||'').replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,80); }
+// Petite carte orange qui demande le nom du document (résout null si Annuler).
+function askDocName(){
+  return new Promise(resolve=>{
+    const card = document.createElement('div');
+    card.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);max-width:calc(100vw - 32px);width:340px;'
+      + 'background:#F59E0B;color:#1c2230;padding:12px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);'
+      + 'z-index:950;font-size:13px;font-weight:500;display:flex;flex-direction:column;gap:8px;';
+    const bar = document.getElementById('mobileTileBar');
+    const r = bar ? bar.getBoundingClientRect() : null;
+    card.style.top = ((r && r.height ? r.bottom : 58) + 6)+'px';
+    card.innerHTML = '<div>Nom du document (utilisé pour les fichiers exportés)</div>'
+      + '<input type="text" maxlength="80" style="font:inherit;padding:8px;border:none;border-radius:8px;width:100%;box-sizing:border-box;" placeholder="ex : Usine Martin">'
+      + '<div style="display:flex;gap:8px;justify-content:flex-end;">'
+      + '<button type="button" data-a="no" style="font:inherit;padding:8px 14px;border:none;border-radius:8px;background:#fff7e6;">Annuler</button>'
+      + '<button type="button" data-a="ok" style="font:inherit;padding:8px 14px;border:none;border-radius:8px;background:#1c2230;color:#fff;">OK</button></div>';
+    const input = card.querySelector('input');
+    const done = (v)=>{ card.remove(); resolve(v); };
+    const ok = ()=>{ const n = cleanFileName(input.value); if (n) done(n); else input.focus(); };
+    card.querySelector('[data-a="ok"]').addEventListener('click', ok);
+    card.querySelector('[data-a="no"]').addEventListener('click', ()=>done(null));
+    input.addEventListener('keydown', (e)=>{ if (e.key==='Enter') ok(); else if (e.key==='Escape') done(null); });
+    document.body.appendChild(card);
+    input.focus();
+  });
+}
+async function ensureDocName(){
+  if (docName) return docName;
+  const n = await askDocName();
+  if (n){ docName = n; scheduleAutoSave(); }
+  return n;
+}
+document.getElementById('btnSave').addEventListener('click', async ()=>{
+  const base = await ensureDocName(); if (!base) return;
+  const doc = { docVersion:2, pages, currentPageIndex, docName };
   const blob = new Blob([JSON.stringify(doc, null, 0)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'plan-pest-control.ppcx.json';
+  a.href = url; a.download = base+'.ppcx.json';
   a.click();
   URL.revokeObjectURL(url);
   toast('Projet enregistré ('+pages.length+' page'+(pages.length>1?'s':'')+').');
@@ -5405,6 +5447,7 @@ document.getElementById('btnLoad').addEventListener('click', ()=>document.getEle
 document.getElementById('fileInputProject').addEventListener('change', async (e)=>{
   const file = e.target.files[0]; if (!file) return;
   const text = await file.text();
+  const openedName = cleanFileName(file.name.replace(/\.ppcx\.json$|\.json$/i,''));
   try{
     const parsed = JSON.parse(text);
     // Compatibilité : un ancien fichier v1 est un modèle de page unique (sans "pages").
@@ -5416,6 +5459,7 @@ document.getElementById('fileInputProject').addEventListener('change', async (e)
       currentPageIndex = 0;
     }
     pages.forEach(migratePlanFormat);
+    docName = openedName || parsed.docName || null; // v2.1-79 : les exports reprennent le nom du fichier ouvert
     model = pages[currentPageIndex];
     idCounter = 100000; // évite les collisions d'ID
     selectedId = null;
@@ -5546,18 +5590,21 @@ async function downloadImagesAsFileOrZip(images, ext, baseName){
 }
 document.getElementById('btnExportPNG').addEventListener('click', async ()=>{
   closeAllPopovers();
+  const base = await ensureDocName(); if (!base) return;
   const images = await captureAllPagesAsImages('image/png');
-  await downloadImagesAsFileOrZip(images, 'png', 'plan-pest-control');
+  await downloadImagesAsFileOrZip(images, 'png', base);
   toast((images.length>1 ? images.length+' pages exportées (.zip).' : 'PNG exporté.'));
 });
 document.getElementById('btnExportJPEG').addEventListener('click', async ()=>{
   closeAllPopovers();
+  const base = await ensureDocName(); if (!base) return;
   const images = await captureAllPagesAsImages('image/jpeg', 0.92);
-  await downloadImagesAsFileOrZip(images, 'jpg', 'plan-pest-control');
+  await downloadImagesAsFileOrZip(images, 'jpg', base);
   toast((images.length>1 ? images.length+' pages exportées (.zip).' : 'JPEG exporté.'));
 });
 document.getElementById('btnExportPDF').addEventListener('click', async ()=>{
   closeAllPopovers();
+  const base = await ensureDocName(); if (!base) return;
   const images = await captureAllPagesAsImages('image/jpeg', 0.95);
   const { jsPDF } = window.jspdf;
   let pdf = null;
@@ -5568,11 +5615,12 @@ document.getElementById('btnExportPDF').addEventListener('click', async ()=>{
     else pdf.addPage('a4', orient);
     pdf.addImage(img.dataUrl, 'JPEG', 0,0, w, h);
   });
-  pdf.save('plan-pest-control.pdf');
+  pdf.save(base+'.pdf');
   toast('PDF exporté ('+images.length+' page'+(images.length>1?'s':'')+').');
 });
 document.getElementById('btnExportPPTX').addEventListener('click', async ()=>{
   closeAllPopovers();
+  const base = await ensureDocName(); if (!base) return;
   const images = await captureAllPagesAsImages('image/png');
   const pptx = new window.PptxGenJS();
   // Le format du diaporama (calque) est fixé sur l'orientation de la page 1 ; les pages
@@ -5592,7 +5640,7 @@ document.getElementById('btnExportPPTX').addEventListener('click', async ()=>{
     const w = pageW*scale, h = pageH*scale;
     slide.addImage({data:img.dataUrl, x:(layoutW-w)/2, y:(layoutH-h)/2, w, h});
   });
-  pptx.writeFile({fileName:'plan-pest-control.pptx'});
+  pptx.writeFile({fileName:base+'.pptx'});
   toast('PPTX exporté ('+images.length+' page'+(images.length>1?'s':'')+').');
 });
 function downloadDataURL(url, filename){
@@ -5749,6 +5797,7 @@ function ensureDefaultDeviceTypes(){
     pages = saved.pages;
     pages.forEach(migratePlanFormat);
     currentPageIndex = Math.min(saved.currentPageIndex||0, pages.length-1);
+    docName = saved.docName || null;
     model = pages[currentPageIndex];
     idCounter = 100000; // évite toute collision d'ID avec la session restaurée
     ensureDefaultDeviceTypes();
