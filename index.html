@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-81 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-82 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-81</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-82</span></div>
   <div class="sep"></div>
   </div>
 
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-81 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-82 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1463,6 +1463,12 @@
    l'enregistrement / à l'export est PRÉ-REMPLI avec le nom du plan de la page 1. Cause :
    le nom du fichier image importé n'était pas conservé. Correctif : le plan mémorise son
    nom (pl.name, sans extension) à l'import ; askDocName(prefill) le propose, modifiable.
+   v2.1-82 : demande de Mic — rotation FINE du plan en gardant l'aimant 0/90/180/270. Cause :
+   l'aimant (ROT_SNAP_DEG = 4°) rend impossible un réglage de quelques dixièmes de degré à la
+   main. Correctif : bulle orange « − angle + » (rotFineEl), affichée dès qu'un plan est
+   sélectionné et déverrouillé (même condition que les mains : rotatablePlan), pas de 0,1°,
+   appui long = répétition ; rotation autour du centre, angle arrondi au dixième ; un seul
+   pushHistory au relâchement. La rotation à la main et son aimant sont inchangés.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -2824,6 +2830,7 @@ function ensureRotIcons(){
 function updateRotateIcons(livePl){
   ensureRotIcons();
   let pl = livePl || rotatablePlan();
+  refreshRotFine(pl);
   if (!pl){
     if (rotIconsGroup.visible()){ rotIconsGroup.visible(false); uiLayer.batchDraw(); }
     return;
@@ -2860,6 +2867,64 @@ function updateRotateIcons(livePl){
   });
   if (rotIconsGroup.getZIndex() !== uiLayer.children.length-1) rotIconsGroup.moveToTop();
   uiLayer.batchDraw();
+}
+/* ---------------------------- Rotation fine − / + (v2.1-82) ------------------------------ */
+const ROT_FINE_STEP = 0.1; // degrés par appui
+let rotFineEl = null, rotFineLabel = null, rotFineTimer = null, rotFineChanged = false;
+function ensureRotFine(){
+  if (rotFineEl) return;
+  rotFineEl = document.createElement('div');
+  rotFineEl.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);z-index:790;display:none;align-items:center;gap:6px;'
+    + 'background:#F59E0B;color:#1c2230;padding:5px 8px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.25);'
+    + 'font-size:13px;font-weight:600;touch-action:none;user-select:none;-webkit-user-select:none;';
+  const mk = (txt, dir)=>{
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = txt;
+    b.style.cssText = 'font:inherit;font-size:20px;line-height:1;width:44px;height:36px;border:none;border-radius:18px;background:#1c2230;color:#fff;touch-action:none;';
+    const stop = ()=>{
+      clearTimeout(rotFineTimer); rotFineTimer = null;
+      if (rotFineChanged){ rotFineChanged = false; pushHistory(); render(); }
+    };
+    b.addEventListener('pointerdown', (e)=>{
+      e.preventDefault();
+      nudgePlanRotation(dir*ROT_FINE_STEP);
+      // Appui long : répétition (d'abord après 400 ms, puis toutes les 90 ms).
+      const rep = ()=>{ nudgePlanRotation(dir*ROT_FINE_STEP); rotFineTimer = setTimeout(rep, 90); };
+      rotFineTimer = setTimeout(rep, 400);
+    });
+    ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev, stop));
+    return b;
+  };
+  rotFineLabel = document.createElement('span');
+  rotFineLabel.style.cssText = 'min-width:62px;text-align:center;font-variant-numeric:tabular-nums;';
+  rotFineEl.append(mk('−',-1), rotFineLabel, mk('+',1));
+  document.body.appendChild(rotFineEl);
+}
+function refreshRotFine(pl){
+  ensureRotFine();
+  if (!pl){ rotFineEl.style.display = 'none'; return; }
+  const bar = document.getElementById('mobileTileBar');
+  const r = bar ? bar.getBoundingClientRect() : null;
+  rotFineEl.style.top = ((r && r.height ? r.bottom : 58) + 6)+'px';
+  const a = (((pl.rotation||0)%360)+360)%360;
+  rotFineLabel.textContent = (Math.round(a*10)/10).toFixed(1).replace('.',',')+'°';
+  rotFineEl.style.display = 'flex';
+}
+// Tourne le plan sélectionné de "delta" degrés autour de son CENTRE (même calcul que la rotation à la main).
+function nudgePlanRotation(delta){
+  const pl = rotatablePlan(); if (!pl) return;
+  const c = planCenter(pl);
+  const rot = Math.round(((((pl.rotation||0)+delta)%360)+360)%360*10)/10 % 360; // arrondi au dixième, sans dérive
+  const rad = rot*Math.PI/180, cos = Math.cos(rad), sin = Math.sin(rad);
+  pl.rotation = rot;
+  pl.x = c.x - ((pl.width/2)*cos - (pl.height/2)*sin);
+  pl.y = c.y - ((pl.width/2)*sin + (pl.height/2)*cos);
+  const node = planImageNodes.get(pl.id);
+  if (node){ node.position({x:pl.x, y:pl.y}); node.rotation(rot); planLayer.batchDraw(); }
+  rotFineChanged = true;
+  updateRotateIcons();
+  if (typeof updateLockIndicator === 'function') updateLockIndicator(true);
+  transformer.forceUpdate(); uiLayer.batchDraw();
 }
 function pointerClient(e){
   const t = e.touches && e.touches[0] ? e.touches[0] : (e.changedTouches && e.changedTouches[0]) || e;
@@ -4724,6 +4789,7 @@ function setTool(name){
   container.classList.toggle('cutting-active', ['cut-rect','cut-point','eraser'].includes(activeTool));
   ghostGroup.destroyChildren(); uiLayer.batchDraw();
   renderPlan(); // recalcule si le plan doit rester draggable selon l'outil actif
+  if (typeof updateRotateIcons === 'function') updateRotateIcons(); // mains et bulle − / + selon l'outil actif (v2.1-82)
   // layoutHeader() recalcule juste la hauteur du bandeau (peut changer selon l'outil actif) ;
   // fitZoom() a été retiré d'ici : changer d'outil ne doit JAMAIS réinitialiser le zoom en
   // cours (c'était très gênant en pratique, ex. en renommant plusieurs pastilles à la
