@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-82 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-83 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-82</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-83</span></div>
   <div class="sep"></div>
   </div>
 
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-82 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-83 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1469,6 +1469,12 @@
    sélectionné et déverrouillé (même condition que les mains : rotatablePlan), pas de 0,1°,
    appui long = répétition ; rotation autour du centre, angle arrondi au dixième ; un seul
    pushHistory au relâchement. La rotation à la main et son aimant sont inchangés.
+   v2.1-83 : demande de Mic — (1) choisir la tuile Pastille alors qu'un plan était sélectionné laissait
+   son cadre bleu affiché ; correctif : onTileChosen('pastille') désélectionne le plan.
+   (2) le bouton cadenas de la tuile Plan ne disait pas l'état du plan ; correctif :
+   updatePlanLockButton() (appelée depuis updateLockIndicator, donc à chaque sélection /
+   verrouillage / annulation) change l'icône (cadenas ouvert / fermé) et le texte dessous
+   (« Plan verrouillé » / « Plan déverrouillé ») d'après le plan sélectionné, à défaut le 1er plan.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -3058,7 +3064,23 @@ function ensureLockBadge(){
   uiLayer.add(lockIndicatorGroup);
   lockBadge = { g, path, locked:false };
 }
+// v2.1-83 : icône + texte du bouton cadenas de la tuile Plan selon l'état du plan (sélectionné, sinon le 1er).
+const PLAN_LOCK_SHACKLE_CLOSED = 'M7.5 10.5V7.8a4.5 4.5 0 0 1 9 0v2.7';
+const PLAN_LOCK_SHACKLE_OPEN = 'M7.5 10.5V7.8a4.5 4.5 0 0 1 9 0V6';
+function updatePlanLockButton(){
+  const btn = document.getElementById('toolLockPlan');
+  if (!btn) return;
+  const pl = findPlanById(selectedId) || (model.plans && model.plans[0]) || null;
+  const txt = !pl ? 'Aucun plan' : (pl.locked ? 'Plan verrouillé' : 'Plan déverrouillé');
+  const lbl = btn.querySelector('.tb-icon-label');
+  if (lbl && lbl.textContent !== txt) lbl.textContent = txt;
+  btn.title = txt;
+  const sh = btn.querySelector('svg path');
+  const d = (pl && !pl.locked) ? PLAN_LOCK_SHACKLE_OPEN : PLAN_LOCK_SHACKLE_CLOSED;
+  if (sh && sh.getAttribute('d') !== d) sh.setAttribute('d', d);
+}
 function updateLockIndicator(duringRotation){
+  updatePlanLockButton();
   // Les icônes de rotation se mettent à jour en même temps (sélection, désélection,
   // redimensionnement…), sauf pendant une rotation où elles sont déjà gérées en direct.
   if (!duringRotation && typeof updateRotateIcons === 'function' && !(planRotate && planRotate.active)) updateRotateIcons();
@@ -4736,6 +4758,8 @@ let activeTileId = 'pastille';
 function ensureDefaultTool(){ activeTileId = 'pastille'; if (activeTool !== DEFAULT_TOOL) setTool(DEFAULT_TOOL); }
 function onTileChosen(tileId){
   activeTileId = tileId;
+  // v2.1-83 : sur la tuile Pastille, un plan resté sélectionné ne doit plus afficher son cadre bleu.
+  if (tileId === 'pastille' && selectedId && findPlanById(selectedId)) selectNode(null, null);
   const isPlacing = activeTool==='place-classic' || activeTool==='place-remote';
   if (tileId === 'pastille'){
     if (!isPlacing) setTool(DEFAULT_TOOL); // retour sur la tuile Pastille : Placement classique (ou le déporté s'il était choisi)
@@ -5833,6 +5857,7 @@ function addIconLabels(){
   });
 }
 addIconLabels();
+updatePlanLockButton();
 // Un seul écouteur "resize" (regroupé sur requestAnimationFrame), au lieu de 4 séparés :
 // évite de refaire 4 fois le travail de mise en page à chaque frame d'un redimensionnement
 // continu (rotation d'écran, ouverture du clavier virtuel, redimensionnement de fenêtre…).
