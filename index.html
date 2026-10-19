@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-88 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-89 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-88</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-89</span></div>
   <div class="sep"></div>
   </div>
 
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-88 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-89 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1504,6 +1504,16 @@
    alors que la pastille posée est calée sur le quadrillage (snapToGrid), avec la taille du poste
    (effectiveNextRadius) et un trait légèrement ombré. Correctif : l'aperçu (tactile et souris)
    utilise la même position calée, la même taille de pastille et la même ombre que le rendu final.
+   v2.1-89 : demande de Mic — (1) fluidité du curseur de placement déporté ; (2) accroche des
+   pastilles sur les intersections de la grille affichée. Causes : (1) à chaque image, le
+   curseur redessinait la couche d'interface, un canvas de feuille entière à la densité de
+   l'écran (très lourd à envoyer au GPU d'un smartphone) ; (2) la grille affichée a un pas de
+   20 (GRID_STEP) alors que l'accroche utilisait un pas de 12 (REMOTE_SNAP_STEP) : les centres
+   ne tombaient jamais sur une intersection visible. Correctifs : (1) curseur et trait dans une
+   couche dédiée (cursorLayer) en résolution 1, masquée hors usage ; (2) snapToGrid() = pas
+   GRID_STEP, actif seulement quand la grille est affichée (le placement déporté l'affiche
+   d'office), appliqué à la pose (classique et déportée, y compris le point réel), à
+   l'aperçu et au glissement d'une pastille existante (dragBoundFunc : accroche en direct).
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -1989,7 +1999,11 @@ const contentLayer = new Konva.Layer();
 // pastilles numérotées ; elle n'intercepte jamais les clics (listening:false).
 const gridLayer = new Konva.Layer({ listening:false });
 const uiLayer = new Konva.Layer(); // transformer + aperçu fantôme (regroupés pour limiter le nb de layers)
-stage.add(planLayer); stage.add(contentLayer); stage.add(gridLayer); stage.add(uiLayer);
+// Couche DÉDIÉE au curseur de placement déporté (v2.1-89), en résolution 1 : la redessiner à chaque
+// image du doigt ne coûte plus un canvas de feuille entière à la densité de l'écran.
+const cursorLayer = new Konva.Layer({ visible:false });
+stage.add(planLayer); stage.add(contentLayer); stage.add(gridLayer); stage.add(uiLayer); stage.add(cursorLayer);
+cursorLayer.getCanvas().setPixelRatio(1);
 // Ordre d'empilement STRUCTUREL du contenu (v2.1-62) : lignes < pastilles < textes < logos <
 // légende. Chaque catégorie a son propre groupe, ajouté une fois pour toutes dans cet ordre :
 // plus besoin de rappeler moveToTop() sur chaque élément à chaque rendu (coût proportionnel au
@@ -2045,7 +2059,7 @@ transformer.find('._anchor').forEach(anchor=>{
   });
 });
 uiLayer.add(ghostGroup);
-uiLayer.add(remoteCursorGroup);
+cursorLayer.add(remoteCursorGroup);
 transformer.on('transform', ()=>{ if (typeof updateLockIndicator === 'function') updateLockIndicator(); });
 
 let lastGridKey = null;
@@ -2398,6 +2412,8 @@ function renderContent(){
         group = new Konva.Group();
         group.add(body);
         group.id(p.id); group.name('pastille'); group.draggable(true);
+        // v2.1-89 : grille affichée = le centre s'accroche aux intersections PENDANT le glissement.
+        group.dragBoundFunc(pos=> gridVisible ? { x:snapToGrid(pos.x), y:snapToGrid(pos.y) } : pos);
         group._sig = sig;
         if (bitmapCacheEnabled) cachePastilleBody(group);
         const r = p.radius;
@@ -2435,7 +2451,7 @@ function renderContent(){
         group.on('dragend', ()=>{
           const pp = model.pastilles.find(x=>x.id===p.id); if (!pp) return;
           let nx = group.x(), ny = group.y();
-          if (isRemotePastille(p.id)){ nx = snapToGrid(nx); ny = snapToGrid(ny); group.position({x:nx,y:ny}); }
+          if (gridVisible){ nx = snapToGrid(nx); ny = snapToGrid(ny); group.position({x:nx,y:ny}); }
           pp.x = nx; pp.y = ny;
           pushHistory(); render();
         });
@@ -3442,7 +3458,7 @@ function updateGhost(pos){
     const type = model.deviceTypes.find(t=>t.id===selectedTypeId);
     if (type && pos){
       const r = effectiveNextRadius(); // même taille que la pastille qui sera réellement posée
-      const c = new Konva.Circle({x:pos.x,y:pos.y,radius:r, fill:type.color, opacity:0.55, stroke:'#000', strokeWidth:1.5});
+      const c = new Konva.Circle({x:snapToGrid(pos.x),y:snapToGrid(pos.y),radius:r, fill:type.color, opacity:0.55, stroke:'#000', strokeWidth:1.5});
       // v2.1-87 : placement déporté à la souris, 2e clic en attente : trait en direct depuis le point réel.
       if (activeTool==='place-remote' && remoteAnchor){
         const gx = snapToGrid(pos.x), gy = snapToGrid(pos.y); // même calage que la pastille posée
@@ -3950,7 +3966,7 @@ stage.on('click', (e)=>{
   if (!pos) return;
   if (e.target !== stage && e.target.getLayer() !== planLayer) return;
   if (!remoteAnchor){
-    remoteAnchor = {x:pos.x, y:pos.y};
+    remoteAnchor = {x:snapToGrid(pos.x), y:snapToGrid(pos.y)};
     toast('Point réel placé. Cliquez à présent où afficher la pastille.');
   } else {
     const anchor = {id: nextId('anchor-'), x:remoteAnchor.x, y:remoteAnchor.y};
@@ -3963,6 +3979,7 @@ stage.on('click', (e)=>{
 });
 
 function addPastille(x,y, commit=true){
+  x = snapToGrid(x); y = snapToGrid(y); // v2.1-89 : centre sur une intersection de la grille si elle est affichée
   const type = model.deviceTypes.find(t=>t.id===selectedTypeId);
   const countSameType = countPastillesOfType(selectedTypeId);
   // Certains postes (ex. rongeurs souris/rat) sont configurés "sans numéro" : leur pastille
@@ -3977,8 +3994,8 @@ function addPastille(x,y, commit=true){
 }
 // Quadrillage invisible et serré, utilisé uniquement comme point d'ancrage pour aligner
 // proprement les pastilles en placement déporté (celles reliées par un trait à leur point réel).
-const REMOTE_SNAP_STEP = 12;
-function snapToGrid(v){ return Math.round(v/REMOTE_SNAP_STEP)*REMOTE_SNAP_STEP; }
+// v2.1-89 : même pas que la grille affichée (GRID_STEP) ; sans effet si la grille est masquée.
+function snapToGrid(v){ return gridVisible ? Math.round(v/GRID_STEP)*GRID_STEP : v; }
 function isRemotePastille(pastilleId){ return model.lines.some(l=>l.toPastilleId===pastilleId); }
 
 /* ---------------------------- Curseur déporté (placement précis au doigt) --- */
@@ -4035,11 +4052,12 @@ function remoteTipFromHandlePos(pos){
 function drawRemoteCursor(){
   if (!remoteCursor){
     if (remoteCursorNodes) remoteCursorGroup.visible(false);
-    uiLayer.batchDraw();
+    cursorLayer.visible(false); // couche masquée hors usage : plus rien à composer
     return;
   }
   const nodes = ensureRemoteCursorNodes();
   remoteCursorGroup.visible(true);
+  cursorLayer.visible(true);
   const lift = REMOTE_CURSOR_LIFT_PX/zoom;
   const handleR = REMOTE_CURSOR_HANDLE_PX / zoom;
   const tx = remoteCursor.tip.x, ty = remoteCursor.tip.y;
@@ -4047,8 +4065,10 @@ function drawRemoteCursor(){
   const color = remoteCursorColor();
 
   // Aperçu de la pastille à venir (outil pastille, phase 'pastille' uniquement)
-  // Position réellement utilisée à la validation : calée sur le quadrillage (v2.1-88).
-  const sx = snapToGrid(tx), sy = snapToGrid(ty);
+  // Position réellement utilisée à la validation : calée sur la grille (v2.1-88/89). Seule la
+  // pastille s'accroche ; le cercle sous le doigt (hx, hy) reste exactement sous le doigt.
+  const snapTip = remoteCursor.tool==='pastille';
+  const sx = snapTip ? snapToGrid(tx) : tx, sy = snapTip ? snapToGrid(ty) : ty;
   if (remoteCursor.tool==='pastille' && remoteCursor.phase==='pastille' && remoteAnchor){
     nodes.previewLine.setAttrs({ points:[remoteAnchor.x, remoteAnchor.y, sx, sy], stroke:color, strokeWidth:2, lineCap:'butt',
       shadowColor:'rgba(0,0,0,0.25)', shadowBlur:2, shadowOffset:{x:0,y:1}, visible:true });
@@ -4073,28 +4093,27 @@ function drawRemoteCursor(){
   const ux = 0, uy = 1; // vecteur unitaire tip->handle : toujours vertical, vers le bas
   const perpX = -uy, perpY = ux;
   const baseDist = handleR*0.92, baseHalf = handleR*0.42;
-  const bcx = tx + ux*baseDist, bcy = ty + uy*baseDist;
+  const bcx = sx + ux*baseDist, bcy = sy + uy*baseDist;
   nodes.arrow.setAttrs({
-    points:[tx, ty, bcx+perpX*baseHalf, bcy+perpY*baseHalf, bcx-perpX*baseHalf, bcy-perpY*baseHalf],
+    points:[sx, sy, bcx+perpX*baseHalf, bcy+perpY*baseHalf, bcx-perpX*baseHalf, bcy-perpY*baseHalf],
     fill:color, stroke:color
   });
 
   // Petit repère exactement sur la pointe visée
-  nodes.tipDot.setAttrs({ x:tx, y:ty, radius:Math.max(2, 3/zoom), fill:color, stroke:'#ffffff', strokeWidth:Math.max(1, 1/zoom) });
+  nodes.tipDot.setAttrs({ x:sx, y:sy, radius:Math.max(2, 3/zoom), fill:color, stroke:'#ffffff', strokeWidth:Math.max(1, 1/zoom) });
 
   // Le cercle à tapoter : grand et bien visible, toujours centré sous le doigt
   nodes.handleCircle.setAttrs({ x:hx, y:hy, radius:handleR, stroke:color, strokeWidth:Math.max(2, 2.5/zoom) });
   nodes.handleDot.setAttrs({ x:hx, y:hy, radius:handleR*0.32, fill:color });
 
-  uiLayer.batchDraw();
-}
-// Valide l'étape en cours (point réel puis pastille numérotée), et enchaîne sur la suivante.
+  cursorLayer.batchDraw();
+}// Valide l'étape en cours (point réel puis pastille numérotée), et enchaîne sur la suivante.
 function confirmRemoteCursor(){
   if (!remoteCursor) return;
   const {x,y} = remoteCursor.tip;
   if (remoteCursor.tool==='pastille'){
     if (remoteCursor.phase==='anchor'){
-      remoteAnchor = {x, y};
+      remoteAnchor = {x:snapToGrid(x), y:snapToGrid(y)};
       remoteCursor = { tool:'pastille', phase:'pastille', tip:{x, y} };
       drawRemoteCursor();
       toast('Point réel validé. Positionnez la pastille puis tapotez le cercle pour valider.');
