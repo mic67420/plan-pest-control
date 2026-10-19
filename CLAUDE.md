@@ -49,6 +49,14 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
 7. Toute fonction d'export doit couvrir **toutes les pages** (`pages[]`), pas seulement la page affichée.
 8. Commentaires du code en français, expliquant le **pourquoi** (historique du bug, choix fait).
 
+## 3 bis. Tests de non-régression et référence
+
+- `tests/smoke.js` (Playwright, sans réseau) : démarrage, éléments de coin, tuile unique active, hauteur des
+  tiroirs, plan verrouillé / déplaçable, gomme, placement déporté, noms des exports. À lancer avant et après
+  chaque gros changement (voir l'en-tête du fichier pour les variables LIBS / PLAYWRIGHT / CHROME).
+- Dernière version validée avant le grand nettoyage (v2.1-102+) : v2.1-101, commit `cbad9f7` (les étiquettes git ne
+  sont pas acceptées par le dépôt distant : retrouver la version par ce numéro de commit).
+
 ## 4. Architecture — points clés à connaître
 
 ### Données
