@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-72 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-73 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -388,6 +388,7 @@
     opacity:0;transition:all .25s ease;z-index:800;pointer-events:none;text-align:center;
   }
   #bubble.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #bubble.tappable{pointer-events:auto;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -395,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-72</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-73</span></div>
   <div class="sep"></div>
   </div>
 
@@ -630,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-72 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-73 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1405,6 +1406,16 @@
    texte sombre, pour trancher avec le gris et le bleu des tuiles. (2) Le rond clair avec
    main fermée qui suivait le doigt pendant la rotation du plan (showTouchHand) est supprimé :
    l'icône au bord du plan passe déjà en main fermée, la rotation est inchangée.
+   v2.1-73 : demande de Mic — être prévenu d'une nouvelle version sans la forcer. Cause
+   racine : le service worker ne redemande index.html qu'au lancement ; une application
+   restée ouverte (ou en arrière-plan) gardait l'ancienne version pendant des jours.
+   Un rechargement automatique aurait fait perdre le travail en cours. Correctif :
+   checkForUpdate() relit index.html (cache:'no-store') au démarrage (+10 s), toutes les
+   5 min et au retour au premier plan, et compare le numéro de version du <title> ; s'il
+   diffère, la bulle orange (désormais cliquable : showBubble(msg, onTap)) propose
+   « Nouvelle version disponible — touchez ici pour la charger ». Au toucher :
+   sauvegarde automatique forcée (doAutoSave) puis rechargement ; si la sauvegarde
+   échoue, on ne recharge pas. La bulle revient après tout autre message de bulle.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -1566,6 +1577,7 @@ function newProject(){
 let zoom = 1;
 let isPinching = false;
 let selectedId = null;
+let updateReady = false;      // v2.1-73 : une nouvelle version a été détectée (déclaré tôt : hideBubble() peut être appelé dès l'initialisation)
 let planUnlockPending = false; // v2.1-70 : « Déplacer le plan » confirmé, le prochain plan touché sera déverrouillé
 let activeTool = null;        // 'place-classic' | 'place-remote' | 'move-plan' | 'pipette' | 'paint-bucket' | 'cut-rect' | 'cut-point' | 'eraser' | null
 let currentColor = '#0E6FA8';
@@ -5531,15 +5543,48 @@ function downloadDataURL(url, filename){
 /* ---------------------------- Toast ---------------------------------------------- */
 let toastTimer=null;
 // Bulle flottante (v2.1-71) : contrairement à toast(), elle reste jusqu'à hideBubble().
-function showBubble(msg){
+function showBubble(msg, onTap){
   const el = document.getElementById('bubble');
   el.textContent = msg;
   // Calée juste sous la barre de tuiles (v2.1-72), dont la hauteur varie selon l'appareil.
   const bar = document.getElementById('mobileTileBar');
   if (bar){ const r = bar.getBoundingClientRect(); if (r.height) el.style.top = Math.round(r.bottom + 6)+'px'; }
+  el._onTap = onTap || null;
+  el.classList.toggle('tappable', !!onTap); // v2.1-73 : bulle cliquable (ex. mise à jour)
   el.classList.add('show');
 }
-function hideBubble(){ document.getElementById('bubble').classList.remove('show'); }
+function hideBubble(){
+  document.getElementById('bubble').classList.remove('show');
+  if (updateReady) showUpdateBubble(); // la proposition de mise à jour revient après un autre message
+}
+document.getElementById('bubble').addEventListener('click', (e)=>{
+  const f = e.currentTarget._onTap; if (f) f();
+});
+
+/* ---------------------------- Nouvelle version disponible (v2.1-73) ---------------------- */
+const APP_VERSION_RE = /<title>[^<]*?(v\d+\.\d+-\d+)/;
+function showUpdateBubble(){ showBubble('Nouvelle version disponible — touchez ici pour la charger', applyUpdate); }
+async function applyUpdate(){
+  // Rien ne doit être perdu : on force la sauvegarde avant de recharger, et on renonce si elle échoue.
+  clearTimeout(autoSaveTimer);
+  await doAutoSave();
+  if (autoSaveDirty){ toast('Sauvegarde impossible : exportez le .json avant de recharger.'); return; }
+  location.reload();
+}
+async function checkForUpdate(){
+  if (updateReady || !/^https?:$/.test(location.protocol) || !navigator.onLine) return;
+  try{
+    const res = await fetch('./index.html', { cache:'no-store' });
+    if (!res.ok) return;
+    const txt = await res.text();
+    const mine = (document.title.match(/v\d+\.\d+-\d+/)||[])[0];
+    const last = (txt.match(APP_VERSION_RE)||[])[1];
+    if (mine && last && mine !== last){ updateReady = true; showUpdateBubble(); }
+  } catch(e){ /* pas de réseau : on réessaiera plus tard */ }
+}
+setTimeout(checkForUpdate, 10000);
+setInterval(checkForUpdate, 5*60*1000);
+document.addEventListener('visibilitychange', ()=>{ if (document.visibilityState==='visible') checkForUpdate(); });
 function toast(msg){
   const el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('show');
