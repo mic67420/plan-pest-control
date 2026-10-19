@@ -961,4 +961,9 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    v2.1-102 : grand nettoyage, étape 2 — le journal ci-dessus quitte l'en-tête de index.html (fichier plus léger
    à charger) pour ce fichier JOURNAL.md ; suppression de deux fonctions jamais appelées (eraseAt,
    isRemotePastille). Aucun changement de comportement.
+
+   v2.1-103 : grand nettoyage, étape 3 — logo Radical intégré recompressé : 900x755 RGBA de 119 Ko (159 Ko en
+   base64, 28 % du fichier) -> 700x587 en PNG 256 couleurs de 14 Ko (écart moyen de couleur 1/255, transparence
+   identique). Garde le format PNG et reste intégré au fichier (le fichier doit s'ouvrir sans serveur, donc pas de
+   fichier séparé). Les documents déjà enregistrés gardent leur ancien logo.
 ```
