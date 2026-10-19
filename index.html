@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-70 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-71 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -380,6 +380,14 @@
     opacity:0;transition:all .25s ease;z-index:900;pointer-events:none;
   }
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  /* Bulle flottante (v2.1-71) : notification qui reste affichée jusqu'à hideBubble() */
+  #bubble{
+    position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-10px);
+    max-width:calc(100vw - 32px);background:#0E6FA8;color:#fff;padding:8px 16px;
+    border-radius:18px;font-size:13px;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.25);
+    opacity:0;transition:all .25s ease;z-index:901;pointer-events:none;text-align:center;
+  }
+  #bubble.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
@@ -387,7 +395,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-70</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-71</span></div>
   <div class="sep"></div>
   </div>
 
@@ -618,10 +626,11 @@
 <input type="file" id="fileInputProject" accept="application/json">
 
 <div id="toast"></div>
+<div id="bubble"></div>
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-70 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-71 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1382,6 +1391,13 @@
    (pushHistory pour l'annulation). Annuler = rien ne change. setTool() désarme
    planUnlockPending dès qu'on change d'outil. Un second clic sur l'outil actif le
    désactive sans question.
+   v2.1-71 : demande de Mic — remplacer la grande fenêtre OK/Annuler de v2.1-70 par
+   une petite bulle flottante, réutilisable pour d'autres notifications. Cause
+   racine : confirm() du navigateur est un gros cadre qui masque l'écran. Correctif :
+   nouvelle bulle #bubble (showBubble / hideBubble, en haut de l'écran, distincte du
+   toast du bas qui disparaît seul). « Déplacer le plan » active l'outil, affiche
+   « Sélectionnez le plan à déplacer » et déverrouille directement le plan touché ;
+   la bulle reste jusqu'à ce que le plan soit touché ou que l'outil change (setTool).
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -2049,7 +2065,7 @@ function renderPlan(){
         if (pl && (activeTool===null || activeTool==='move-plan')){ selectNode(node, p.id); }
         // v2.1-70 : l'utilisateur a validé « Déplacer le plan » ; le plan touché est déverrouillé.
         if (pl && planUnlockPending && activeTool==='move-plan'){
-          planUnlockPending = false;
+          planUnlockPending = false; hideBubble();
           if (pl.locked){ pl.locked = false; toast('Plan déverrouillé, vous pouvez le déplacer.'); pushHistory(); render(); }
         }
       });
@@ -4530,14 +4546,13 @@ async function autoInsertClientLogoPlaceholder(){
 /* ---------------------------- Outils plan (déplacer/verrouiller) -------------- */
 // "Déplacer le plan" reste un mode global : en mode PC/souris comme en tactile, chaque plan
 // devient alors individuellement déplaçable/redimensionnable (voir renderPlan()).
-// v2.1-70 : à chaque activation, on prévient que le plan touché sera déverrouillé. Un second
+// v2.1-70/71 : à chaque activation, une bulle indique que le plan touché sera déverrouillé. Un second
 // clic sur l'outil déjà actif le désactive sans question.
 document.getElementById('toolMovePlan').addEventListener('click', ()=>{
   if (activeTool==='move-plan'){ setTool('move-plan'); return; }
-  if (!confirm('Sélectionnez le plan : il sera automatiquement déverrouillé. OK ?')) return;
   setTool('move-plan');
   planUnlockPending = true;
-  toast('Touchez le plan à déplacer.');
+  showBubble('Sélectionnez le plan à déplacer');
 });
 // "Verrouiller" agit sur le plan actuellement SÉLECTIONNÉ (il peut y en avoir plusieurs par
 // page désormais) : on sélectionne un plan en cliquant dessus, puis on bascule son verrou.
@@ -4590,7 +4605,7 @@ function onTileChosen(tileId){
   }
 }
 function setTool(name){
-  planUnlockPending = false; // changer d'outil annule le déverrouillage en attente (v2.1-70)
+  planUnlockPending = false; hideBubble(); // changer d'outil annule le déverrouillage en attente (v2.1-70)
   activeTool = (activeTool===name) ? null : name;
   if (activeTool === null && name !== '__none__' && activeTileId === 'pastille') activeTool = DEFAULT_TOOL;
   remoteAnchor = null; cutPoints=[]; cutRectStart=null; isErasing=false;
@@ -5530,6 +5545,12 @@ function downloadDataURL(url, filename){
 
 /* ---------------------------- Toast ---------------------------------------------- */
 let toastTimer=null;
+// Bulle flottante (v2.1-71) : contrairement à toast(), elle reste jusqu'à hideBubble().
+function showBubble(msg){
+  const el = document.getElementById('bubble');
+  el.textContent = msg; el.classList.add('show');
+}
+function hideBubble(){ document.getElementById('bubble').classList.remove('show'); }
 function toast(msg){
   const el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('show');
