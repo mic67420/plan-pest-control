@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-80 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-81 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-80</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-81</span></div>
   <div class="sep"></div>
   </div>
 
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-80 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-81 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1459,6 +1459,10 @@
    l'export PDF (captureAllPagesAsImages : TOUTES les pages), envoyée à une iframe cachée
    dont le CSS impose une feuille A4 par page selon son orientation (@page nommées), puis
    window.print() ; le titre de l'iframe reprend docName pour le nom du PDF enregistré.
+   v2.1-81 : demande de Mic — chaque plan a un nom différent : le nom du document demandé à
+   l'enregistrement / à l'export est PRÉ-REMPLI avec le nom du plan de la page 1. Cause :
+   le nom du fichier image importé n'était pas conservé. Correctif : le plan mémorise son
+   nom (pl.name, sans extension) à l'import ; askDocName(prefill) le propose, modifiable.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -4491,7 +4495,7 @@ document.getElementById('fileInputPlan').addEventListener('change', async (e)=>{
   const file = e.target.files[0];
   if (!file) return;
   const dataURL = await fileToDataURL(file);
-  await importPlanImageFromDataURL(dataURL);
+  await importPlanImageFromDataURL(dataURL, file.name);
   toast(file.name+' importé.');
   e.target.value='';
 });
@@ -4499,7 +4503,7 @@ document.getElementById('fileInputPlan').addEventListener('change', async (e)=>{
 // copiée ailleurs (clic droit "Copier l'image", capture d'écran, etc.). Ajoute un NOUVEAU
 // plan à la page courante à chaque appel (un import ne remplace plus les plans déjà
 // présents) : on peut ainsi accumuler autant de plans que nécessaire sur une même page.
-async function importPlanImageFromDataURL(dataURL){
+async function importPlanImageFromDataURL(dataURL, fileName){
   const imgEl = await loadImage(dataURL);
   const maxW = stage.width()*0.85, maxH = stage.height()*0.85;
   const ratio = Math.min(maxW/imgEl.width, maxH/imgEl.height, 1);
@@ -4513,7 +4517,8 @@ async function importPlanImageFromDataURL(dataURL){
     id: nextId('plan-'), dataURL, originalDataURL: dataURL,
     x:(stage.width()-imgEl.width*ratio)/2 + offset, y:(stage.height()-imgEl.height*ratio)/2 + offset,
     width:imgEl.width*ratio, height:imgEl.height*ratio, rotation:0, locked:false,
-    brightness:0, contrast:0, saturation:0, hue:0
+    brightness:0, contrast:0, saturation:0, hue:0,
+    name: fileName ? cleanFileName(fileName.replace(/\.[^.]+$/,'')) : '' // v2.1-81 : sert à pré-remplir le nom du document
   };
   pl.originalX = pl.x; pl.originalY = pl.y;
   pl.originalWidth = pl.width; pl.originalHeight = pl.height;
@@ -5407,7 +5412,7 @@ window.addEventListener('keydown', (e)=>{
 // Nom de fichier sûr (v2.1-79) : sans caractères interdits sous Windows.
 function cleanFileName(n){ return (n||'').replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,80); }
 // Petite carte orange qui demande le nom du document (résout null si Annuler).
-function askDocName(){
+function askDocName(prefill){
   return new Promise(resolve=>{
     const card = document.createElement('div');
     card.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);max-width:calc(100vw - 32px);width:340px;'
@@ -5427,13 +5432,15 @@ function askDocName(){
     card.querySelector('[data-a="ok"]').addEventListener('click', ok);
     card.querySelector('[data-a="no"]').addEventListener('click', ()=>done(null));
     input.addEventListener('keydown', (e)=>{ if (e.key==='Enter') ok(); else if (e.key==='Escape') done(null); });
+    input.value = prefill || '';
     document.body.appendChild(card);
-    input.focus();
+    input.focus(); input.select();
   });
 }
 async function ensureDocName(){
   if (docName) return docName;
-  const n = await askDocName();
+  const firstPlan = pages[0] && pages[0].plans && pages[0].plans.find(pl=>pl.name); // nom du plan de la page 1
+  const n = await askDocName(firstPlan ? firstPlan.name : '');
   if (n){ docName = n; scheduleAutoSave(); }
   return n;
 }
