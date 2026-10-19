@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-73 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-74 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-73</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-74</span></div>
   <div class="sep"></div>
   </div>
 
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-73 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-74 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1416,6 +1416,11 @@
    « Nouvelle version disponible — touchez ici pour la charger ». Au toucher :
    sauvegarde automatique forcée (doAutoSave) puis rechargement ; si la sauvegarde
    échoue, on ne recharge pas. La bulle revient après tout autre message de bulle.
+   v2.1-74 : demande de Mic — verrouiller le plan doit désactiver « Déplacer le plan ».
+   Cause racine : l'outil restait actif (et sa bulle affichée) alors que le plan, une fois
+   verrouillé, ne peut plus bouger. Correctif : endMovePlanIfLocked() est appelée après le
+   verrouillage d'un plan, par le bouton « Verrouiller le plan » comme par le cadenas de la
+   barre de sélection ; si l'outil actif est « Déplacer le plan », il est décoché (setTool).
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -3099,12 +3104,17 @@ function findSelectedModelObject(){
       || model.logos.find(l=>l.id===selectedId)
       || null;
 }
+// v2.1-74 : un plan verrouillé ne peut plus être déplacé, l'outil « Déplacer le plan » est donc décoché.
+function endMovePlanIfLocked(obj){
+  if (obj && obj.locked && activeTool==='move-plan' && model.plans.includes(obj)) setTool('move-plan');
+}
 document.getElementById('selLock').addEventListener('click', ()=>{
   const obj = findSelectedModelObject();
   if (!obj) return;
   obj.locked = !obj.locked;
   document.getElementById('selLock').textContent = obj.locked ? '🔒' : '🔓';
   toast(obj.locked ? 'Élément verrouillé (déplacement bloqué).' : 'Élément déverrouillé.');
+  endMovePlanIfLocked(obj);
   pushHistory(); render();
 });
 document.getElementById('selDup').addEventListener('click', ()=>{
@@ -4558,6 +4568,7 @@ document.getElementById('toolLockPlan').addEventListener('click', ()=>{
   if (!pl){ toast('Sélectionnez d\'abord un plan à verrouiller.'); return; }
   pl.locked = !pl.locked;
   toast(pl.locked ? 'Plan verrouillé.' : 'Plan déverrouillé.');
+  endMovePlanIfLocked(pl);
   pushHistory(); render();
 });
 document.getElementById('toolPipette').addEventListener('click', ()=>setTool('pipette'));
