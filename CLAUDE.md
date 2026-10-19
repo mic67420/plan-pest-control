@@ -100,7 +100,8 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
 - **Cadenas** : pastille rouge + cadenas blanc, au coin supérieur droit de l'élément, suit ses
   déplacements, cliquable (verrouille / déverrouille).
 - **4 éléments de coin** (logo Radical, logo client + « Adresse du client », légende, « Mise à jour
-  le ») : verrouillés par défaut sur un nouveau projet ; copiés sur chaque nouvel étage depuis la
+  le ») : emplacements par défaut = `CORNER_PRESETS` (portrait / paysage, mesurés sur les documents de test de
+  Mic, v2.1-96) ; verrouillés par défaut sur un nouveau projet ; copiés sur chaque nouvel étage depuis la
   page choisie ; marge au bord préservée lors du passage portrait ↔ paysage.
 
 ## 5. Approches ABANDONNÉES (ne pas les retenter)
