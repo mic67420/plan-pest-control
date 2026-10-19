@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-74 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-75 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-74</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-75</span></div>
   <div class="sep"></div>
   </div>
 
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-74 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-75 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1421,6 +1421,13 @@
    verrouillé, ne peut plus bouger. Correctif : endMovePlanIfLocked() est appelée après le
    verrouillage d'un plan, par le bouton « Verrouiller le plan » comme par le cadenas de la
    barre de sélection ; si l'outil actif est « Déplacer le plan », il est décoché (setTool).
+   v2.1-75 : demande de Mic — le cadenas d'une PASTILLE doit être tout juste à côté du
+   cercle bleu, vers 10 h. Cause racine : le cadenas était calé sur le coin supérieur
+   droit de la boîte englobante, donc loin du cercle bleu (halo) d'une pastille ronde.
+   Correctif (updateLockIndicator) : pour une pastille, le cadenas est placé sur la
+   direction « 10 h » (à 300° dans le sens horaire depuis le haut) du centre, à la
+   distance rayon du halo (r+9, +2 pour le liseré) + rayon du cadenas (13 px écran) + 2 px
+   d'écart. Les autres éléments (plan, texte, logo, légende) gardent le coin supérieur droit.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -2967,7 +2974,15 @@ function updateLockIndicator(duringRotation){
   // mouvement (voir stage.on('dragmove') plus bas), pour tous les types d'éléments.
   const box = node.getClientRect({ relativeTo: uiLayer });
   const off = 16/zoom;
-  lockBadge.g.position({ x: box.x + box.width + off, y: box.y - off });
+  const pastille = model.pastilles.find(p=>p.id===selectedId);
+  if (pastille){
+    // v2.1-75 : cadenas collé au cercle bleu, à « 10 h » (x = -sin60°, y = -cos60° en repère écran).
+    const d = (pastille.radius + 9 + 2) + (13 + 2)/zoom;
+    const a = 300*Math.PI/180;
+    lockBadge.g.position({ x: node.x() + d*Math.sin(a), y: node.y() - d*Math.cos(a) });
+  } else {
+    lockBadge.g.position({ x: box.x + box.width + off, y: box.y - off });
+  }
   lockBadge.g.scale({ x:1/zoom, y:1/zoom });
   const locked = !!obj.locked;
   if (lockBadge.locked !== locked){
