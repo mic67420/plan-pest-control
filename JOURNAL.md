@@ -966,4 +966,12 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    base64, 28 % du fichier) -> 700x587 en PNG 256 couleurs de 14 Ko (écart moyen de couleur 1/255, transparence
    identique). Garde le format PNG et reste intégré au fichier (le fichier doit s'ouvrir sans serveur, donc pas de
    fichier séparé). Les documents déjà enregistrés gardent leur ancien logo.
+
+   v2.1-104 : grand nettoyage, étape 4 — gestion du doigt. Mesure (profil CPU, 60 mouvements de doigt) : les
+   4 gestionnaires tactiles du stage coûtent moins de 1 ms par mouvement : les fusionner n'aurait rien changé
+   et aurait mis le geste au doigt (fragile) en danger -> NON FAIT. Vrai coût : à chaque événement tactile Konva
+   appelle getIntersection (2 fois par mouvement), qui lit un pixel de chaque couche (getImageData) : peu cher en
+   test (0,08 ms) mais lecture GPU lente sur smartphone. Correctif : stage.getIntersection garde pendant un
+   geste (touchmove) l'élément touché au contact initial, comme un écran tactile natif ; recalcul au contact et au
+   relâchement seulement. Souris inchangée. Les redessins (batchDraw) étaient déjà regroupés par image.
 ```

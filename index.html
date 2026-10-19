@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-103 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-104 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -405,7 +405,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-103</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-104</span></div>
   <div class="sep"></div>
   </div>
 
@@ -643,7 +643,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-103 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-104 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1148,6 +1148,25 @@ const uiLayer = new Konva.Layer(); // transformer + aperçu fantôme (regroupés
 const cursorLayer = new Konva.Layer({ visible:false });
 stage.add(planLayer); stage.add(contentLayer); stage.add(gridLayer); stage.add(uiLayer); stage.add(cursorLayer);
 cursorLayer.getCanvas().setPixelRatio(1);
+// v2.1-104 : À CHAQUE événement tactile, Konva cherche l'élément sous le doigt (getIntersection) en LISANT un pixel
+// de chaque couche (getImageData) — une lecture GPU lente sur smartphone, répétée à chaque mouvement du doigt.
+// Comme sur un écran tactile natif, l'élément visé est celui du CONTACT INITIAL : on garde donc ce résultat pendant
+// les mouvements du même geste (touchmove) et on ne le recalcule qu'au contact et au relâchement (là où la cible
+// compte : tap, début de glissement). Souris et relâchement inchangés.
+(function(){
+  const origGI = stage.getIntersection.bind(stage);
+  let moving = false, cached = undefined, awaitingStart = false;
+  const content = stage.content;
+  content.addEventListener('touchstart', ()=>{ moving = false; cached = undefined; awaitingStart = true; }, true);
+  content.addEventListener('touchmove', ()=>{ moving = true; }, true);
+  ['touchend','touchcancel'].forEach(ev=>content.addEventListener(ev, ()=>{ moving = false; cached = undefined; awaitingStart = false; }, true));
+  stage.getIntersection = function(pos){
+    if (moving && cached !== undefined) return cached;
+    const r = origGI(pos);
+    if (awaitingStart){ cached = r; awaitingStart = false; } // 1er calcul après le contact = élément touché
+    return r;
+  };
+})();
 // Ordre d'empilement STRUCTUREL du contenu (v2.1-62) : lignes < pastilles < textes < logos <
 // légende. Chaque catégorie a son propre groupe, ajouté une fois pour toutes dans cet ordre :
 // plus besoin de rappeler moveToTop() sur chaque élément à chaque rendu (coût proportionnel au
