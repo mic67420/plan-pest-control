@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-85 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-86 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-85</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-86</span></div>
   <div class="sep"></div>
   </div>
 
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-85 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-86 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1487,6 +1487,12 @@
    Cause : v2.1-83 ne désélectionnait le plan que pour la tuile Pastille. Correctif :
    onTileChosen() désélectionne le plan pour toute tuile ≠ « plan » ; non sélectionné, il est
    figé (planCanBeDragged exige la sélection), comme verrouillé.
+   v2.1-86 : demande de Mic — le tiroir Pastille doit se réduire après la pose de la première
+   pastille ou après 2 s. Cause : il restait ouvert 5 s après un appui (délai commun aux
+   tiroirs à appuis répétés) et ne se fermait pas à la pose, masquant le plan. Correctif :
+   tiroir Pastille = minuteur de 2 s dès l'ouverture, relancé à chaque appui dans le tiroir
+   (reporté tant qu'un sous-menu / la liste des postes est ouvert) ; addPastille() le ferme
+   immédiatement. Les autres tiroirs gardent leur délai de 5 s.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -3946,6 +3952,7 @@ function addPastille(x,y, commit=true){
   const radius = (type && type.defaultRadius) ? type.defaultRadius : currentPastilleRadius;
   const p = { id: nextId('past-'), typeId: selectedTypeId, label, x, y, radius, rotation:0 };
   model.pastilles.push(p);
+  closeAllTileDrawers(); // v2.1-86 : le tiroir Pastille se referme dès qu'une pastille est posée
   if (commit){ pushHistory(); render(); }
   return p;
 }
@@ -5181,6 +5188,7 @@ function bindStepper(btn, step, read, write, onEnd){
 }
 // Un tiroir de tuile se referme après 5 s sans activité : un appui long sur − / + compte comme activité.
 function keepPastilleDrawerOpen(){
+  if (pastilleDrawerTimer){ schedulePastilleDrawerClose(); return; } // v2.1-86 : minuteur de 2 s du tiroir Pastille
   if (typeof tileRepeatCloseTimer !== 'undefined' && tileRepeatCloseTimer){
     clearTimeout(tileRepeatCloseTimer);
     tileRepeatCloseTimer = setTimeout(closeAllTileDrawers, TILE_REPEAT_CLICK_DELAY_MS);
@@ -5342,7 +5350,19 @@ function makeBarDraggable(barEl, handleEl){
 }
 makeBarDraggable(document.getElementById('selectionBar'), document.getElementById('selectionBarHandle'));
 
+// Tiroir Pastille (v2.1-86) : fermeture après 2 s sans appui, sauf si un sous-menu (liste des postes,
+// ajout de poste…) est ouvert dans l'intervalle : on repousse alors de 2 s.
+const PASTILLE_DRAWER_CLOSE_MS = 2000;
+let pastilleDrawerTimer = null;
+function schedulePastilleDrawerClose(){
+  clearTimeout(pastilleDrawerTimer);
+  pastilleDrawerTimer = setTimeout(()=>{
+    if (document.querySelector('.popover.open') || document.querySelector('#deviceTypeDropdownList.open')){ schedulePastilleDrawerClose(); return; }
+    closeAllTileDrawers();
+  }, PASTILLE_DRAWER_CLOSE_MS);
+}
 function closeAllTileDrawers(){
+  clearTimeout(pastilleDrawerTimer); pastilleDrawerTimer = null;
   document.querySelectorAll('.tb-group.mobile-open').forEach(g=>{ g.classList.remove('mobile-open'); g.style.top=''; });
   updateMobileTileActiveState();
   if (typeof tileRepeatCloseTimer !== 'undefined' && tileRepeatCloseTimer){ clearTimeout(tileRepeatCloseTimer); tileRepeatCloseTimer = null; }
@@ -5358,6 +5378,7 @@ function openTileDrawer(tileId, allowToggle=true){
   group.style.top = (barRect.bottom + 6) + 'px';
   group.classList.add('mobile-open');
   updateMobileTileActiveState();
+  if (tileId === 'pastille') schedulePastilleDrawerClose();
 }
 // Survol à la SOURIS (ordinateur) : ouverture immédiate du sous-menu, sans délai ni clic.
 // Limité aux vrais pointeurs souris (pointerType 'mouse') : sur un écran tactile, le
@@ -5400,7 +5421,8 @@ document.querySelectorAll('.tb-group[data-tile]').forEach(group=>{
       // Réinitialise le délai à chaque nouveau clic dans ce tiroir : il ne se referme que
       // si aucun bouton n'y a été recliqué depuis TILE_REPEAT_CLICK_DELAY_MS.
       if (tileRepeatCloseTimer) clearTimeout(tileRepeatCloseTimer);
-      tileRepeatCloseTimer = setTimeout(closeAllTileDrawers, TILE_REPEAT_CLICK_DELAY_MS);
+      if (group.dataset.tile === 'pastille'){ tileRepeatCloseTimer = null; schedulePastilleDrawerClose(); } // v2.1-86 : 2 s pour la tuile Pastille
+      else tileRepeatCloseTimer = setTimeout(closeAllTileDrawers, TILE_REPEAT_CLICK_DELAY_MS);
     } else {
       if (tileRepeatCloseTimer){ clearTimeout(tileRepeatCloseTimer); tileRepeatCloseTimer = null; }
       setTimeout(closeAllTileDrawers, 100);
