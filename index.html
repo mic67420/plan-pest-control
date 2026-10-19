@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-71 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-72 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -383,9 +383,9 @@
   /* Bulle flottante (v2.1-71) : notification qui reste affichée jusqu'à hideBubble() */
   #bubble{
     position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-10px);
-    max-width:calc(100vw - 32px);background:#0E6FA8;color:#fff;padding:8px 16px;
+    max-width:calc(100vw - 32px);background:#F59E0B;color:#1c2230;padding:8px 16px;
     border-radius:18px;font-size:13px;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.25);
-    opacity:0;transition:all .25s ease;z-index:901;pointer-events:none;text-align:center;
+    opacity:0;transition:all .25s ease;z-index:800;pointer-events:none;text-align:center;
   }
   #bubble.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
@@ -395,7 +395,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-71</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-72</span></div>
   <div class="sep"></div>
   </div>
 
@@ -630,7 +630,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-71 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-72 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1398,6 +1398,13 @@
    toast du bas qui disparaît seul). « Déplacer le plan » active l'outil, affiche
    « Sélectionnez le plan à déplacer » et déverrouille directement le plan touché ;
    la bulle reste jusqu'à ce que le plan soit touché ou que l'outil change (setTool).
+   v2.1-72 : demande de Mic — (1) la bulle passait par-dessus les tuiles ; cause : position
+   fixe à 64 px du haut, sans lien avec la hauteur réelle de la barre de tuiles. Correctif :
+   showBubble() la cale juste sous #mobileTileBar (mesurée à chaque affichage), avec un
+   z-index inférieur à celui des tiroirs (un tiroir ouvert la masque) ; couleur orange,
+   texte sombre, pour trancher avec le gris et le bleu des tuiles. (2) Le rond clair avec
+   main fermée qui suivait le doigt pendant la rotation du plan (showTouchHand) est supprimé :
+   l'icône au bord du plan passe déjà en main fermée, la rotation est inchangée.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -2793,25 +2800,6 @@ function updateRotateIcons(livePl){
   if (rotIconsGroup.getZIndex() !== uiLayer.children.length-1) rotIconsGroup.moveToTop();
   uiLayer.batchDraw();
 }
-// Main fermée affichée au-dessus du doigt pendant une rotation tactile (le doigt cache l'icône).
-// Déplacée par "transform" CSS (v2.1-61) : modifier left/top à chaque image obligeait le
-// navigateur à recalculer la mise en page, alors que transform ne touche que la composition.
-let rotateHandEl = null;
-function showTouchHand(clientX, clientY){
-  if (!rotateHandEl){
-    rotateHandEl = document.createElement('div');
-    rotateHandEl.style.cssText = 'position:fixed;left:0;top:0;z-index:2000;width:48px;height:48px;pointer-events:none;'
-      + 'will-change:transform;'
-      + 'background:#fffffff0;border:2px solid #0E6FA8;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.3);'
-      + 'display:flex;align-items:center;justify-content:center;';
-    rotateHandEl.innerHTML = '<img src="'+ROT_IMG_CLOSED.src+'" width="38" height="38" alt="">';
-    document.body.appendChild(rotateHandEl);
-  }
-  // au-dessus à gauche du doigt, pour rester visible
-  rotateHandEl.style.transform = 'translate3d('+(clientX - 72)+'px,'+(clientY - 72)+'px,0)';
-  rotateHandEl.style.display = 'flex';
-}
-function hideTouchHand(){ if (rotateHandEl) rotateHandEl.style.display = 'none'; }
 function pointerClient(e){
   const t = e.touches && e.touches[0] ? e.touches[0] : (e.changedTouches && e.changedTouches[0]) || e;
   return { x:t.clientX, y:t.clientY };
@@ -2836,7 +2824,6 @@ function startPlanRotation(e, iconIndex){
     rot:null, x:0, y:0, cx:c.x, cy:c.y, dirty:false, raf:0, uiHidden:false,
   };
   stage.container().style.cursor = CURSOR_HAND_CLOSED;
-  if (planRotate.active.isTouch) showTouchHand(c.x, c.y);
   updateRotateIcons(); // l'icône touchée passe en main fermée
   window.addEventListener('mousemove', onPlanRotateMove);
   window.addEventListener('touchmove', onPlanRotateMove, {passive:false});
@@ -2881,7 +2868,6 @@ function applyPlanRotationFrame(){
   const node = planImageNodes.get(pl.id);
   if (node){ node.position({x:st.x, y:st.y}); node.rotation(rot); planLayer.batchDraw(); }
   updateRotateIcons({ ...pl, x:st.x, y:st.y, rotation:rot });
-  if (st.isTouch) showTouchHand(st.cx, st.cy);
 }
 function onPlanRotateEnd(){
   const st = planRotate.active; if (!st) return;
@@ -2894,7 +2880,6 @@ function onPlanRotateEnd(){
   window.removeEventListener('mouseup', onPlanRotateEnd);
   window.removeEventListener('touchend', onPlanRotateEnd);
   window.removeEventListener('touchcancel', onPlanRotateEnd);
-  hideTouchHand();
   stage.container().style.cursor = '';
   if (st.uiHidden) transformer.visible(true); // le cadre bleu réapparaît (render() le recale ensuite)
   // Empêche le "clic" qui suit la fin du geste de désélectionner le plan.
@@ -5548,7 +5533,11 @@ let toastTimer=null;
 // Bulle flottante (v2.1-71) : contrairement à toast(), elle reste jusqu'à hideBubble().
 function showBubble(msg){
   const el = document.getElementById('bubble');
-  el.textContent = msg; el.classList.add('show');
+  el.textContent = msg;
+  // Calée juste sous la barre de tuiles (v2.1-72), dont la hauteur varie selon l'appareil.
+  const bar = document.getElementById('mobileTileBar');
+  if (bar){ const r = bar.getBoundingClientRect(); if (r.height) el.style.top = Math.round(r.bottom + 6)+'px'; }
+  el.classList.add('show');
 }
 function hideBubble(){ document.getElementById('bubble').classList.remove('show'); }
 function toast(msg){
