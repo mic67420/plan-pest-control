@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-76 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-77 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -396,7 +396,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-76</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-77</span></div>
   <div class="sep"></div>
   </div>
 
@@ -631,7 +631,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-76 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-77 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1437,6 +1437,10 @@
    tactile.) Correctif : aucun fantôme quand le pointeur est sur une pastille
    (pastilleUnderPointer, positions des nodes en direct) ; et un appui sur une pastille
    verrouillée affiche « Pastille verrouillée : touchez le cadenas pour la déverrouiller ».
+   v2.1-77 : demande de Mic — le message « Pastille verrouillée » doit être la bulle orange.
+   Cause racine : v2.1-76 utilisait toast() (bas de l'écran), masqué par la barre de sélection.
+   Correctif : showTimedBubble(msg, ms) (bulle orange sous les tuiles, disparaît seule après
+   2,5 s) utilisée pour ce message.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -2365,7 +2369,7 @@ function renderContent(){
         group.on('click tap', ()=>selectNode(group, p.id));
         group.on('mousedown touchstart', ()=>{
           const pp = model.pastilles.find(x=>x.id===p.id);
-          if (pp && pp.locked) toast('Pastille verrouillée : touchez le cadenas pour la déverrouiller.');
+          if (pp && pp.locked) showTimedBubble('Pastille verrouillée : touchez le cadenas pour la déverrouiller');
         });
         group.on('dragend', ()=>{
           const pp = model.pastilles.find(x=>x.id===p.id); if (!pp) return;
@@ -5613,6 +5617,15 @@ function showBubble(msg, onTap){
   el._onTap = onTap || null;
   el.classList.toggle('tappable', !!onTap); // v2.1-73 : bulle cliquable (ex. mise à jour)
   el.classList.add('show');
+}
+// Bulle orange qui disparaît seule (v2.1-77) ; ne masque pas un autre message affiché entre-temps.
+let timedBubbleTimer = null;
+function showTimedBubble(msg, ms){
+  showBubble(msg);
+  clearTimeout(timedBubbleTimer);
+  timedBubbleTimer = setTimeout(()=>{
+    if (document.getElementById('bubble').textContent === msg) hideBubble();
+  }, ms || 2500);
 }
 function hideBubble(){
   document.getElementById('bubble').classList.remove('show');
