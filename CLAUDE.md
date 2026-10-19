@@ -19,10 +19,9 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
 
 - Mic, responsable qualité, **non-développeur, novice total**.
 - Toujours répondre **en français**.
-- **Réponse après chaque modification : ULTRA CONDENSÉE** (consigne de Mic) : sans jargon, mais pas de
-  texte à rallonge. Format : 1 ligne = ce qui a été fait + version publiée ; 1 ligne = la cause (si
-  correction de bug) ; puis « À tester » en 2-3 puces courtes maximum. Aucun détail technique, aucune
-  liste de vérifications. Développer uniquement si Mic le demande.
+- **Réponse après chaque modification : MINIMALISTE** (consigne de Mic, 2e rappel) : 1 ligne = fait +
+  version publiée ; « À tester » = 2 puces très courtes. Pas de cause, pas de détails, pas de vérifications,
+  sauf si Mic le demande.
 - Pour les questions et explications demandées par Mic : clair, étape par étape, sans jargon.
 - Mic travaille sous **Windows** (pas de Mac : ne jamais parler du Finder, de Cmd, etc.).
 
