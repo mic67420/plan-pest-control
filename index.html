@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-96 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-97 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -401,7 +401,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-96</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-97</span></div>
   <div class="sep"></div>
   </div>
 
@@ -486,7 +486,7 @@
             </svg>
             <span>Pot</span>
           </button>
-          <button class="pop-tool-btn" id="toolEraser" title="Gomme carrée">
+          <button class="pop-tool-btn" id="toolEraser" title="Gomme">
             <svg width="19" height="19" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M17.5 3.5 21 7 12.5 15.5 8 11Z" fill="#F0A6C8" stroke="#2B3242" stroke-width="1.3" stroke-linejoin="round"/>
               <path d="M8 11 3.5 15.5a1.4 1.4 0 0 0 0 2L6 20h4l2.5-2.5Z" fill="#BFE0F0" stroke="#2B3242" stroke-width="1.3" stroke-linejoin="round"/>
@@ -497,7 +497,18 @@
         </div>
         <div class="pop-row" id="bucketColorRow"><label>Couleur du pot</label><span class="dd-swatch" id="bucketColorSwatch" style="background:#FFFFFF;border-radius:50%;border:1.5px solid #000;"></span><input type="color" id="bucketColorPicker" value="#FFFFFF" style="width:26px;height:26px;border:none;padding:0;"></div>
         <div class="pop-row" id="bucketToleranceRow"><label>Tolérance pot</label><input type="range" id="rngTolerance" min="4" max="120" value="32"></div>
-        <div class="pop-row" id="eraserSizeRow"><label>Taille gomme</label><input type="range" id="rngEraserSize" min="4" max="120" value="24"></div>
+        <div class="pop-row" id="eraserSizeRow" style="flex-wrap:wrap;gap:8px;align-items:center;">
+          <label>Gomme</label>
+          <button type="button" class="pop-btn" id="btnEraserSquare" title="Gomme carrée" style="width:auto;margin:0;padding:8px 12px;">■ Carrée</button>
+          <button type="button" class="pop-btn" id="btnEraserRound" title="Gomme ronde" style="width:auto;margin:0;padding:8px 12px;">● Ronde</button>
+          <div class="size-ctl-row" style="flex-basis:100%;">
+            <button type="button" class="step-btn" id="btnEraserSizeMinus" aria-label="Réduire la gomme">−</button>
+            <input type="range" id="rngEraserSize" min="4" max="120" value="24">
+            <button type="button" class="step-btn" id="btnEraserSizePlus" aria-label="Agrandir la gomme">+</button>
+            <span class="val" id="eraserSizeLabel">24</span>
+            <div class="size-preview" id="eraserPreview" title="Témoin : taille de la gomme sur la feuille, au zoom actuel"><div id="eraserPreviewShape"></div></div>
+          </div>
+        </div>
         <div class="hint" style="margin:2px 0 6px;">Astuce : la pipette définit la couleur utilisée par le pot de peinture.</div>
         <div class="pop-divider"></div>
         <div class="pop-section-title">Réglages de l'image</div>
@@ -632,7 +643,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-96 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-97 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1552,6 +1563,14 @@
    dont les éléments sont ENCORE exactement sur le préréglage de l'orientation de départ, on applique
    le préréglage de la nouvelle orientation ; sinon (éléments déplacés à la main) la logique
    « marge préservée » existante s'applique, rien n'est déplacé de force (règle 2 de CLAUDE.md).
+   v2.1-97 : demande de Mic — outil gomme : trait d'un point à un autre. Avant, la gomme effaçait en continu
+   au fil du doigt, sans pouvoir viser un début et une fin, ni tracer droit. Nouveau fonctionnement :
+   appui bref = une tache à la taille de la gomme ; appui maintenu puis glissé = aperçu du trait en
+   direct du point de départ jusqu'au doigt (pointe déportée au-dessus du doigt, comme les autres outils
+   tactiles), effacement au RELÂCHEMENT (eraseStroke) ; accroche automatique horizontale / verticale à
+   ±5° (snapEraseEnd) ; forme carrée ou ronde ; taille par − / curseur / + avec pastille témoin
+   (réglages « Outils image »). Le carré balayé est tracé comme l'enveloppe convexe des deux carrés
+   d'extrémité (convexHull) ; le rond par un trait à bouts arrondis. Un seul pushHistory par trait.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -3518,8 +3537,8 @@ function updateGhost(pos){
       ghostGroup.add(c);
     }
   } else if (activeTool==='eraser' && pos){
-    const brush = parseInt(document.getElementById('rngEraserSize').value,10);
-    ghostGroup.add(new Konva.Rect({x:pos.x-brush/2,y:pos.y-brush/2,width:brush,height:brush, fill:bucketColor, opacity:0.55, stroke:'#C0392B', strokeWidth:1.5, dash:[4,3]}));
+    renderEraserGhost(pos); // forme de la gomme (carrée / ronde) ou aperçu du trait en cours (v2.1-97)
+    return;
   }
   uiLayer.batchDraw();
 }
@@ -3770,7 +3789,7 @@ function scheduleRemoteCursorMove(pos){
     // Actions continues propres à chaque outil, effectuées à la pointe visée (et non
     // sous le doigt) : la gomme efface au fil du glissement, la découpe rectangle met
     // à jour son aperçu.
-    if (remoteCursor.tool==='eraser' && isErasing){ eraseAt(remoteCursor.tip); }
+    if (remoteCursor.tool==='eraser'){ /* v2.1-97 : l'aperçu du trait est mis à jour par drawRemoteCursor ; effacement au relâchement */ }
     else if (remoteCursor.tool==='cut-rect' && remoteCursor.phase==='end' && cutRectStart){ drawCutPreview(remoteCursor.tip); }
     else if (remoteCursor.tool==='cut-point' && cutPoints.length>0){ drawCutPreview(remoteCursor.tip); }
   });
@@ -4131,10 +4150,7 @@ function drawRemoteCursor(){
   }
   // Aperçu du carré de la gomme, centré sur la pointe visée (et non sous le doigt)
   if (remoteCursor.tool==='eraser'){
-    const brush = parseInt(document.getElementById('rngEraserSize').value,10);
-    ghostGroup.destroyChildren();
-    ghostGroup.add(new Konva.Rect({x:tx-brush/2,y:ty-brush/2,width:brush,height:brush, fill:bucketColor, opacity:0.55, stroke:'#C0392B', strokeWidth:1.5, dash:[4,3]}));
-    uiLayer.batchDraw();
+    renderEraserGhost({x:tx, y:ty}); // v2.1-97 : forme + aperçu du trait depuis le point de départ
   }
 
   // Flèche verticale (pointe en haut, base près du cercle en dessous)
@@ -4381,22 +4397,26 @@ stage.on('mousedown touchstart', (e)=>{
     if (!targetNode){ toast('Cliquez sur un plan pour utiliser la gomme.'); return; }
     eraseTargetPlanId = targetNode.id();
     isErasing=true;
+    eraseStart = { x:rawPos.x, y:rawPos.y }; // début du trait (v2.1-97) ; l'effacement a lieu au relâchement
+    eraseEnd = null;
     targetNode.clearCache();
-    eraseAt(rawPos);
+    renderEraserGhost(rawPos);
   }
 });
 // Démarre réellement le tracé de gomme à la position donnée (facteur commun entre un
 // mouvement rapide détecté pendant l'attente, et un relâchement rapide sans mouvement).
-function startEraseAt(rawPos){
-  const targetNode = planNodeAt(rawPos);
+// v2.1-97 : "origin" = point du premier contact (le début du trait est la pointe au-dessus de CE point,
+// même si le curseur n'a été créé qu'après un petit déplacement du doigt) ; aucun effacement ici.
+function startEraseAt(rawPos, origin){
+  const targetNode = planNodeAt(origin || rawPos);
   if (!targetNode){ toast('Touchez un plan pour utiliser la gomme.'); return; }
   eraseTargetPlanId = targetNode.id();
-  const tip = remoteTipFromHandlePos(rawPos);
-  remoteCursor = { tool:'eraser', tip };
-  drawRemoteCursor();
+  eraseStart = remoteTipFromHandlePos(origin || rawPos);
+  eraseEnd = null;
+  remoteCursor = { tool:'eraser', tip: remoteTipFromHandlePos(rawPos) };
   isErasing = true;
   targetNode.clearCache();
-  eraseAt(tip);
+  drawRemoteCursor();
 }
 stage.on('mousemove touchmove', (e)=>{
   if (isPinching) return;
@@ -4408,10 +4428,11 @@ stage.on('mousemove touchmove', (e)=>{
     const moved = Math.hypot(t.clientX-eraserPendingGate.startX, t.clientY-eraserPendingGate.startY);
     if (moved > PASTILLE_LONGPRESS_MOVE_PX){
       clearTimeout(eraserPendingGate.timer);
+      const origin = clientPointToStage(eraserPendingGate.startX, eraserPendingGate.startY);
       eraserPendingGate = null;
       if (e.evt.cancelable) e.evt.preventDefault();
       const rawPos = rawTouchStagePos(e);
-      if (rawPos) startEraseAt(rawPos);
+      if (rawPos) startEraseAt(rawPos, origin);
     }
     return;
   }
@@ -4437,7 +4458,7 @@ stage.on('mousemove touchmove', (e)=>{
   const pos = stage.getPointerPosition();
   if (!pos) return;
   if (activeTool==='cut-rect' && cutRectStart){ drawCutPreview(pos); }
-  else if (activeTool==='eraser' && isErasing){ eraseAt(pos); }
+  // gomme : l'aperçu du trait est mis à jour par updateGhost (v2.1-97), rien à effacer pendant le glissement
 });
 stage.on('mouseup touchend touchcancel', (e)=>{
   if (isRealTouch(e) && (activeTool==='cut-rect' || activeTool==='cut-point')) return;
@@ -4452,11 +4473,7 @@ stage.on('mouseup touchend touchcancel', (e)=>{
       if (ct){
         const rawPos = clientPointToStage(ct.clientX, ct.clientY);
         startEraseAt(rawPos);
-        isErasing = false;
-        const canvas = planNaturalCanvases.get(eraseTargetPlanId);
-        const pl = findPlanById(eraseTargetPlanId);
-        const node = planImageNodes.get(eraseTargetPlanId);
-        if (canvas && pl) commitPlanPixelEdit(eraseTargetPlanId);
+        if (eraseStart) finishErase(eraseStart); // appui bref : une tache à la taille de la gomme
         remoteCursor = null; drawRemoteCursor();
       }
     }
@@ -4467,13 +4484,7 @@ stage.on('mouseup touchend touchcancel', (e)=>{
   if (!pos){
     // sur certains appareils, la position du dernier point touché n'est plus disponible
     // après touchend : on annule proprement plutôt que de planter.
-    if (activeTool==='eraser' && isErasing){
-      isErasing=false;
-      const canvas = planNaturalCanvases.get(eraseTargetPlanId);
-      const pl = findPlanById(eraseTargetPlanId);
-      const node = planImageNodes.get(eraseTargetPlanId);
-      if (canvas && pl) commitPlanPixelEdit(eraseTargetPlanId);
-    }
+    if (activeTool==='eraser' && isErasing) finishErase(null); // dernière position connue, sinon simple tache
     cutRectStart = null;
     if (usingRemoteCursor){ remoteCursor = null; drawRemoteCursor(); }
     return;
@@ -4490,11 +4501,7 @@ stage.on('mouseup touchend touchcancel', (e)=>{
     if (w>4 && h>4) showCutConfirm(rectPts);
     else { ghostGroup.destroyChildren(); uiLayer.batchDraw(); }
   } else if (activeTool==='eraser' && isErasing){
-    isErasing=false;
-    const canvas = planNaturalCanvases.get(eraseTargetPlanId);
-    const pl = findPlanById(eraseTargetPlanId);
-    const node = planImageNodes.get(eraseTargetPlanId);
-    if (canvas && pl) commitPlanPixelEdit(eraseTargetPlanId);
+    finishErase(pos);
   }
   if (usingRemoteCursor){ remoteCursor = null; drawRemoteCursor(); }
 });
@@ -4661,39 +4668,113 @@ function applyCutPolygon(pointsStage){
 /* ---------------------------- Gomme ------------------------------------------- */
 let isErasing = false;
 let eraseTargetPlanId = null; // plan visé par le tracé de gomme en cours (déterminé au premier contact)
-function eraseAt(posStage){
+// ---------------------------------------------------------------------------------------------------
+// Gomme en TRAIT (v2.1-97) : début au premier contact, effacement au relâchement.
+let eraserShape = 'square';       // 'square' | 'round'
+let eraseStart = null;            // début du trait (coordonnées feuille) pendant un appui
+let eraseEnd = null;              // dernier point visé (après accroche), pour un relâchement sans position
+const ERASE_SNAP_DEG = 5;         // accroche horizontale / verticale à ± 5°
+function eraserBrush(){ return parseInt(document.getElementById('rngEraserSize').value,10); }
+// Accroche H/V : si le trait est à moins de ERASE_SNAP_DEG d'une direction horizontale ou verticale, il s'y cale.
+function snapEraseEnd(a, b){
+  const dx = b.x-a.x, dy = b.y-a.y;
+  if (!dx && !dy) return b;
+  const ang = Math.atan2(dy, dx)*180/Math.PI;
+  const nearest = Math.round(ang/90)*90;
+  if (Math.abs(ang-nearest) <= ERASE_SNAP_DEG) return (nearest%180===0) ? {x:b.x, y:a.y} : {x:a.x, y:b.y};
+  return b;
+}
+// Enveloppe convexe (chaîne monotone) : le balayage d'un carré le long d'un segment = enveloppe des deux carrés d'extrémité.
+function convexHull(P){
+  const seen = new Set();
+  P = P.filter(p=>{ const k = p[0]+','+p[1]; if (seen.has(k)) return false; seen.add(k); return true; }); // points doublons (tache : a == b) écartés
+  P = P.sort((p,q)=>p[0]-q[0] || p[1]-q[1]);
+  const cross = (o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);
+  const lo = []; for (const p of P){ while (lo.length>=2 && cross(lo[lo.length-2],lo[lo.length-1],p)<=0) lo.pop(); lo.push(p); }
+  const up = []; for (let i=P.length-1;i>=0;i--){ const p=P[i]; while (up.length>=2 && cross(up[up.length-2],up[up.length-1],p)<=0) up.pop(); up.push(p); }
+  lo.pop(); up.pop(); return lo.concat(up);
+}
+// Efface le trait a -> b (coordonnées feuille) sur le plan visé ; a == b donne une simple tache.
+function eraseStroke(a, b){
   if (!eraseTargetPlanId) return;
   const planNode = planImageNodes.get(eraseTargetPlanId);
   const canvas = planNaturalCanvases.get(eraseTargetPlanId);
   if (!planNode || !canvas) return;
   const { sx, sy } = planPixelScale(planNode);
-  const local = toLocal(planNode, posStage.x, posStage.y);
-  const px = local.x*sx, py = local.y*sy;
-  const brush = parseInt(document.getElementById('rngEraserSize').value,10);
-  const halfW = (brush*sx)/2, halfH = (brush*sy)/2;
-  const ctx = canvas.getContext('2d');
-  ctx.save();
-  // La gomme peint avec la couleur définie par la pipette (partagée avec le pot de
-  // peinture, "bucketColor"), pour effacer en se fondant dans le fond du plan — plutôt que
-  // de créer un trou transparent qui laisserait voir la feuille blanche en dessous.
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.fillStyle = bucketColor;
-  ctx.fillRect(px-halfW, py-halfH, halfW*2, halfH*2);
-  ctx.restore();
-  // L'écran affiche la copie RÉDUITE (voir makeDisplayCanvas) : on y peint le même carré pour
-  // que la gomme se voie en direct. La copie réduite est régénérée proprement depuis l'image
-  // pleine définition à la fin du tracé (commitPlanPixelEdit).
+  const la = toLocal(planNode, a.x, a.y), lb = toLocal(planNode, b.x, b.y);
+  const A = {x:la.x*sx, y:la.y*sy}, B = {x:lb.x*sx, y:lb.y*sy};
+  const brush = eraserBrush(), hw = (brush*sx)/2, hh = (brush*sy)/2;
+  // La gomme peint avec la couleur de la pipette (bucketColor), pour se fondre dans le fond du plan.
+  const paint = (ctx, k)=>{
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = bucketColor; ctx.strokeStyle = bucketColor;
+    if (eraserShape === 'round'){
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 2*hw*k;
+      ctx.beginPath(); ctx.moveTo(A.x*k, A.y*k); ctx.lineTo(B.x*k, B.y*k); ctx.stroke();
+      ctx.beginPath(); ctx.arc(A.x*k, A.y*k, hw*k, 0, 2*Math.PI); ctx.fill();
+      ctx.beginPath(); ctx.arc(B.x*k, B.y*k, hw*k, 0, 2*Math.PI); ctx.fill();
+    } else {
+      const hull = convexHull([A,B].flatMap(p=>[[p.x-hw,p.y-hh],[p.x+hw,p.y-hh],[p.x+hw,p.y+hh],[p.x-hw,p.y+hh]]));
+      ctx.beginPath(); hull.forEach((q,i)=> i ? ctx.lineTo(q[0]*k, q[1]*k) : ctx.moveTo(q[0]*k, q[1]*k)); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  };
+  paint(canvas.getContext('2d'), 1);
+  // L'écran affiche la copie RÉDUITE (makeDisplayCanvas) : même tracé à l'échelle ; elle est régénérée
+  // proprement depuis l'image pleine définition à la fin (commitPlanPixelEdit).
   const dispCanvas = planDisplayCanvases.get(eraseTargetPlanId);
-  if (dispCanvas && dispCanvas !== canvas){
-    const k = dispCanvas.width / canvas.width;
-    const dctx = dispCanvas.getContext('2d');
-    dctx.fillStyle = bucketColor;
-    dctx.fillRect((px-halfW)*k, (py-halfH)*k, halfW*2*k, halfH*2*k);
-  }
-  // Pendant le tracé, on ne fait qu'un rafraîchissement léger (le node dessine en direct
-  // depuis le canevas source tant qu'il n'est pas mis en cache) : pas de ré-encodage coûteux
-  // à chaque mouvement, seulement à la fin du tracé (voir mouseup/touchend).
+  if (dispCanvas && dispCanvas !== canvas) paint(dispCanvas.getContext('2d'), dispCanvas.width/canvas.width);
   planLayer.batchDraw();
+}
+function eraseAt(posStage){ eraseStroke(posStage, posStage); } // tache simple (compatibilité)
+// Aperçu : forme de la gomme sous le pointeur, ou trait du point de départ jusqu'au pointeur pendant un appui.
+function renderEraserGhost(tip){
+  ghostGroup.destroyChildren();
+  const brush = eraserBrush(), h = brush/2;
+  const common = { fill:bucketColor, opacity:0.55, stroke:'#C0392B', strokeWidth:1.5, dash:[4,3], listening:false };
+  const shapeAt = (p)=> eraserShape==='round'
+    ? new Konva.Circle(Object.assign({x:p.x, y:p.y, radius:h}, common))
+    : new Konva.Rect(Object.assign({x:p.x-h, y:p.y-h, width:brush, height:brush}, common));
+  if (isErasing && eraseStart){
+    const end = snapEraseEnd(eraseStart, tip); eraseEnd = end;
+    if (eraserShape === 'round'){
+      ghostGroup.add(new Konva.Line({points:[eraseStart.x,eraseStart.y,end.x,end.y], stroke:bucketColor, strokeWidth:brush, lineCap:'round', opacity:0.55, listening:false}));
+      ghostGroup.add(shapeAt(eraseStart)); ghostGroup.add(shapeAt(end));
+    } else {
+      const hull = convexHull([eraseStart,end].flatMap(p=>[[p.x-h,p.y-h],[p.x+h,p.y-h],[p.x+h,p.y+h],[p.x-h,p.y+h]]));
+      ghostGroup.add(new Konva.Line(Object.assign({points:hull.flat(), closed:true}, common)));
+    }
+    ghostGroup.add(new Konva.Line({points:[eraseStart.x,eraseStart.y,end.x,end.y], stroke:'#C0392B', strokeWidth:1, listening:false}));
+  } else {
+    ghostGroup.add(shapeAt(tip));
+  }
+  uiLayer.batchDraw();
+}
+// Relâchement : on efface le trait (ou une tache si le pointeur n'a pas bougé), puis un seul pushHistory.
+function finishErase(pos){
+  if (!isErasing) return;
+  isErasing = false;
+  if (eraseStart){
+    let end = pos ? snapEraseEnd(eraseStart, pos) : (eraseEnd || eraseStart);
+    if (pos && Math.hypot(pos.x-eraseStart.x, pos.y-eraseStart.y) < 3) end = eraseStart; // simple clic = tache
+    eraseStroke(eraseStart, end);
+  }
+  eraseStart = null; eraseEnd = null;
+  ghostGroup.destroyChildren(); uiLayer.batchDraw();
+  const canvas = planNaturalCanvases.get(eraseTargetPlanId);
+  const pl = findPlanById(eraseTargetPlanId);
+  if (canvas && pl) commitPlanPixelEdit(eraseTargetPlanId);
+}
+// Réglages de la gomme (forme, taille avec − / + et témoin) — v2.1-97.
+function updateEraserUI(){
+  const brush = eraserBrush();
+  document.getElementById('eraserSizeLabel').textContent = brush;
+  document.getElementById('btnEraserSquare').classList.toggle('active', eraserShape==='square');
+  document.getElementById('btnEraserRound').classList.toggle('active', eraserShape==='round');
+  const d = Math.max(4, Math.min(40, brush*zoom)); // témoin plafonné à 40 px comme la pastille témoin
+  const shape = document.getElementById('eraserPreviewShape');
+  shape.style.cssText = 'width:'+d+'px;height:'+d+'px;background:'+bucketColor+';border:1.5px dashed #C0392B;box-sizing:border-box;border-radius:'+(eraserShape==='round'?'50%':'2px')+';';
 }
 document.getElementById('toolResetCuts').addEventListener('click', async ()=>{
   closeAllPopovers();
@@ -4947,7 +5028,7 @@ function setTool(name){
   if (activeTool !== 'paint-bucket') document.getElementById('bucketToleranceRow').style.display='none';
   if (activeTool !== 'eraser') document.getElementById('eraserSizeRow').style.display='none';
   if (activeTool==='paint-bucket'){ document.getElementById('bucketToleranceRow').style.display='flex'; }
-  if (activeTool==='eraser'){ document.getElementById('eraserSizeRow').style.display='flex'; }
+  if (activeTool==='eraser'){ document.getElementById('eraserSizeRow').style.display='flex'; updateEraserUI(); }
   const container = document.getElementById('konvaContainer');
   container.classList.toggle('pipette-active', activeTool==='pipette');
   container.classList.toggle('cutting-active', ['cut-rect','cut-point','eraser'].includes(activeTool));
@@ -5306,6 +5387,14 @@ function keepPastilleDrawerOpen(){
     return true;
   };
   // Tiroir "Pastille" : taille de la prochaine pastille.
+  // Gomme : forme et taille (v2.1-97).
+  const er = document.getElementById('rngEraserSize');
+  bindStepper(document.getElementById('btnEraserSizeMinus'), -1, ()=>parseFloat(er.value), setRange(er));
+  bindStepper(document.getElementById('btnEraserSizePlus'), +1, ()=>parseFloat(er.value), setRange(er));
+  er.addEventListener('input', updateEraserUI);
+  document.getElementById('btnEraserSquare').addEventListener('click', ()=>{ eraserShape='square'; updateEraserUI(); });
+  document.getElementById('btnEraserRound').addEventListener('click', ()=>{ eraserShape='round'; updateEraserUI(); });
+  updateEraserUI();
   bindStepper(document.getElementById('btnPastilleSizeMinus'), -1, ()=>parseFloat(rng.value), setRange(rng));
   bindStepper(document.getElementById('btnPastilleSizePlus'), +1, ()=>parseFloat(rng.value), setRange(rng));
   // Barre de sélection : taille de la pastille sélectionnée (historique enregistré à la fin du geste).
