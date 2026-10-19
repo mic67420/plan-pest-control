@@ -70,6 +70,14 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       names.push((await dl).suggestedFilename());
     }
     ok(names.join('|')==='Plan test.pdf|Plan test.pptx|Plan test.png|Plan test.ppcx.json', 'exports : PDF, PPTX, PNG et .json au nom du document ('+names.join(', ')+')');
+    // 9. Sauvegarde automatique légère (v2.1-105) : images à part, rechargement, ancien format
+    const save = await pg.evaluate(async()=>{ scheduleAutoSave(); clearTimeout(autoSaveTimer); const t0=performance.now(); await doAutoSave(); const first=performance.now()-t0; scheduleAutoSave(); clearTimeout(autoSaveTimer); const t1=performance.now(); await doAutoSave(); const second=performance.now()-t1; const db=await openIDB(); const info=await new Promise(res=>{ const tx=db.transaction([IDB_STORE,IDB_IMG_STORE],'readonly'); const a=tx.objectStore(IDB_STORE).get(IDB_KEY); const k=tx.objectStore(IDB_IMG_STORE).getAllKeys(); tx.oncomplete=()=>res({ko:Math.round(JSON.stringify(a.result).length/1024),imgs:k.result.length,refs:!!a.result.imgRefs}); }); return Object.assign({first:Math.round(first),second:Math.round(second)}, info); });
+    ok(save.refs && save.ko < 60 && save.imgs >= 1, 'sauvegarde auto : document léger ('+save.ko+' Ko), '+save.imgs+' image(s) à part, 2e sauvegarde en '+save.second+' ms');
+    await pg.reload(); await pg.waitForTimeout(2000);
+    ok(await pg.evaluate(()=>model.plans.length===1 && model.pastilles.length>=1 && model.plans[0].dataURL.length>1000), 'rechargement : plan et pastilles restaurés depuis la sauvegarde automatique');
+    await pg.evaluate(()=>new Promise(async res=>{ const db=await openIDB(); const tx=db.transaction([IDB_STORE],'readwrite'); tx.objectStore(IDB_STORE).put({docVersion:2,pages:pages.map(cloneModel),currentPageIndex:0,savedAt:Date.now()},IDB_KEY); tx.oncomplete=res; }));
+    await pg.reload(); await pg.waitForTimeout(2000);
+    ok(await pg.evaluate(()=>model.plans.length===1), 'ancienne sauvegarde (images dans le document) toujours lisible');
     ok(errs.length===0, 'aucune erreur JavaScript'+(errs.length?' : '+errs[0]:''));
   } finally { await b.close(); }
   console.log(fails ? '\n'+fails+' ÉCHEC(S)' : '\nTOUS LES TESTS PASSENT');

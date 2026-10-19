@@ -974,4 +974,13 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    test (0,08 ms) mais lecture GPU lente sur smartphone. Correctif : stage.getIntersection garde pendant un
    geste (touchmove) l'élément touché au contact initial, comme un écran tactile natif ; recalcul au contact et au
    relâchement seulement. Souris inchangée. Les redessins (batchDraw) étaient déjà regroupés par image.
+
+   v2.1-105 : grand nettoyage, étape 5 — sauvegarde automatique plus légère. Cause : à chaque sauvegarde (1,5 s
+   après chaque modification) idbSave recopiait le document ENTIER dans IndexedDB, images de plan comprises
+   (plusieurs Mo, en double : image affichée + image d'origine). Correctif : les grosses images (plans, logos) sont
+   enregistrées une seule fois dans un magasin 'images' (base passée en version 2, ajout non destructif), sous une
+   clé = empreinte + longueur ; le document sauvegardé ne contient que des références {__img:clé} (quelques Ko).
+   Les images devenues inutiles sont supprimées dans la même transaction (écriture atomique : document et images
+   cohérents). Lecture : idbLoad résout les références ; les anciennes sauvegardes (images dans le document) restent
+   lisibles et passent au nouveau format à la sauvegarde suivante. Le fichier .json exporté est inchangé.
 ```

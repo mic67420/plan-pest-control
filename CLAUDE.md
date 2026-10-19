@@ -66,8 +66,10 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
 - Chaque page : `plans[]` (plusieurs plans possibles), `pastilles[]`, `anchors[]`, `lines[]`,
   `textes[]`, `logos[]`, `legend{}`, `deviceTypes[]`, `orientation`.
 - Historique = document entier (`cloneDoc()`), les gros dataURL sont partagés par référence.
-- Sauvegarde automatique IndexedDB (`scheduleAutoSave`, debounce 600 ms). Le fichier `.json`
-  exporté reste la sauvegarde fiable (surtout sur iPhone).
+- Sauvegarde automatique IndexedDB (`scheduleAutoSave`, debounce 1,5 s) : depuis v2.1-105 le document ne contient
+  que des références `{__img:clé}` ; les grosses images (plans, logos) sont écrites une seule fois dans le magasin
+  `images` (base en version 2, anciennes sauvegardes lisibles). Le fichier `.json` exporté reste la sauvegarde
+  fiable (surtout sur iPhone) et contient les images en clair.
 
 ### Rendu
 - Rendu **incrémental** : les nodes Konva persistent entre rendus et ne sont reconstruits que si

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-104 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-105 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -405,7 +405,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-104</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-105</span></div>
   <div class="sep"></div>
   </div>
 
@@ -643,7 +643,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-104 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-105 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -698,51 +698,114 @@ let historyIndex = 0;
 // du navigateur ne fasse jamais perdre le travail en cours.
 const IDB_NAME = 'PlanPestControlDB';
 const IDB_STORE = 'autosave';
+const IDB_IMG_STORE = 'images'; // v2.1-105 : les grosses images (plans, logos) sont enregistrées UNE SEULE FOIS, à part
 const IDB_KEY = 'currentDoc';
 let idbPromise = null;
 function openIDB(){
   if (idbPromise) return idbPromise;
   idbPromise = new Promise((resolve, reject)=>{
     if (!window.indexedDB){ reject(new Error('IndexedDB indisponible')); return; }
-    const req = indexedDB.open(IDB_NAME, 1);
-    req.onupgradeneeded = ()=>{ req.result.createObjectStore(IDB_STORE); };
+    const req = indexedDB.open(IDB_NAME, 2); // v2 : ajoute le magasin d'images (les anciennes sauvegardes restent lisibles)
+    req.onupgradeneeded = ()=>{
+      const db = req.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+      if (!db.objectStoreNames.contains(IDB_IMG_STORE)) db.createObjectStore(IDB_IMG_STORE);
+    };
     req.onsuccess = ()=>resolve(req.result);
     req.onerror = ()=>reject(req.error);
   });
   return idbPromise;
 }
+// Avant (v2.1-104 et plus ancien) : à CHAQUE sauvegarde, tout le document était recopié, y compris les images
+// de plan (plusieurs Mo, en double : image affichée + image d'origine). Maintenant : le document ne contient plus
+// que des références {__img:clé} vers les grosses images, écrites une seule fois par contenu (clé = empreinte +
+// longueur) ; une sauvegarde ordinaire n'écrit donc que quelques Ko. Les images devenues inutiles sont supprimées.
+const IDB_BIG_STRING = 4000;
+const imgKeyCache = new Map();   // dataURL -> clé (l'empreinte d'une chaîne de plusieurs Mo n'est calculée qu'une fois)
+const storedImgKeys = new Set(); // clés déjà présentes dans IndexedDB pendant cette session
+function imgKeyFor(str){
+  let k = imgKeyCache.get(str);
+  if (k) return k;
+  let h = 2166136261;
+  for (let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  k = 'img-' + (h>>>0).toString(36) + '-' + str.length;
+  if (imgKeyCache.size > 60) imgKeyCache.clear(); // évite l'accumulation d'anciennes images en mémoire
+  imgKeyCache.set(str, k);
+  return k;
+}
+// Copie légère des pages : seules les propriétés porteuses d'images sont remplacées par des références.
+function pagesWithImageRefs(srcPages, needed){
+  const ref = (v)=>{
+    if (typeof v === 'string' && v.length > IDB_BIG_STRING){ const k = imgKeyFor(v); needed.set(k, v); return { __img:k }; }
+    return v;
+  };
+  return srcPages.map(pg=>Object.assign({}, pg, {
+    plans: (pg.plans||[]).map(pl=>Object.assign({}, pl, { dataURL:ref(pl.dataURL), originalDataURL:ref(pl.originalDataURL) })),
+    logos: (pg.logos||[]).map(lg=>Object.assign({}, lg, { dataURL:ref(lg.dataURL) })),
+  }));
+}
 async function idbSave(data){
   try{
     const db = await openIDB();
+    const needed = new Map();
+    const light = Object.assign({}, data, { pages: pagesWithImageRefs(data.pages, needed), imgRefs:true });
+    const fresh = [...needed.keys()].filter(k=>!storedImgKeys.has(k));
     await new Promise((resolve, reject)=>{
-      const tx = db.transaction(IDB_STORE, 'readwrite');
-      tx.objectStore(IDB_STORE).put(data, IDB_KEY);
+      const tx = db.transaction([IDB_STORE, IDB_IMG_STORE], 'readwrite');
+      const imgs = tx.objectStore(IDB_IMG_STORE);
+      fresh.forEach(k=>imgs.put(needed.get(k), k));
+      tx.objectStore(IDB_STORE).put(light, IDB_KEY);
+      // Images qui ne sont plus utilisées par le document : supprimées dans la même transaction.
+      const cur = imgs.getAllKeys();
+      cur.onsuccess = ()=>{ (cur.result||[]).forEach(k=>{ if (!needed.has(k)){ imgs.delete(k); storedImgKeys.delete(k); } }); };
       tx.oncomplete = resolve;
       tx.onerror = ()=>reject(tx.error);
+      tx.onabort = ()=>reject(tx.error);
     });
+    fresh.forEach(k=>storedImgKeys.add(k));
     return true;
   } catch(err){ console.warn('Sauvegarde automatique impossible :', err); return false; }
 }
 async function idbLoad(){
   try{
     const db = await openIDB();
-    return await new Promise((resolve, reject)=>{
+    const snap = await new Promise((resolve, reject)=>{
       const tx = db.transaction(IDB_STORE, 'readonly');
       const req = tx.objectStore(IDB_STORE).get(IDB_KEY);
       req.onsuccess = ()=>resolve(req.result || null);
       req.onerror = ()=>reject(req.error);
     });
+    if (!snap || !snap.imgRefs) return snap; // ancien format (images dans le document) : lu tel quel
+    const keys = new Set();
+    const scan = (v)=>{ if (v && typeof v === 'object' && v.__img) keys.add(v.__img); };
+    snap.pages.forEach(pg=>{ (pg.plans||[]).forEach(pl=>{ scan(pl.dataURL); scan(pl.originalDataURL); }); (pg.logos||[]).forEach(lg=>scan(lg.dataURL)); });
+    const imgs = {};
+    await new Promise((resolve, reject)=>{
+      const tx = db.transaction(IDB_IMG_STORE, 'readonly');
+      const st = tx.objectStore(IDB_IMG_STORE);
+      keys.forEach(k=>{ const r = st.get(k); r.onsuccess = ()=>{ imgs[k] = r.result; }; });
+      tx.oncomplete = resolve; tx.onerror = ()=>reject(tx.error);
+    });
+    const back = (v)=>(v && typeof v === 'object' && v.__img) ? (imgs[v.__img] || '') : v;
+    snap.pages.forEach(pg=>{
+      (pg.plans||[]).forEach(pl=>{ pl.dataURL = back(pl.dataURL); pl.originalDataURL = back(pl.originalDataURL); });
+      (pg.logos||[]).forEach(lg=>{ lg.dataURL = back(lg.dataURL); });
+    });
+    keys.forEach(k=>storedImgKeys.add(k)); // déjà en base : inutile de les réécrire
+    return snap;
   } catch(err){ return null; }
 }
 async function idbClear(){
   try{
     const db = await openIDB();
     await new Promise((resolve, reject)=>{
-      const tx = db.transaction(IDB_STORE, 'readwrite');
+      const tx = db.transaction([IDB_STORE, IDB_IMG_STORE], 'readwrite');
       tx.objectStore(IDB_STORE).delete(IDB_KEY);
+      tx.objectStore(IDB_IMG_STORE).clear();
       tx.oncomplete = resolve;
       tx.onerror = ()=>reject(tx.error);
     });
+    storedImgKeys.clear();
   } catch(err){ /* rien à faire */ }
 }
 // Sauvegarde automatique allégée (v2.1-63). Avant : un délai de 0,6 s après CHAQUE changement,
