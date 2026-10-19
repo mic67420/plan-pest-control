@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-98 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-99 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -114,6 +114,7 @@
     flex:none;width:52px;height:52px;border:none;background:transparent; /* v2.1-94 : plus de cadre pointillé */
     display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
   }
+  #btnEraserSquare.active, #btnEraserRound.active{background:var(--accent);border-color:var(--accent);color:#fff;}
   .size-preview-shape{display:flex;align-items:center;justify-content:center;}
   .size-preview-note{display:none;position:absolute;left:0;right:0;bottom:3px;text-align:center;font-size:9.5px;color:#8890a0;line-height:1.1;pointer-events:none;}
   #selectionBar .step-btn-dark{
@@ -401,7 +402,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-98</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-99</span></div>
   <div class="sep"></div>
   </div>
 
@@ -497,17 +498,15 @@
         </div>
         <div class="pop-row" id="bucketColorRow"><label>Couleur du pot</label><span class="dd-swatch" id="bucketColorSwatch" style="background:#FFFFFF;border-radius:50%;border:1.5px solid #000;"></span><input type="color" id="bucketColorPicker" value="#FFFFFF" style="width:26px;height:26px;border:none;padding:0;"></div>
         <div class="pop-row" id="bucketToleranceRow"><label>Tolérance pot</label><input type="range" id="rngTolerance" min="4" max="120" value="32"></div>
-        <div class="pop-row" id="eraserSizeRow" style="flex-wrap:wrap;gap:8px;align-items:center;">
-          <label>Gomme</label>
-          <button type="button" class="pop-btn" id="btnEraserSquare" title="Gomme carrée" style="width:auto;margin:0;padding:8px 12px;">■ Carrée</button>
-          <button type="button" class="pop-btn" id="btnEraserRound" title="Gomme ronde" style="width:auto;margin:0;padding:8px 12px;">● Ronde</button>
-          <div class="size-ctl-row" style="flex-basis:100%;">
-            <button type="button" class="step-btn" id="btnEraserSizeMinus" aria-label="Réduire la gomme">−</button>
-            <input type="range" id="rngEraserSize" min="4" max="120" value="24">
-            <button type="button" class="step-btn" id="btnEraserSizePlus" aria-label="Agrandir la gomme">+</button>
-            <span class="val" id="eraserSizeLabel">24</span>
-            <div class="size-preview" id="eraserPreview" title="Témoin : taille de la gomme sur la feuille, au zoom actuel"><div id="eraserPreviewShape"></div></div>
-          </div>
+        <div class="pop-row" id="eraserSizeRow" style="flex-wrap:nowrap;gap:6px;align-items:center;">
+          <label style="width:auto;min-width:0;flex:none;">Gomme</label>
+          <button type="button" class="pop-btn" id="btnEraserSquare" title="Gomme carrée" style="width:36px;height:36px;margin:0;padding:0;flex:none;font-size:20px;line-height:1;">■</button>
+          <button type="button" class="pop-btn" id="btnEraserRound" title="Gomme ronde" style="width:36px;height:36px;margin:0;padding:0;flex:none;font-size:20px;line-height:1;">●</button>
+          <button type="button" class="step-btn" id="btnEraserSizeMinus" aria-label="Réduire la gomme" style="width:36px;height:36px;font-size:22px;">−</button>
+          <input type="range" id="rngEraserSize" min="4" max="120" value="24" style="flex:1 1 auto;width:auto;min-width:40px;">
+          <button type="button" class="step-btn" id="btnEraserSizePlus" aria-label="Agrandir la gomme" style="width:36px;height:36px;font-size:22px;">+</button>
+          <span class="val" id="eraserSizeLabel" style="width:22px;flex:none;text-align:center;font-size:12px;color:#5c6478;">24</span>
+          <div class="size-preview" id="eraserPreview" title="Témoin : taille de la gomme sur la feuille, au zoom actuel" style="width:30px;height:30px;"><div id="eraserPreviewShape"></div></div>
         </div>
         <div class="pop-divider"></div>
         <div class="pop-section-title">Réglages de l'image</div>
@@ -642,7 +641,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-98 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-99 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1573,6 +1572,10 @@
    v2.1-98 : demande de Mic — (1) accroche H/V de la gomme à ± 2° au lieu de ± 5° (trop large) :
    ERASE_SNAP_DEG 5 -> 2, à l'essai. (2) Astuces supprimées partout : dernière ligne restante, celle du
    pot de peinture (« la pipette définit la couleur… ») dans les réglages Outils image.
+   v2.1-99 : demande de Mic — réglages de la gomme sur UNE seule ligne (comme « Couleur du pot » et
+   « Tolérance »). Cause : v2.1-97 les avait mis sur deux lignes (forme, puis taille). Correctif :
+   une ligne unique « Gomme ■ ● − curseur + valeur témoin » (boutons de forme et − / + de 36 px,
+   témoin de 30 px plafonné à 26 px de diamètre), forme choisie mise en surbrillance.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -4774,7 +4777,7 @@ function updateEraserUI(){
   document.getElementById('eraserSizeLabel').textContent = brush;
   document.getElementById('btnEraserSquare').classList.toggle('active', eraserShape==='square');
   document.getElementById('btnEraserRound').classList.toggle('active', eraserShape==='round');
-  const d = Math.max(4, Math.min(40, brush*zoom)); // témoin plafonné à 40 px comme la pastille témoin
+  const d = Math.max(4, Math.min(26, brush*zoom)); // témoin plafonné à 26 px (ligne unique, v2.1-99)
   const shape = document.getElementById('eraserPreviewShape');
   shape.style.cssText = 'width:'+d+'px;height:'+d+'px;background:'+bucketColor+';border:1.5px dashed #C0392B;box-sizing:border-box;border-radius:'+(eraserShape==='round'?'50%':'2px')+';';
 }
