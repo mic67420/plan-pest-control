@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-97 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-98 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -401,7 +401,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-97</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-98</span></div>
   <div class="sep"></div>
   </div>
 
@@ -509,7 +509,6 @@
             <div class="size-preview" id="eraserPreview" title="Témoin : taille de la gomme sur la feuille, au zoom actuel"><div id="eraserPreviewShape"></div></div>
           </div>
         </div>
-        <div class="hint" style="margin:2px 0 6px;">Astuce : la pipette définit la couleur utilisée par le pot de peinture.</div>
         <div class="pop-divider"></div>
         <div class="pop-section-title">Réglages de l'image</div>
         <div class="pop-row"><label>Luminosité</label><input type="range" id="rngBrightness" min="-100" max="100" value="0"></div>
@@ -643,7 +642,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-97 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-98 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
 
@@ -1571,6 +1570,9 @@
    ±5° (snapEraseEnd) ; forme carrée ou ronde ; taille par − / curseur / + avec pastille témoin
    (réglages « Outils image »). Le carré balayé est tracé comme l'enveloppe convexe des deux carrés
    d'extrémité (convexHull) ; le rond par un trait à bouts arrondis. Un seul pushHistory par trait.
+   v2.1-98 : demande de Mic — (1) accroche H/V de la gomme à ± 2° au lieu de ± 5° (trop large) :
+   ERASE_SNAP_DEG 5 -> 2, à l'essai. (2) Astuces supprimées partout : dernière ligne restante, celle du
+   pot de peinture (« la pipette définit la couleur… ») dans les réglages Outils image.
 */
 
 /* ---------------------------- Constantes ------------------------------- */
@@ -4673,7 +4675,7 @@ let eraseTargetPlanId = null; // plan visé par le tracé de gomme en cours (dé
 let eraserShape = 'square';       // 'square' | 'round'
 let eraseStart = null;            // début du trait (coordonnées feuille) pendant un appui
 let eraseEnd = null;              // dernier point visé (après accroche), pour un relâchement sans position
-const ERASE_SNAP_DEG = 5;         // accroche horizontale / verticale à ± 5°
+const ERASE_SNAP_DEG = 2;         // accroche horizontale / verticale à ± 2° (v2.1-98 : était 5°, trop large)
 function eraserBrush(){ return parseInt(document.getElementById('rngEraserSize').value,10); }
 // Accroche H/V : si le trait est à moins de ERASE_SNAP_DEG d'une direction horizontale ou verticale, il s'y cale.
 function snapEraseEnd(a, b){
