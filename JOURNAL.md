@@ -1016,4 +1016,9 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    la partie orange montre la valeur, petite poignée ronde de 16 px, boutons − / + en petits cercles clairs de 26 px
    au signe orange, valeur chiffrée en petit à droite. Mécanique inchangée (vrai <input type=range> transparent
    par-dessus, intercepteur de .value). Barre de sélection (− / + sombres) inchangée.
+
+   v2.1-111 : demande de Mic — (1) réglages de l'image : même barre que dans le tiroir Texte (modèle E) ; (2) les mots
+   Luminosité / Contraste / Saturation / Teinte sont remplacés par de petites icônes (soleil, disque noir et blanc,
+   goutte, cercle des couleurs ; le mot reste en infobulle), ce qui libère la largeur pour la barre ; (3) les tiroirs
+   restent affichés 10 s (au lieu de 5 s) : PASTILLE_DRAWER_CLOSE_MS et TILE_REPEAT_CLICK_DELAY_MS passent à 10000.
 ```

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-110 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-111 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -164,6 +164,7 @@
   body.mobile-mode .popover .pop-btn{ margin-top:3px; }
   .pop-row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:11.5px;color:#5c6478;flex-wrap:wrap;}
   .pop-row label{width:82px;flex:none;}
+  .pop-row label.ico, body.mobile-mode .pop-row label.ico{width:28px;display:flex;align-items:center;justify-content:center;} /* v2.1-111 : icône à la place du mot (Luminosité, Contraste, Saturation, Teinte) */
   .pop-row input[type=range]{flex:1;accent-color:var(--accent);}
   .pop-row input[type=text]{border:1px solid #d8dce3;border-radius:6px;padding:5px 7px;font-size:16px;color:#2a3142;}
   .pop-btn{
@@ -428,7 +429,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-110</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-111</span></div>
   <div class="sep"></div>
   </div>
 
@@ -535,10 +536,10 @@
         </div>
         <div class="pop-divider"></div>
         <div class="pop-section-title">Réglages de l'image</div>
-        <div class="pop-row"><label>Luminosité</label><input type="range" id="rngBrightness" min="-100" max="100" value="0"></div>
-        <div class="pop-row"><label>Contraste</label><input type="range" id="rngContrast" min="-100" max="100" value="0"></div>
-        <div class="pop-row"><label>Saturation</label><input type="range" id="rngSaturation" min="-100" max="100" value="0"></div>
-        <div class="pop-row"><label>Teinte</label><input type="range" id="rngHue" min="-180" max="180" value="0"></div>
+        <div class="pop-row"><label class="ico" title="Luminosité" aria-label="Luminosité"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5c6478" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="#F6C453" stroke="#B8862B"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg></label><input type="range" id="rngBrightness" min="-100" max="100" value="0"></div>
+        <div class="pop-row"><label class="ico" title="Contraste" aria-label="Contraste"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="#fff" stroke="#2B3242" stroke-width="1.8"/><path d="M12 3.4a8.6 8.6 0 0 1 0 17.2Z" fill="#2B3242"/></svg></label><input type="range" id="rngContrast" min="-100" max="100" value="0"></div>
+        <div class="pop-row"><label class="ico" title="Saturation" aria-label="Saturation"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 3.2c3.3 4.1 6 7.2 6 10.8a6 6 0 0 1-12 0c0-3.6 2.7-6.7 6-10.8Z" fill="#4FA9E0" stroke="#1B6FA8" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.2 14.2a3 3 0 0 0 2.4 2.6" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></label><input type="range" id="rngSaturation" min="-100" max="100" value="0"></div>
+        <div class="pop-row"><label class="ico" title="Teinte" aria-label="Teinte"><span style="display:block;width:18px;height:18px;border-radius:50%;background:conic-gradient(#e53935,#fdd835,#43a047,#00acc1,#1e88e5,#8e24aa,#e53935);border:1px solid #8890a0;box-sizing:border-box;"></span></label><input type="range" id="rngHue" min="-180" max="180" value="0"></div>
         <button class="pop-btn" id="toolResetCuts">Restaurer le plan d'origine</button>
       </div>
     </div>
@@ -668,7 +669,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-110 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-111 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -4806,7 +4807,7 @@ makeBarDraggable(document.getElementById('selectionBar'), document.getElementByI
 
 // Tiroir Pastille (v2.1-86) : fermeture après 2 s sans appui, sauf si un sous-menu (liste des postes,
 // ajout de poste…) est ouvert dans l'intervalle : on repousse alors de 2 s.
-const PASTILLE_DRAWER_CLOSE_MS = 5000; // v2.1-93 : remis à 5 s (2 s trop court)
+const PASTILLE_DRAWER_CLOSE_MS = 10000; // v2.1-111 : tiroirs affichés 10 s (5 s à la demande de Mic : trop court)
 let pastilleDrawerTimer = null;
 function schedulePastilleDrawerClose(){
   clearTimeout(pastilleDrawerTimer);
@@ -4885,7 +4886,7 @@ document.querySelectorAll('#mobileTileBar .mtile').forEach(btn=>{
 // actions. Pour ces tiroirs-là, on attend un délai d'INACTIVITÉ (aucun nouveau clic pendant
 // ce délai) avant de refermer, au lieu de fermer aussitôt après le premier clic.
 const TILE_REPEAT_CLICK_TILES = ['page','vue','historique','plan','pastille','texte']; // v2.1-107 : 'texte' ajouté (ses options doivent rester accessibles)
-const TILE_REPEAT_CLICK_DELAY_MS = 5000; // à ajuster selon le retour utilisateur (test)
+const TILE_REPEAT_CLICK_DELAY_MS = 10000; // v2.1-111 : 10 s, comme PASTILLE_DRAWER_CLOSE_MS
 let tileRepeatCloseTimer = null;
 document.querySelectorAll('.tb-group[data-tile]').forEach(group=>{
   // v2.1-100 : tout appui ou réglage (curseur) dans le tiroir Plan relance le délai de fermeture.
