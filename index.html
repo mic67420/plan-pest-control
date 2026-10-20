@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-111 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-112 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -429,7 +429,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-111</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-112</span></div>
   <div class="sep"></div>
   </div>
 
@@ -669,7 +669,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-111 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-112 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -4627,10 +4627,9 @@ function buildRangeB(input, opts){
       return b;
     };
     const minus = mk('−', -1), plus = mk('+', +1);
-    valEl = document.createElement('span'); valEl.className = 'rngE-val';
     wrap.parentNode.insertBefore(minus, wrap);
     wrap.parentNode.insertBefore(plus, wrap.nextSibling);
-    plus.parentNode.insertBefore(valEl, plus.nextSibling);
+    if (!opts.noValue){ valEl = document.createElement('span'); valEl.className = 'rngE-val'; plus.parentNode.insertBefore(valEl, plus.nextSibling); } // v2.1-112 : pas de valeur chiffrée pour les réglages d'image
   }
   sync();
   return wrap;
@@ -4638,7 +4637,8 @@ function buildRangeB(input, opts){
 (function(){
   buildRangeB(document.getElementById('rngPastilleSize'));      // −/+ déjà présents dans le tiroir
   buildRangeB(document.getElementById('rngEraserSize'));        // idem
-  ['rngTolerance','rngBrightness','rngContrast','rngSaturation','rngHue'].forEach(id=>buildRangeB(document.getElementById(id), { buttons:true }));
+  buildRangeB(document.getElementById('rngTolerance'), { buttons:true });
+  ['rngBrightness','rngContrast','rngSaturation','rngHue'].forEach(id=>buildRangeB(document.getElementById(id), { buttons:true, noValue:true })); // le « 0 » n'apprend rien (v2.1-112)
   buildRangeB(document.getElementById('selFontSize'), { buttons:true });
 })();
 (function(){

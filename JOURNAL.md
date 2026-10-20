@@ -1021,4 +1021,8 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    Luminosité / Contraste / Saturation / Teinte sont remplacés par de petites icônes (soleil, disque noir et blanc,
    goutte, cercle des couleurs ; le mot reste en infobulle), ce qui libère la largeur pour la barre ; (3) les tiroirs
    restent affichés 10 s (au lieu de 5 s) : PASTILLE_DRAWER_CLOSE_MS et TILE_REPEAT_CLICK_DELAY_MS passent à 10000.
+
+   v2.1-112 : demande de Mic — la valeur chiffrée (« 0 » au repos) est retirée des 4 réglages de l'image
+   (luminosité, contraste, saturation, teinte) : elle n'apprend rien (opts.noValue de buildRangeB). Tolérance du
+   pot, gomme, pastille et texte gardent leur valeur.
 ```
