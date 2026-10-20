@@ -1002,4 +1002,12 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    bleu quand le fond était déjà transparent, donc cliquer ne changeait rien de visible. Masqué seulement dans le
    tiroir Texte (CSS) : la barre de la légende le garde. Conséquence : pour retirer un fond coloré d'un texte,
    utiliser Annuler.
+
+   v2.1-109 : demande de Mic — modèle B pour tous les réglages à valeur : barre épaisse dont la partie orange
+   montre la valeur, poignée ronde qui l'affiche, boutons carrés − / + orange aux extrémités. Appliqué à : taille
+   des pastilles, taille de la gomme, tolérance du pot, luminosité / contraste / saturation / teinte, taille du
+   texte (buildRangeB). Le vrai <input type=range> reste en place, transparent et par-dessus la barre : glisser,
+   événements 'input' / 'change' et code existant inchangés ; l'intercepteur de .value garde la poignée à jour
+   quand le code change la valeur directement. La valeur chiffrée à côté (16, 24) est masquée : elle est dans la
+   poignée. La taille de la pastille dans la barre de sélection (− / + sombres) est inchangée.
 ```

@@ -78,6 +78,9 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     await pg.evaluate(()=>new Promise(async res=>{ const db=await openIDB(); const tx=db.transaction([IDB_STORE],'readwrite'); tx.objectStore(IDB_STORE).put({docVersion:2,pages:pages.map(cloneModel),currentPageIndex:0,savedAt:Date.now()},IDB_KEY); tx.oncomplete=res; }));
     await pg.reload(); await pg.waitForTimeout(2000);
     ok(await pg.evaluate(()=>model.plans.length===1), 'ancienne sauvegarde (images dans le document) toujours lisible');
+    // 10. Réglages « modèle B » (v2.1-109) : 8 barres, poignée à jour, boutons − / +
+    const rb = await pg.evaluate(()=>{ document.getElementById('rngPastilleSize').value = 30; const h = ()=>document.getElementById('rngPastilleSize').closest('.rngB').querySelector('.rngB-handle').textContent; const a = h(); const b = document.getElementById('btnPastilleSizePlus'); b.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:1})); b.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:1})); return { n:document.querySelectorAll('.rngB').length, a, b:h(), taille:currentPastilleRadius }; });
+    ok(rb.n===8 && rb.a==='30' && rb.b==='31' && rb.taille===31, 'réglages modèle B : '+rb.n+' barres, poignée 30 puis 31 avec le bouton +');
     ok(errs.length===0, 'aucune erreur JavaScript'+(errs.length?' : '+errs[0]:''));
   } finally { await b.close(); }
   console.log(fails ? '\n'+fails+' ÉCHEC(S)' : '\nTOUS LES TESTS PASSENT');
