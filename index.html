@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-109 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-110 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -109,26 +109,20 @@
     color:#2a3142;font-size:26px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;
     touch-action:manipulation;user-select:none;-webkit-user-select:none;
   }
-  /* v2.1-100 : boutons − / + en orange (lisibilité) */
-  .step-btn{background:#F59E0B;border-color:#D98400;color:#1c2230;font-weight:700;}
-  /* v2.1-109 — MODÈLE B pour tous les réglages à valeur : barre épaisse (partie orange = valeur), poignée ronde
-     qui affiche la valeur, boutons carrés − / + orange aux extrémités. Le vrai <input type=range> reste là,
-     transparent et par-dessus : il gère le glisser au doigt, le clavier et les événements d'origine. */
-  .rngB{position:relative;flex:1 1 auto;min-width:90px;height:46px;}
-  .rngB.small{height:36px;}
-  .rngB-track{position:absolute;inset:0;border-radius:23px;background:#e6e9ee;overflow:hidden;}
-  .rngB.small .rngB-track{border-radius:18px;}
-  .rngB-fill{position:absolute;left:0;top:0;bottom:0;background:#F59E0B;}
-  .rngB-handle{position:absolute;top:5px;width:36px;height:36px;margin-left:-18px;border-radius:50%;background:#fff;border:3px solid #D98400;
-    box-sizing:border-box;font-size:12px;font-weight:700;line-height:30px;text-align:center;color:#1c2230;pointer-events:none;font-variant-numeric:tabular-nums;}
-  .rngB.small .rngB-handle{top:3px;width:30px;height:30px;margin-left:-15px;line-height:24px;font-size:11px;}
+  /* v2.1-110 — MODÈLE E (fin et discret) pour tous les réglages à valeur : trait fin dont la partie orange montre la
+     valeur, petite poignée ronde, boutons − / + en petits cercles clairs au signe orange, valeur en petit à droite.
+     (Le modèle B de v2.1-109, jugé trop massif, est abandonné.) Le vrai <input type=range> reste là, transparent
+     et par-dessus : glisser au doigt, clavier et événements d'origine inchangés. */
+  .rngB{position:relative;flex:1 1 auto;min-width:90px;height:34px;}
+  .rngB-track{position:absolute;left:0;right:0;top:15px;height:4px;border-radius:2px;background:#dfe3e9;}
+  .rngB-fill{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:#F59E0B;}
+  .rngB-handle{position:absolute;top:9px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#fff;border:2px solid #F59E0B;box-sizing:border-box;pointer-events:none;}
   input.rngB-input{position:absolute !important;inset:0;width:100% !important;height:100% !important;margin:0;opacity:0;cursor:pointer;touch-action:none;}
-  .sqB{width:36px;height:36px;flex:none;border-radius:10px;border:1px solid #D98400;background:#F59E0B;color:#1c2230;font-size:22px;font-weight:700;line-height:1;padding:0;
+  .sqB, .step-btn{width:26px;height:26px;flex:none;border-radius:50%;border:1px solid #d8dce3;background:#fff;color:#D98400;font-size:17px;font-weight:700;line-height:1;padding:0;
     display:flex;align-items:center;justify-content:center;touch-action:manipulation;user-select:none;-webkit-user-select:none;}
-  .sqB:active{background:#D98400;}
+  .sqB:active, .step-btn:active{background:#fff3d6;border-color:#F59E0B;color:#D98400;}
+  .rngE-val, .size-ctl-row .val, #eraserSizeLabel{width:30px;text-align:right;font-size:13px;font-weight:600;color:#1c2230;flex:none;}
   .size-ctl .rngB{flex:none;width:150px;}
-  .size-ctl-row .val, #eraserSizeLabel{display:none !important;} /* la valeur est dans la poignée */
-  .step-btn:active{background:#D98400;border-color:#D98400;color:#1c2230;}
   .size-preview{
     flex:none;width:52px;height:52px;border:none;background:transparent; /* v2.1-94 : plus de cadre pointillé */
     display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
@@ -351,7 +345,7 @@
   #textOptions button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
   #textOptions #selAlignGroup, #textOptions #selBgNone{display:none !important;} /* v2.1-108 : alignement et ∅ retirés du tiroir Texte */
   #textOptions label{font-size:11px;color:#5c6478 !important;}
-  #textOptions button.sqB{background:#F59E0B;border:1px solid #D98400;color:#1c2230;width:36px;height:36px;padding:0;font-size:22px;} /* − / + orange aussi dans le tiroir Texte */
+  #textOptions button.sqB{width:26px;height:26px;padding:0;border-radius:50%;background:#fff;border:1px solid #d8dce3;color:#D98400;font-size:17px;}
   #textOptions input[type=color]{width:34px;height:32px;border:none;padding:0;border-radius:4px;background:none;}
   #textOptions input[type=range]{width:100px;}
   #selectionBarHandle{
@@ -434,7 +428,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-109</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-110</span></div>
   <div class="sep"></div>
   </div>
 
@@ -533,10 +527,10 @@
         <div class="pop-row" id="eraserSizeRow" style="flex-wrap:nowrap;gap:6px;align-items:center;">
           <button type="button" class="pop-btn" id="btnEraserSquare" title="Gomme carrée" style="width:auto;height:36px;margin:0;padding:0 8px;flex:none;font-size:12.5px;font-weight:600;line-height:1;">■ Carré</button>
           <button type="button" class="pop-btn" id="btnEraserRound" title="Gomme ronde" style="width:auto;height:36px;margin:0;padding:0 8px;flex:none;font-size:12.5px;font-weight:600;line-height:1;">● Rond</button>
-          <button type="button" class="step-btn" id="btnEraserSizeMinus" aria-label="Réduire la gomme" style="width:36px;height:36px;font-size:22px;">−</button>
+          <button type="button" class="step-btn" id="btnEraserSizeMinus" aria-label="Réduire la gomme">−</button>
           <input type="range" id="rngEraserSize" min="4" max="120" value="24" style="flex:1 1 auto;width:auto;min-width:40px;">
-          <button type="button" class="step-btn" id="btnEraserSizePlus" aria-label="Agrandir la gomme" style="width:36px;height:36px;font-size:22px;">+</button>
-          <span class="val" id="eraserSizeLabel" style="width:22px;flex:none;text-align:center;font-size:12px;color:#5c6478;">24</span>
+          <button type="button" class="step-btn" id="btnEraserSizePlus" aria-label="Agrandir la gomme">+</button>
+          <span class="val" id="eraserSizeLabel">24</span>
           <div class="size-preview" id="eraserPreview" title="Témoin : taille de la gomme sur la feuille, au zoom actuel" style="width:30px;height:30px;"><div id="eraserPreviewShape"></div></div>
         </div>
         <div class="pop-divider"></div>
@@ -674,7 +668,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-109 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-110 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -4607,23 +4601,23 @@ function keepPastilleDrawerOpen(){
 // modifie parfois .value directement, sans événement).
 function buildRangeB(input, opts){
   opts = opts || {};
-  const wrap = document.createElement('div'); wrap.className = 'rngB' + (opts.small ? ' small' : '');
+  const wrap = document.createElement('div'); wrap.className = 'rngB';
   const track = document.createElement('div'); track.className = 'rngB-track';
   const fill = document.createElement('div'); fill.className = 'rngB-fill'; track.appendChild(fill);
   const handle = document.createElement('div'); handle.className = 'rngB-handle';
   input.parentNode.insertBefore(wrap, input);
   wrap.append(track, handle, input); input.classList.add('rngB-input');
-  const half = opts.small ? 15 : 18;
+  let valEl = null; // valeur chiffrée à droite (v2.1-110), créée avec les boutons − / +
   const sync = ()=>{
     const min = parseFloat(input.min), max = parseFloat(input.max), v = parseFloat(input.value);
     const pct = max > min ? Math.max(0, Math.min(1, (v-min)/(max-min))) : 0;
-    const x = 'calc('+half+'px + (100% - '+(2*half)+'px) * '+pct+')';
-    fill.style.width = x; handle.style.left = x; handle.textContent = Math.round(v);
+    const x = 'calc(8px + (100% - 16px) * '+pct+')';
+    fill.style.width = x; handle.style.left = x;
+    if (valEl) valEl.textContent = Math.round(v);
   };
   const desc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
   Object.defineProperty(input, 'value', { get(){ return desc.get.call(this); }, set(v){ desc.set.call(this, v); sync(); }, configurable:true });
   input.addEventListener('input', sync);
-  sync();
   if (opts.buttons){
     const mk = (txt, dir)=>{
       const b = document.createElement('button'); b.type = 'button'; b.className = 'sqB'; b.textContent = txt; b.setAttribute('aria-label', dir<0 ? 'Diminuer' : 'Augmenter');
@@ -4631,16 +4625,20 @@ function buildRangeB(input, opts){
       bindStepper(b, dir, ()=>parseFloat(input.value), write, ()=>input.dispatchEvent(new Event('change', { bubbles:true })));
       return b;
     };
-    wrap.parentNode.insertBefore(mk('−', -1), wrap);
-    wrap.parentNode.insertBefore(mk('+', +1), wrap.nextSibling);
+    const minus = mk('−', -1), plus = mk('+', +1);
+    valEl = document.createElement('span'); valEl.className = 'rngE-val';
+    wrap.parentNode.insertBefore(minus, wrap);
+    wrap.parentNode.insertBefore(plus, wrap.nextSibling);
+    plus.parentNode.insertBefore(valEl, plus.nextSibling);
   }
+  sync();
   return wrap;
 }
 (function(){
   buildRangeB(document.getElementById('rngPastilleSize'));      // −/+ déjà présents dans le tiroir
   buildRangeB(document.getElementById('rngEraserSize'));        // idem
-  ['rngTolerance','rngBrightness','rngContrast','rngSaturation','rngHue'].forEach(id=>buildRangeB(document.getElementById(id), { small:true, buttons:true }));
-  buildRangeB(document.getElementById('selFontSize'), { small:true, buttons:true });
+  ['rngTolerance','rngBrightness','rngContrast','rngSaturation','rngHue'].forEach(id=>buildRangeB(document.getElementById(id), { buttons:true }));
+  buildRangeB(document.getElementById('selFontSize'), { buttons:true });
 })();
 (function(){
   const rng = document.getElementById('rngPastilleSize');

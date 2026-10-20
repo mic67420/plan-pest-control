@@ -1010,4 +1010,10 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    événements 'input' / 'change' et code existant inchangés ; l'intercepteur de .value garde la poignée à jour
    quand le code change la valeur directement. La valeur chiffrée à côté (16, 24) est masquée : elle est dans la
    poignée. La taille de la pastille dans la barre de sélection (− / + sombres) est inchangée.
+
+   v2.1-110 : demande de Mic — le modèle B de v2.1-109 est jugé trop massif et trop impactant : remplacé par le
+   modèle E « fin et discret » pour TOUS les réglages à valeur (mêmes barres, buildRangeB) : trait fin de 4 px dont
+   la partie orange montre la valeur, petite poignée ronde de 16 px, boutons − / + en petits cercles clairs de 26 px
+   au signe orange, valeur chiffrée en petit à droite. Mécanique inchangée (vrai <input type=range> transparent
+   par-dessus, intercepteur de .value). Barre de sélection (− / + sombres) inchangée.
 ```
