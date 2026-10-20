@@ -996,4 +996,10 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    suit désormais le délai de 5 s des autres tiroirs (au lieu de se fermer aussitôt) pour laisser régler le
    texte ; la zone d'options n'est pas comptée dans l'égalisation des hauteurs. Légende, logos, pastilles :
    barre du bas inchangée.
+
+   v2.1-108 : demande de Mic — tiroir Texte allégé : boutons d'alignement, « Dupliquer » et « ∅ » retirés du tiroir
+   (il reste Taille, Police, Fond). « ∅ » mettait le fond du texte à « aucun » (transparent) : il apparaissait
+   bleu quand le fond était déjà transparent, donc cliquer ne changeait rien de visible. Masqué seulement dans le
+   tiroir Texte (CSS) : la barre de la légende le garde. Conséquence : pour retirer un fond coloré d'un texte,
+   utiliser Annuler.
 ```

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-107 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-108 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -332,6 +332,7 @@
   #textOptions.has-text{display:flex;}
   #textOptions button{background:#F1F3F6;border:1px solid #d8dce3;color:#1c2230;border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:600;cursor:pointer;}
   #textOptions button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  #textOptions #selAlignGroup, #textOptions #selBgNone{display:none !important;} /* v2.1-108 : alignement et ∅ retirés du tiroir Texte */
   #textOptions label{font-size:11px;color:#5c6478 !important;}
   #textOptions input[type=color]{width:34px;height:32px;border:none;padding:0;border-radius:4px;background:none;}
   #textOptions input[type=range]{width:100px;}
@@ -415,7 +416,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-107</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-108</span></div>
   <div class="sep"></div>
   </div>
 
@@ -582,7 +583,7 @@
     <label class="tb-check" title="N'afficher dans la légende que les postes utilisés"><input type="checkbox" id="chkOnlyUsed" checked> Utilisés</label>
     <!-- v2.1-107 : options du texte sélectionné (alignement, taille, police, fond) : les contrôles de la barre du bas
          y sont déplacés tant qu'un texte est sélectionné (voir placeTextOptions). -->
-    <div id="textOptions"><button type="button" id="textDup" title="Dupliquer le texte">Dupliquer</button></div>
+    <div id="textOptions"></div>
   </div>
 
 </div>
@@ -655,7 +656,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-107 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-108 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2439,8 +2440,7 @@ function placeTextOptions(inTray){
   const tray = document.getElementById('textOptions'), bar = document.getElementById('selectionBar');
   const ids = ['selAlignGroup','selFontSizeWrap','selColorWrap','selBgWrap'];
   if (inTray){
-    const dup = document.getElementById('textDup');
-    ids.forEach(id=>tray.insertBefore(document.getElementById(id), dup));
+    ids.forEach(id=>tray.appendChild(document.getElementById(id)));
     tray.classList.add('has-text');
   } else {
     // retour dans la barre, à leur place d'origine
@@ -2589,7 +2589,6 @@ document.getElementById('selLock').addEventListener('click', ()=>{
   toast(obj.locked ? 'Élément verrouillé (déplacement bloqué).' : 'Élément déverrouillé.');
   pushHistory(); render();
 });
-document.getElementById('textDup').addEventListener('click', ()=>document.getElementById('selDup').click());
 document.getElementById('selDup').addEventListener('click', ()=>{
   if (selectedId==='legend-frame') return;
   const p = model.pastilles.find(p=>p.id===selectedId);
