@@ -983,4 +983,8 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    Les images devenues inutiles sont supprimées dans la même transaction (écriture atomique : document et images
    cohérents). Lecture : idbLoad résout les références ; les anciennes sauvegardes (images dans le document) restent
    lisibles et passent au nouveau format à la sauvegarde suivante. Le fichier .json exporté est inchangé.
+
+   v2.1-106 : tiroir Pastille — libellé « Taille » retiré (le curseur − / + parle de lui-même) et toutes les cases
+   (poste, taille, témoin, boutons) alignées sur la même ligne médiane (align-items:center) : sur écran large
+   elles étaient décalées en hauteur.
 ```

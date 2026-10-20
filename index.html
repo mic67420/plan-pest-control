@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-105 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-106 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -281,6 +281,8 @@
   body.mobile-mode .tb-group.mobile-open{
     box-sizing:border-box; min-height:var(--drawer-h, 0px);
   }
+  /* v2.1-106 : tiroir Pastille — toutes les cases alignées sur la même ligne médiane */
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open{ align-items:center; }
   body.mobile-mode .tb-group.mobile-open{
     display:flex !important; position:fixed; left:6px; right:6px; z-index:900;
     background:#fff; border-radius:12px; box-shadow:0 16px 36px rgba(20,26,40,.3);
@@ -405,7 +407,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-105</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-106</span></div>
   <div class="sep"></div>
   </div>
 
@@ -534,7 +536,6 @@
     <!-- Taille de la prochaine pastille : bouton − à gauche, bouton + à droite du curseur (v2.1-68),
          et une pastille TÉMOIN à taille réelle sur la feuille, au zoom actuel. -->
     <div class="size-ctl" title="Taille de la prochaine pastille">
-      <label class="size-ctl-lbl">Taille</label>
       <div class="size-ctl-row">
         <button type="button" class="step-btn" id="btnPastilleSizeMinus" aria-label="Réduire la taille">−</button>
         <input type="range" id="rngPastilleSize" min="8" max="42" value="16">
@@ -643,7 +644,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-105 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-106 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
