@@ -987,4 +987,13 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    v2.1-106 : tiroir Pastille — libellé « Taille » retiré (le curseur − / + parle de lui-même) et toutes les cases
    (poste, taille, témoin, boutons) alignées sur la même ligne médiane (align-items:center) : sur écran large
    elles étaient décalées en hauteur.
+
+   v2.1-107 : demande de Mic (test) — options du texte dans la barre du haut. La barre noire du bas disparaît pour
+   un texte : alignement, taille, couleur de police et fond sont déplacés (placeTextOptions : les mêmes éléments
+   changent de parent, donc mêmes écouteurs) dans une ligne du tiroir Texte, qui s'ouvre et active la tuile
+   Texte dès qu'un nouveau texte est sélectionné. Cadenas + croix rouge (confirmation « Supprimer ce texte ? »)
+   directement sur le texte, comme pour le plan ; « Dupliquer » devient un bouton du tiroir. Le tiroir Texte
+   suit désormais le délai de 5 s des autres tiroirs (au lieu de se fermer aussitôt) pour laisser régler le
+   texte ; la zone d'options n'est pas comptée dans l'égalisation des hauteurs. Légende, logos, pastilles :
+   barre du bas inchangée.
 ```

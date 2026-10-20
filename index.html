@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-106 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-107 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -327,6 +327,14 @@
     display:none;gap:8px;align-items:center;box-shadow:0 8px 20px rgba(0,0,0,.25);
     flex-wrap:wrap; row-gap:6px; justify-content:center; box-sizing:border-box;
   }
+  /* v2.1-107 : options du texte dans le tiroir Texte (style clair, comme le reste du tiroir) */
+  #textOptions{display:none;flex-basis:100%;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 4px 2px;margin-top:2px;border-top:1px solid #e3e6ec;}
+  #textOptions.has-text{display:flex;}
+  #textOptions button{background:#F1F3F6;border:1px solid #d8dce3;color:#1c2230;border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:600;cursor:pointer;}
+  #textOptions button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  #textOptions label{font-size:11px;color:#5c6478 !important;}
+  #textOptions input[type=color]{width:34px;height:32px;border:none;padding:0;border-radius:4px;background:none;}
+  #textOptions input[type=range]{width:100px;}
   #selectionBarHandle{
     display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex:none;
     border-radius:7px;background:#2c3650;cursor:grab;touch-action:none;
@@ -407,7 +415,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-106</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-107</span></div>
   <div class="sep"></div>
   </div>
 
@@ -572,6 +580,9 @@
     <div class="sep"></div>
     <button class="tb-icon" id="toolToggleLegend" title="Insérer/retirer la légende"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3.5" width="18" height="17" rx="1.6" fill="#FFFFFF" stroke="#2B3242" stroke-width="1.3"/><circle cx="7" cy="8" r="1.5" fill="#D6493E" stroke="none"/><circle cx="7" cy="12.3" r="1.5" fill="#4C9A6A" stroke="none"/><circle cx="7" cy="16.6" r="1.5" fill="#0E6FA8" stroke="none"/><path d="M10.8 8h7M10.8 12.3h7M10.8 16.6h5" stroke="#8791A3" stroke-width="1.4" stroke-linecap="round"/></svg></button>
     <label class="tb-check" title="N'afficher dans la légende que les postes utilisés"><input type="checkbox" id="chkOnlyUsed" checked> Utilisés</label>
+    <!-- v2.1-107 : options du texte sélectionné (alignement, taille, police, fond) : les contrôles de la barre du bas
+         y sont déplacés tant qu'un texte est sélectionné (voir placeTextOptions). -->
+    <div id="textOptions"><button type="button" id="textDup" title="Dupliquer le texte">Dupliquer</button></div>
   </div>
 
 </div>
@@ -644,7 +655,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-106 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-107 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2340,8 +2351,10 @@ function ensureLockBadge(){
   del.on('mousedown touchstart', (e)=>{ e.cancelBubble = true; });
   del.on('click tap', (e)=>{
     e.cancelBubble = true;
-    if (!findPlanById(selectedId)) return;
-    askYesNo('Supprimer le plan ?').then(ok=>{ if (ok && findPlanById(selectedId)) document.getElementById('selDelete').click(); });
+    const isTxt = model.textes.some(t=>t.id===selectedId);
+    if (!findPlanById(selectedId) && !isTxt) return;
+    const sid = selectedId;
+    askYesNo(isTxt ? 'Supprimer ce texte ?' : 'Supprimer le plan ?').then(ok=>{ if (ok && selectedId===sid) document.getElementById('selDelete').click(); });
   });
   del.on('mouseenter', ()=>{ stage.container().style.cursor = 'pointer'; });
   del.on('mouseleave', ()=>{ stage.container().style.cursor = ''; });
@@ -2399,7 +2412,7 @@ function updateLockIndicator(duringRotation){
   }
   lockBadge.g.scale({ x:1/zoom, y:1/zoom });
   // Croix de suppression : seulement pour un plan, juste sous le cadenas (v2.1-84).
-  const isPlanSel2 = !!findPlanById(selectedId);
+  const isPlanSel2 = !!findPlanById(selectedId) || model.textes.some(t=>t.id===selectedId); // plan ou texte (v2.1-107)
   lockBadge.del.visible(isPlanSel2);
   if (isPlanSel2){
     const gp = lockBadge.g.position();
@@ -2417,16 +2430,43 @@ function updateLockIndicator(duringRotation){
 // Le cadenas (et les icônes de rotation d'un plan) suivent l'élément sélectionné pendant
 // qu'on le DÉPLACE, quel que soit son type.
 stage.on('dragmove', ()=>{ if (selectedId) updateLockIndicator(); });
+// v2.1-107 : déplace les contrôles de texte entre la barre du bas et le tiroir Texte (les écouteurs suivent les éléments).
+let lastTextDrawerId = null;
+let textOptionsInTray = false;
+function placeTextOptions(inTray){
+  if (inTray === textOptionsInTray) return;
+  textOptionsInTray = inTray;
+  const tray = document.getElementById('textOptions'), bar = document.getElementById('selectionBar');
+  const ids = ['selAlignGroup','selFontSizeWrap','selColorWrap','selBgWrap'];
+  if (inTray){
+    const dup = document.getElementById('textDup');
+    ids.forEach(id=>tray.insertBefore(document.getElementById(id), dup));
+    tray.classList.add('has-text');
+  } else {
+    // retour dans la barre, à leur place d'origine
+    const before = { selAlignGroup:'selLabel', selFontSizeWrap:'selLabel', selColorWrap:'selLock', selBgWrap:'selLock' };
+    ids.forEach(id=>bar.insertBefore(document.getElementById(id), document.getElementById(before[id])));
+    tray.classList.remove('has-text');
+  }
+}
 function refreshSelectionUI(){
   const bar = document.getElementById('selectionBar');
-  if (!selectedId){ bar.style.display='none'; scheduleBottomReserve(); document.getElementById('toolLockPlan').classList.remove('active'); updateLockIndicator(); return; }
+  if (!selectedId){ placeTextOptions(false); lastTextDrawerId = null; bar.style.display='none'; scheduleBottomReserve(); document.getElementById('toolLockPlan').classList.remove('active'); updateLockIndicator(); return; }
   const node = stage.findOne('#'+selectedId);
-  if (!node){ bar.style.display='none'; scheduleBottomReserve(); updateLockIndicator(); return; }
+  if (!node){ placeTextOptions(false); lastTextDrawerId = null; bar.style.display='none'; scheduleBottomReserve(); updateLockIndicator(); return; }
   // La barre est ancrée en bas de l'écran par CSS (voir #selectionBar) plutôt que
   // positionnée près de l'élément sélectionné : elle pouvait sinon atterrir en plein
   // milieu du plan et y rester figée par-dessus le contenu, sans repère fixe pour la
   // retrouver ni moyen de la déplacer.
-  bar.style.display = findPlanById(selectedId) ? 'none' : 'flex'; // v2.1-84 : plus de barre pour le plan (cadenas + croix sur le plan)
+  // v2.1-84 : plus de barre pour le plan (cadenas + croix sur le plan) ; v2.1-107 : ni pour un texte (options dans le tiroir Texte)
+  const isTextSel = model.textes.some(t=>t.id===selectedId);
+  placeTextOptions(isTextSel);
+  bar.style.display = (findPlanById(selectedId) || isTextSel) ? 'none' : 'flex';
+  if (isTextSel && lastTextDrawerId !== selectedId){
+    // Nouveau texte sélectionné : la tuile Texte devient active et son tiroir s'ouvre sur les options.
+    lastTextDrawerId = selectedId;
+    onTileChosen('texte'); openTileDrawer('texte', false);
+  } else if (!isTextSel){ lastTextDrawerId = null; }
   scheduleBottomReserve();
   document.getElementById('selInfo').textContent = describeSelection();
   const selObj = findSelectedModelObject();
@@ -2549,6 +2589,7 @@ document.getElementById('selLock').addEventListener('click', ()=>{
   toast(obj.locked ? 'Élément verrouillé (déplacement bloqué).' : 'Élément déverrouillé.');
   pushHistory(); render();
 });
+document.getElementById('textDup').addEventListener('click', ()=>document.getElementById('selDup').click());
 document.getElementById('selDup').addEventListener('click', ()=>{
   if (selectedId==='legend-frame') return;
   const p = model.pastilles.find(p=>p.id===selectedId);
@@ -4733,8 +4774,10 @@ function equalizeDrawerHeights(){
     const was = g.classList.contains('mobile-open');
     const old = g.style.cssText;
     g.style.visibility = 'hidden'; g.style.minHeight = '0px';
+    const to = g.querySelector('#textOptions'); const toOld = to ? to.style.display : ''; if (to) to.style.display = 'none'; // v2.1-107 : options du texte non comptées
     g.classList.add('mobile-open');
     max = Math.max(max, g.getBoundingClientRect().height);
+    if (to) to.style.display = toOld;
     if (!was) g.classList.remove('mobile-open');
     g.style.cssText = old;
   });
@@ -4786,7 +4829,7 @@ document.querySelectorAll('#mobileTileBar .mtile').forEach(btn=>{
 // autre…) : les refermer après le tout premier clic empêcherait justement d'enchaîner ces
 // actions. Pour ces tiroirs-là, on attend un délai d'INACTIVITÉ (aucun nouveau clic pendant
 // ce délai) avant de refermer, au lieu de fermer aussitôt après le premier clic.
-const TILE_REPEAT_CLICK_TILES = ['page','vue','historique','plan','pastille'];
+const TILE_REPEAT_CLICK_TILES = ['page','vue','historique','plan','pastille','texte']; // v2.1-107 : 'texte' ajouté (ses options doivent rester accessibles)
 const TILE_REPEAT_CLICK_DELAY_MS = 5000; // à ajuster selon le retour utilisateur (test)
 let tileRepeatCloseTimer = null;
 document.querySelectorAll('.tb-group[data-tile]').forEach(group=>{
