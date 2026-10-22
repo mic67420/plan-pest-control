@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-120 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-121 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -439,7 +439,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-120</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-121</span></div>
   <div class="sep"></div>
   </div>
 
@@ -680,7 +680,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-120 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-121 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -3981,6 +3981,10 @@ document.getElementById('cutConfirmNo').addEventListener('click', ()=>{
   else if (activeTool==='cut-point' && isTouchCapableDevice()){ remoteCursor = { tool:'cut-point', tip: viewportCenterStagePos() }; drawRemoteCursor(); }
 });
 function applyCutPolygon(pointsStage){
+  // v2.1-121 : le curseur de découpe peut être créé SANS toucher le plan (icône ciseaux : setTool le place au centre de
+  // la vue), donc sans cible mémorisée ; on prend alors le plan sélectionné (cadre bleu), ou le seul plan de la page.
+  if (selectedId && planImageNodes.has(selectedId) && findPlanById(selectedId)) cutTargetPlanId = selectedId;
+  else if (!planImageNodes.has(cutTargetPlanId) && model.plans.length===1) cutTargetPlanId = model.plans[0].id;
   const planNode = planImageNodes.get(cutTargetPlanId);
   const canvas = planNaturalCanvases.get(cutTargetPlanId);
   const pl = findPlanById(cutTargetPlanId);

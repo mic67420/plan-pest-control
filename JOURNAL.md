@@ -1089,4 +1089,10 @@ v2.1-120 — Ciseaux : un seul pointage suffit
    transparente, « Touchez un plan pour le découper » s'affichait alors que le plan était déjà sélectionné (cadre bleu).
  - Correctif : cutTargetNodeAt() prend le plan déjà sélectionné, où que tombe le doigt, sinon le plan touché
    (curseur déporté, souris rectangle, souris points). Test smoke ajouté.
+
+v2.1-121 — Ciseaux : « Sélectionnez un plan avant de découper » alors que le plan est sélectionné
+ - Cause : avec l'icône ciseaux, le curseur de découpe est créé au centre de la vue sans toucher le plan, donc sans
+   cible mémorisée (cutTargetPlanId vide ou périmée) ; applyCutPolygon refusait au moment de valider. La v2.1-120 ne
+   couvrait que le cas du premier appui sur le plan.
+ - Correctif : applyCutPolygon prend le plan sélectionné (sinon le seul plan de la page). Test smoke ajouté.
 ```

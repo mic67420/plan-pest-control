@@ -97,6 +97,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     ok(await pg.evaluate(()=>activeTool==='cut-rect'), 'ciseaux du plan : découpe rectangulaire active');
     ok(await pg.evaluate(()=>{ const sel=selectedId; return !!findPlanById(sel) && createRemoteCursorForTool('cut-rect',{x:2,y:2}) && cutTargetPlanId===sel; }), 'ciseaux : premier appui hors du plan = plan déjà sélectionné pris pour cible (v2.1-120)');
     await pg.evaluate(()=>{ remoteCursor=null; });
+    ok(await pg.evaluate(()=>{ const sel=selectedId; cutTargetPlanId=null; const n=model.plans.length; applyCutPolygon([{x:300,y:300},{x:360,y:300},{x:360,y:360},{x:300,y:360}]); return n>=1 && cutTargetPlanId===sel; }), 'ciseaux : curseur posé sans toucher le plan, la découpe prend le plan sélectionné (v2.1-121)');
     await pg.evaluate(()=>badgeCutEl.click()); await pg.waitForTimeout(200);
     await pg.evaluate(()=>badgeSetEl.click()); await pg.waitForTimeout(400);
     ok(await pg.evaluate(()=>document.getElementById('popPlanSettings').classList.contains('open')), 'réglages du plan : fenêtre Outils image ouverte');
