@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-121 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-122 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -439,7 +439,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-121</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-122</span></div>
   <div class="sep"></div>
   </div>
 
@@ -680,7 +680,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-121 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-122 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1343,8 +1343,13 @@ let transformer = new Konva.Transformer({
   anchorFill: '#ffffff',
   borderStroke: '#0E6FA8',
   borderStrokeWidth: 1.5,
-  rotateAnchorCursor: 'grab'
+  rotateAnchorCursor: 'grab',
+  // v2.1-122 : à 5° ou moins d'un angle droit, la rotation (textes, logos) s'accroche sur l'horizontale / la verticale
+  rotationSnaps: [0, 90, 180, 270],
+  rotationSnapTolerance: 5
 });
+// v2.1-122 : pas de rotation pour le plan (4 mains dédiées) ni pour la légende ; oui pour textes et logos.
+function rotateAllowedFor(id){ return !!id && !findPlanById(id) && id !== 'legend-frame'; }
 uiLayer.add(transformer);
 // Poignées MINIMALISTES (v2.1-57) : chaque poignée est DESSINÉE comme un petit point, mais sa
 // zone de saisie (hitFunc) garde la taille complète de 52 px — aussi facile à attraper au
@@ -2027,7 +2032,7 @@ function renderContent(){
     // — réattachait les poignées sur la pastille dès le rendu suivant la sélection,
     // annulant silencieusement l'exclusion pourtant faite au moment du clic.
     const isPastille = model.pastilles.some(p=>p.id===selectedId);
-    if (node && !isPastille){ transformer.nodes([node]); transformer.rotateEnabled(!findPlanById(selectedId)); transformer.forceUpdate(); } // forceUpdate : le cadre de sélection suit la NOUVELLE taille du texte (ajusté à son contenu)
+    if (node && !isPastille){ transformer.nodes([node]); transformer.rotateEnabled(rotateAllowedFor(selectedId)); transformer.forceUpdate(); } // forceUpdate : le cadre de sélection suit la NOUVELLE taille du texte (ajusté à son contenu)
     else if (!node){ transformer.nodes([]); selectedId=null; }
     else { transformer.nodes([]); }
   } else {
@@ -2113,7 +2118,7 @@ function selectNode(node, modelId){
   transformer.nodes(modelId && !isPastille ? [node] : []);
   // Plan : plus de poignée de rotation (remplacée par la zone de rotation "main" tout autour
   // du cadre, façon Paint.NET — voir plus bas, v2.1-56). Les autres éléments la gardent.
-  transformer.rotateEnabled(!(modelId && findPlanById(modelId)));
+  transformer.rotateEnabled(rotateAllowedFor(modelId));
   // Le halo lumineux (voir renderContent) ne se resynchronise normalement qu'au PROCHAIN
   // rendu complet — qui pouvait ne survenir que bien après un simple clic de sélection (le
   // clic seul n'en déclenche pas). Sans ce correctif, le halo n'apparaissait donc pas au

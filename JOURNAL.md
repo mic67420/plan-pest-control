@@ -1095,4 +1095,10 @@ v2.1-121 — Ciseaux : « Sélectionnez un plan avant de découper » alors que 
    cible mémorisée (cutTargetPlanId vide ou périmée) ; applyCutPolygon refusait au moment de valider. La v2.1-120 ne
    couvrait que le cas du premier appui sur le plan.
  - Correctif : applyCutPolygon prend le plan sélectionné (sinon le seul plan de la page). Test smoke ajouté.
+
+v2.1-122 — Rotation : légende fixe, textes accrochés à 5°
+ - Demande de Mic : pas de rotation pour la légende ; textes pivotables avec accroche horizontale / verticale à 5°.
+ - Correctif : rotateAllowedFor() (ni plan, ni légende) pour les deux endroits qui règlent rotateEnabled ; transformer
+   avec rotationSnaps [0,90,180,270] et rotationSnapTolerance 5 (vaut aussi pour les logos). Une légende déjà tournée
+   dans un ancien document garde son angle (non remis à zéro).
 ```

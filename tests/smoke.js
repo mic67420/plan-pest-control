@@ -101,6 +101,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     await pg.evaluate(()=>badgeCutEl.click()); await pg.waitForTimeout(200);
     await pg.evaluate(()=>badgeSetEl.click()); await pg.waitForTimeout(400);
     ok(await pg.evaluate(()=>document.getElementById('popPlanSettings').classList.contains('open')), 'réglages du plan : fenêtre Outils image ouverte');
+    ok(await pg.evaluate(()=>{ selectNode(textNodes.get(model.textes[0].id), model.textes[0].id); const tx=transformer.rotateEnabled(); selectNode(legendGroupNode, 'legend-frame'); const lg=transformer.rotateEnabled(); return tx && !lg && transformer.rotationSnapTolerance()===5; }), 'rotation : texte oui (accroche 5°), légende non (v2.1-122)');
     ok(errs.length===0, 'aucune erreur JavaScript'+(errs.length?' : '+errs[0]:''));
   } finally { await b.close(); }
   console.log(fails ? '\n'+fails+' ÉCHEC(S)' : '\nTOUS LES TESTS PASSENT');
