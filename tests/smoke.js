@@ -89,6 +89,12 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     await pg.waitForTimeout(400);
     const bd = await pg.evaluate(()=>{ const l = badgeLockEl.getBoundingClientRect(), h = sheetShadowHostEl.getBoundingClientRect(); return { show: badgeOverlay.style.display, out: l.left + l.width/2 > h.right - 1 }; });
     ok(bd.show==='block' && bd.out, 'cadenas du plan collé au bord droit : visible en dehors de la page');
+    // 13. Ciseaux et réglages sous la croix du plan (v2.1-115)
+    await pg.evaluate(()=>badgeCutEl.click()); await pg.waitForTimeout(250);
+    ok(await pg.evaluate(()=>activeTool==='cut-rect'), 'ciseaux du plan : découpe rectangulaire active');
+    await pg.evaluate(()=>badgeCutEl.click()); await pg.waitForTimeout(200);
+    await pg.evaluate(()=>badgeSetEl.click()); await pg.waitForTimeout(400);
+    ok(await pg.evaluate(()=>document.getElementById('popPlanSettings').classList.contains('open')), 'réglages du plan : fenêtre Outils image ouverte');
     ok(errs.length===0, 'aucune erreur JavaScript'+(errs.length?' : '+errs[0]:''));
   } finally { await b.close(); }
   console.log(fails ? '\n'+fails+' ÉCHEC(S)' : '\nTOUS LES TESTS PASSENT');

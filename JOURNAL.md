@@ -1042,4 +1042,10 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    leur position écran est recalculée à chaque affichage, défilement, zoom ou redimensionnement. Les anciens
    objets Konva sont remplacés par des objets de même interface (visible, position en coordonnées feuille,
    path.data) : le reste du code est inchangé. Taille et distance cadenas-croix constantes à l'écran.
+
+   v2.1-115 : demande de Mic (essai terrain, v2.1-114 = référence) — sous la croix de suppression d'un plan, deux
+   boutons ronds bleus : CISEAUX (découpe rectangulaire prête en un appui, bulle « Tracez le rectangle à
+   découper », un second appui annule ; icône blanche quand l'outil est actif) et RÉGLAGES (ouvre le tiroir Plan
+   avec la fenêtre « Outils image » directement). Même mécanique que le cadenas : boutons HTML (placeBadges),
+   visibles hors de la page ; plan sélectionné uniquement.
 ```

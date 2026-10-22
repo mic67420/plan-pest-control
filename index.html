@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-114 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-115 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -429,7 +429,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-114</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-115</span></div>
   <div class="sep"></div>
   </div>
 
@@ -669,7 +669,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-114 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-115 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2357,8 +2357,8 @@ function nodeForId(id){
 // toujours au premier plan. Pour ne pas toucher au reste du code, `lockIndicatorGroup` et `lockBadge` gardent
 // l'interface qu'avaient les anciens objets Konva (visible(), position() en coordonnées FEUILLE, path.data()) ;
 // c'est placeBadges() qui convertit en position écran, à chaque affichage, défilement, zoom ou redimensionnement.
-let badgeOverlay = null, badgeLockEl = null, badgeDelEl = null;
-const badgeState = { show:false, lock:{x:0,y:0}, delShow:false, locked:false };
+let badgeOverlay = null, badgeLockEl = null, badgeDelEl = null, badgeCutEl = null, badgeSetEl = null;
+const badgeState = { show:false, lock:{x:0,y:0}, delShow:false, toolsShow:false, locked:false };
 function placeBadges(){
   if (!badgeOverlay) return;
   const wrap = document.getElementById('canvasWrap').getBoundingClientRect();
@@ -2370,6 +2370,13 @@ function placeBadges(){
   badgeLockEl.style.transform = 'translate('+(px-13)+'px,'+(py-13)+'px)';
   badgeDelEl.style.display = badgeState.delShow ? 'flex' : 'none';
   badgeDelEl.style.transform = 'translate('+(px-13)+'px,'+(py+32-13)+'px)'; // 32 px écran sous le cadenas, quel que soit le zoom
+  // v2.1-115 : sous la croix, pour un plan seulement : ciseaux (découpe rectangulaire) puis réglages de l'image
+  badgeCutEl.style.display = badgeSetEl.style.display = badgeState.toolsShow ? 'flex' : 'none';
+  badgeCutEl.style.transform = 'translate('+(px-13)+'px,'+(py+64-13)+'px)';
+  badgeSetEl.style.transform = 'translate('+(px-13)+'px,'+(py+96-13)+'px)';
+  const cutOn = activeTool === 'cut-rect';
+  badgeCutEl.style.background = cutOn ? '#fff' : '#0E6FA8'; badgeCutEl.style.borderColor = cutOn ? '#0E6FA8' : '#fff';
+  badgeCutEl.firstChild.setAttribute('stroke', cutOn ? '#0E6FA8' : '#fff');
 }
 let badgeRAF = 0;
 function schedulePlaceBadges(){ if (!badgeRAF) badgeRAF = requestAnimationFrame(()=>{ badgeRAF = 0; placeBadges(); }); }
@@ -2398,6 +2405,20 @@ function ensureLockBadge(){
     askYesNo(isTxt ? 'Supprimer ce texte ?' : 'Supprimer le plan ?').then(ok=>{ if (ok && selectedId===sid) document.getElementById('selDelete').click(); });
   });
   badgeDelEl.style.display = 'none';
+  // v2.1-115 : ciseaux = découpe rectangulaire prête en un appui ; réglage = fenêtre « Outils image » ouverte directement.
+  const toolBtn = (label, svg, onClick)=>{ const b = mk(label, svg, onClick); b.style.background = '#0E6FA8'; b.style.display = 'none'; return b; };
+  badgeCutEl = toolBtn('Découpe rectangulaire', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.8"/><circle cx="6" cy="18" r="2.8"/><path d="M8.2 7.8L20 18M8.2 16.2L20 6"/></svg>', ()=>{
+    if (activeTool === 'cut-rect'){ setTool('cut-rect'); schedulePlaceBadges(); return; } // second appui : annule la découpe
+    onTileChosen('plan'); setTool('cut-rect');
+    showBubble('Tracez le rectangle à découper');
+    schedulePlaceBadges();
+  });
+  badgeSetEl = toolBtn('Réglages de l\'image', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.2" fill="#0E6FA8"/><circle cx="15" cy="12" r="2.2" fill="#0E6FA8"/><circle cx="8" cy="17" r="2.2" fill="#0E6FA8"/></svg>', ()=>{
+    onTileChosen('plan');
+    openTileDrawer('plan', false);
+    const pop = document.getElementById('popPlanSettings');
+    if (pop && !pop.classList.contains('open')) document.getElementById('btnPlanSettings').click();
+  });
   document.body.appendChild(badgeOverlay);
   document.getElementById('canvasWrap').addEventListener('scroll', schedulePlaceBadges, { passive:true });
   window.addEventListener('resize', schedulePlaceBadges);
@@ -2407,6 +2428,7 @@ function ensureLockBadge(){
     g: { position(p){ if (!p) return { x:badgeState.lock.x, y:badgeState.lock.y }; badgeState.lock = { x:p.x, y:p.y }; }, scale(){} },
     path: { data(d){ badgeState.locked = (d === LOCK_PATH_CLOSED); refreshLockSvg(); } },
     del: { visible(v){ if (v === undefined) return badgeState.delShow; badgeState.delShow = !!v; }, position(){}, scale(){} },
+    tools: { visible(v){ badgeState.toolsShow = !!v; } },
     locked:false
   };
 }
@@ -2462,6 +2484,7 @@ function updateLockIndicator(duringRotation){
   // Croix de suppression : seulement pour un plan, juste sous le cadenas (v2.1-84).
   const isPlanSel2 = !!findPlanById(selectedId) || model.textes.some(t=>t.id===selectedId); // plan ou texte (v2.1-107)
   lockBadge.del.visible(isPlanSel2);
+  lockBadge.tools.visible(!!findPlanById(selectedId)); // ciseaux + réglages : plan seulement (v2.1-115)
   if (isPlanSel2){
     const gp = lockBadge.g.position();
     lockBadge.del.position({ x:gp.x, y:gp.y + 32/zoom });
