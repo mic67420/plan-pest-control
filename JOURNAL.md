@@ -1076,4 +1076,11 @@ v2.1-118 — Cadre, mains et poignées du plan visibles hors de la page ; appui 
    dans la marge n'agit pas (pas de pose, pas de désélection : stage.on filtré, stage.onAny pour le pincement) et fait
    défiler la vue (marginPan). Appui prolongé 2 s immobile sur un plan non sélectionné : sélection (bascule sur la
    tuile Plan si un outil était actif). Coût : canevas ≈ 58 % plus grands en pixels.
+
+v2.1-119 — Cadenas décalé par la marge
+ - Cause : updateLockIndicator() mesurait le cadre avec getClientRect({relativeTo: uiLayer}) ; uiLayer n'étant pas un
+   ancêtre du plan, la marge du stage (120) était ajoutée : cadenas, croix, ciseaux et réglages apparaissaient trop loin
+   du coin du cadre.
+ - Correctif : relativeTo: stage (coordonnées feuille). Test smoke ajouté (cadenas collé au coin haut-droit du cadre).
+ - Non reproduit : cadre bleu plus petit que l'image (capture de Mic) ; redimensionnement, découpe, filtres, DPR 2 testés OK.
 ```

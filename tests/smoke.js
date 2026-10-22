@@ -89,6 +89,9 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     await pg.waitForTimeout(400);
     const bd = await pg.evaluate(()=>{ const l = badgeLockEl.getBoundingClientRect(), h = sheetShadowHostEl.getBoundingClientRect(); return { show: badgeOverlay.style.display, out: l.left + l.width/2 > h.right - 1 }; });
     ok(bd.show==='block' && bd.out, 'cadenas du plan collé au bord droit : visible en dehors de la page');
+    // 12 bis. Cadenas à côté du coin haut-droit du CADRE (v2.1-119 : la marge du stage le décalait de 120 unités)
+    const lk = await pg.evaluate(()=>{ const pl=model.plans[0]; const e=(badgeState.lock.x-(pl.x+pl.width))*zoom, f=(pl.y-badgeState.lock.y)*zoom; return { e:Math.round(e), f:Math.round(f) }; });
+    ok(lk.e>=0 && lk.e<=30 && lk.f>=0 && lk.f<=30, 'cadenas collé au coin haut-droit du cadre ('+lk.e+', '+lk.f+' px)');
     // 13. Ciseaux et réglages sous la croix du plan (v2.1-115)
     await pg.evaluate(()=>badgeCutEl.click()); await pg.waitForTimeout(250);
     ok(await pg.evaluate(()=>activeTool==='cut-rect'), 'ciseaux du plan : découpe rectangulaire active');
