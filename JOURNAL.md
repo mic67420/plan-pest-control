@@ -1025,4 +1025,12 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    v2.1-112 : demande de Mic — la valeur chiffrée (« 0 » au repos) est retirée des 4 réglages de l'image
    (luminosité, contraste, saturation, teinte) : elle n'apprend rien (opts.noValue de buildRangeB). Tolérance du
    pot, gomme, pastille et texte gardent leur valeur.
+
+   v2.1-113 : demande de Mic — « ratés dans la numérotation » des pastilles. Cause : le numéro était « nombre de
+   pastilles de CE poste + 1 » : (1) après suppression de E2, la suivante prenait E3 en doublon (E1, E3, E3) ;
+   (2) les postes de même lettre (placebo ext. et rodenticide ext. = « E ») recommençaient chacun à E1 ;
+   (3) « Dupliquer » recopiait l'étiquette. Correctif : nextFreeLabelNumber(code) = plus petit numéro libre parmi
+   les étiquettes « CODEn » de TOUTES les pages (une suite par lettre, les trous sont comblés) ; utilisé par la
+   pose, par la pastille témoin (même numéro que la prochaine pose) et par Dupliquer. Les pastilles déjà posées
+   gardent leur numéro.
 ```

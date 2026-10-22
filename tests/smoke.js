@@ -81,6 +81,9 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     // 10. Réglages « modèle E » (v2.1-110) : 8 barres, poignée à jour, boutons − / +
     const rb = await pg.evaluate(()=>{ document.getElementById('rngPastilleSize').value = 30; const h = ()=>document.getElementById('rngPastilleSize').closest('.rngB').querySelector('.rngB-fill').style.width; const a = h(); const b = document.getElementById('btnPastilleSizePlus'); b.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:1})); b.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:1})); return { n:document.querySelectorAll('.rngB').length, a, b:h(), taille:currentPastilleRadius }; });
     ok(rb.n===8 && rb.a && rb.b && rb.a!==rb.b && rb.taille===31, 'réglages modèle E : '+rb.n+' barres, le remplissage suit la valeur (30 puis 31 avec le bouton +)');
+    // 11. Numérotation des pastilles (v2.1-113) : pas de doublon, trous comblés, une suite par lettre
+    const num = await pg.evaluate(()=>{ const saved = model.pastilles.slice(); model.pastilles = []; selectedTypeId='type-E'; addPastille(100,100); addPastille(150,100); addPastille(200,100); model.pastilles = model.pastilles.filter(p=>p.label!=='E2'); addPastille(250,100); selectedTypeId='type-Rext'; addPastille(300,100); selectedId = model.pastilles[0].id; document.getElementById('selDup').click(); const labels = model.pastilles.map(p=>p.label); model.pastilles = saved; return labels; });
+    ok(num.join()==='E1,E3,E2,E4,E5' && new Set(num).size===num.length, 'numérotation : '+num.join(' ')+' (trou comblé, une suite par lettre, copie renumérotée)');
     ok(errs.length===0, 'aucune erreur JavaScript'+(errs.length?' : '+errs[0]:''));
   } finally { await b.close(); }
   console.log(fails ? '\n'+fails+' ÉCHEC(S)' : '\nTOUS LES TESTS PASSENT');

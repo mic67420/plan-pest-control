@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-112 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-113 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -429,7 +429,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-112</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-113</span></div>
   <div class="sep"></div>
   </div>
 
@@ -669,7 +669,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-112 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-113 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1191,6 +1191,24 @@ function deleteCurrentPage(){
 }
 // Nombre total de pastilles déjà posées pour un type de dispositif donné, toutes pages
 // confondues : sert à faire continuer la numérotation (R1, R2, R3...) d'une page à l'autre.
+// v2.1-113 : prochain numéro libre d'une LETTRE (code du poste), toutes pages confondues. Avant : « nombre de
+// pastilles du poste + 1 », d'où des doublons (E1, E3, E3 après suppression de E2 ; un E1 par poste pour deux
+// postes de même lettre ; copies « Dupliquer » portant le même numéro). Maintenant : le plus petit numéro
+// non utilisé par une étiquette « CODEn » de n'importe quelle page (les trous laissés par une suppression
+// sont comblés, jamais de doublon).
+function nextFreeLabelNumber(code){
+  const re = new RegExp('^'+code.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(\\d+)$');
+  const used = new Set();
+  pages.forEach(pg=>pg.pastilles.forEach(p=>{ const m = re.exec(p.label||''); if (m) used.add(parseInt(m[1],10)); }));
+  let n = 1; while (used.has(n)) n++;
+  return n;
+}
+function nextPastilleLabel(typeId){
+  const type = model.deviceTypes.find(t=>t.id===typeId);
+  if (type && type.noNumber) return '';
+  const code = type ? type.code : '?';
+  return code + nextFreeLabelNumber(code);
+}
 function countPastillesOfType(typeId){
   return pages.reduce((sum, pg)=> sum + pg.pastilles.filter(p=>p.typeId===typeId).length, 0);
 }
@@ -2607,6 +2625,7 @@ document.getElementById('selDup').addEventListener('click', ()=>{
   const p = model.pastilles.find(p=>p.id===selectedId);
   if (p){
     const np = {...p, id: nextId('past-'), x:p.x+24, y:p.y+24};
+    if (p.label) np.label = nextPastilleLabel(p.typeId); // la copie reçoit le prochain numéro libre (v2.1-113), plus un doublon
     model.pastilles.push(np); selectedId = np.id; pushHistory(); render(); return;
   }
   const t = model.textes.find(t=>t.id===selectedId);
@@ -3263,10 +3282,9 @@ stage.on('click', (e)=>{
 function addPastille(x,y, commit=true){
   x = snapToGrid(x); y = snapToGrid(y); // v2.1-89 : centre sur une intersection de la grille si elle est affichée
   const type = model.deviceTypes.find(t=>t.id===selectedTypeId);
-  const countSameType = countPastillesOfType(selectedTypeId);
   // Certains postes (ex. rongeurs souris/rat) sont configurés "sans numéro" : leur pastille
   // n'affiche alors que la couleur/forme, sans étiquette dessus.
-  const label = (type && type.noNumber) ? '' : (type ? type.code : '?') + (countSameType+1);
+  const label = nextPastilleLabel(selectedTypeId);
   const radius = (type && type.defaultRadius) ? type.defaultRadius : currentPastilleRadius;
   const p = { id: nextId('past-'), typeId: selectedTypeId, label, x, y, radius, rotation:0 };
   model.pastilles.push(p);
@@ -4537,7 +4555,7 @@ function updateSizePreview(){
   const noteEl = document.getElementById('pastilleSizePreviewNote');
   const type = model.deviceTypes.find(t=>t.id===selectedTypeId);
   const r = effectiveNextRadius();
-  const label = (type && type.noNumber) ? '' : (type ? type.code : '?') + (countPastillesOfType(selectedTypeId)+1);
+  const label = nextPastilleLabel(selectedTypeId); // même numéro que la prochaine pastille posée
   const MAX_D = 40;                       // diamètre maximal du témoin (px écran) — v2.1-94 : 84 -> 40 (rayon 20)
   const realD = 2*r*zoom;
   const k = realD > MAX_D ? MAX_D/realD : 1;
