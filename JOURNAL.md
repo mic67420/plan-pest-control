@@ -1048,4 +1048,11 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    découper », un second appui annule ; icône blanche quand l'outil est actif) et RÉGLAGES (ouvre le tiroir Plan
    avec la fenêtre « Outils image » directement). Même mécanique que le cadenas : boutons HTML (placeBadges),
    visibles hors de la page ; plan sélectionné uniquement.
+
+   v2.1-116 : demande de Mic (essai, v2.1-115 = référence) — fonds de tiroir transparents / ajourés pour voir le plan
+   derrière. Bouton « Fond » dans la tuile Vue : appuis successifs = 1 Opaque (comme avant), 2 Verre dépoli (voile
+   blanc 62 % + flou), 3 Transparent (voile 26 %, éléments posés sur pastilles blanches), 4 Ajouré (aucun fond,
+   éléments sur pastilles blanches, liseré). Les fenêtres d'options (.popover) suivent avec un voile minimum.
+   Choix mémorisé sur l'appareil (localStorage). Pur CSS (classes drawer-bg-N sur <body>) : aucun changement de
+   comportement.
 ```

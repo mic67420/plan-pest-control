@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-115 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-116 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -301,6 +301,22 @@
     padding:10px; flex-wrap:wrap; row-gap:8px; max-height:60vh; overflow-y:auto;
     max-width:none;
   }
+  /* v2.1-116 — ESSAI : 4 fonds de tiroir, choisis par le bouton « Fond » de la tuile Vue (classe drawer-bg-N sur <body>).
+     1 Opaque (comme avant) · 2 Verre dépoli (flou + voile blanc) · 3 Transparent (voile léger, éléments sur pastilles
+     blanches) · 4 Ajouré (aucun fond, seuls les éléments restent sur pastilles blanches). Les fenêtres d'options
+     (.popover) suivent, avec un voile minimum pour rester lisibles. */
+  body.drawer-bg-2.mobile-mode .tb-group.mobile-open{ background:rgba(255,255,255,.62); -webkit-backdrop-filter:blur(14px) saturate(1.2); backdrop-filter:blur(14px) saturate(1.2); }
+  body.drawer-bg-3.mobile-mode .tb-group.mobile-open{ background:rgba(255,255,255,.26); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); }
+  body.drawer-bg-4.mobile-mode .tb-group.mobile-open{ background:transparent; box-shadow:none; border:1px solid rgba(255,255,255,.55); }
+  body.drawer-bg-3.mobile-mode .tb-group.mobile-open > *:not(.sep):not(#textOptions),
+  body.drawer-bg-4.mobile-mode .tb-group.mobile-open > *:not(.sep):not(#textOptions){ background:rgba(255,255,255,.88); border-radius:10px; }
+  body.drawer-bg-3.mobile-mode .tb-group.mobile-open > #textOptions.has-text,
+  body.drawer-bg-4.mobile-mode .tb-group.mobile-open > #textOptions.has-text{ background:rgba(255,255,255,.88); border-radius:10px; border-top:none; }
+  body.drawer-bg-2 .popover{ background:rgba(255,255,255,.78); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); }
+  body.drawer-bg-3 .popover{ background:rgba(255,255,255,.62); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+  body.drawer-bg-4 .popover{ background:rgba(255,255,255,.5); box-shadow:none; }
+  body.drawer-bg-4 .popover .pop-row, body.drawer-bg-4 .popover .pop-tool-btn, body.drawer-bg-4 .popover .pop-btn,
+  body.drawer-bg-4 .popover .pop-section-title{ background:rgba(255,255,255,.88); border-radius:8px; }
   body.mobile-mode .tb-icon{
     height:auto; min-height:54px; width:64px; min-width:64px; font-size:22px; border-radius:10px;
     flex-direction:column; gap:3px; padding:6px 2px 5px; box-sizing:border-box;
@@ -429,7 +445,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-115</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-116</span></div>
   <div class="sep"></div>
   </div>
 
@@ -467,6 +483,7 @@
     <span id="zoomLabel" class="mono" title="Niveau de zoom">100%</span>
     <button class="tb-icon" id="btnZoomIn" title="Zoom avant"><svg class="icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="#E4EEF4" stroke="#0E6FA8" stroke-width="1.8"/><path d="M15.3 15.3 20 20" stroke="#2B3242" stroke-width="2" stroke-linecap="round"/><path d="M10.5 7.5v6M7.5 10.5h6" stroke="#0E6FA8" stroke-width="1.8" stroke-linecap="round"/></svg></button>
     <button class="tb-icon" id="btnZoomFit" title="Ajuster à l'écran"><svg class="icon" viewBox="0 0 24 24"><rect x="5.5" y="5.5" width="13" height="13" rx="1" fill="#FBE6BF" stroke="#E8A83C" stroke-width="1.4"/><path d="M4 8V5.5a1.5 1.5 0 0 1 1.5-1.5H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16" stroke="#2B3242" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="tb-icon" id="btnDrawerBg" title="Fond des tiroirs (essai : opaque, verre, transparent, ajouré)"><svg class="icon" viewBox="0 0 24 24"><rect x="3.5" y="5" width="13" height="13" rx="2" fill="#E4F1F8" stroke="#0E6FA8" stroke-width="1.4"/><rect x="8" y="9" width="12.5" height="11" rx="2" fill="#ffffff" fill-opacity=".55" stroke="#2B3242" stroke-width="1.4" stroke-dasharray="2.2 1.8"/></svg></button>
   </div>
   <div class="sep"></div>
 
@@ -669,7 +686,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-115 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-116 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -5482,7 +5499,7 @@ const SHORT_ICON_LABELS = {
   'Page précédente':'Précédente','Page suivante':'Suivante','Ajouter un étage':'+ Étage',
   'Déplacer cette page vers la gauche':'Page ←','Déplacer cette page vers la droite':'Page →',
   'Supprimer la page courante':'Suppr. page','Nouveau projet':'Nouveau',
-  'Orientation portrait':'Portrait','Orientation paysage':'Paysage','Zoom arrière':'Zoom −','Zoom avant':'Zoom +',
+  'Orientation portrait':'Portrait','Fond des tiroirs (essai : opaque, verre, transparent, ajouré)':'Fond','Orientation paysage':'Paysage','Zoom arrière':'Zoom −','Zoom avant':'Zoom +',
   "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Ouvrir un projet':'Ouvrir',
   'Importer un plan':'Importer','Découpe rectangulaire':'Découpe □','Découpe point par point':'Découpe pts',
   'Outils image : pipette, pot de peinture, gomme, réglages':'Outils image','Pot de peinture intelligent':'Pot peinture',
@@ -5505,6 +5522,17 @@ function addIconLabels(){
 addIconLabels();
 updatePlanLockButton();
 // v2.1-90 : état de la grille d'accroche écrit sous l'icône (comme le cadenas du plan).
+// v2.1-116 : fond des tiroirs (essai). Mode mémorisé sur l'appareil (localStorage) — 1 Opaque, 2 Verre, 3 Transparent, 4 Ajouré.
+const DRAWER_BG_NAMES = ['','Opaque','Verre','Transp.','Ajouré'];
+let drawerBgMode = 1;
+try{ const v = parseInt(localStorage.getItem('ppc_drawer_bg')||'1',10); if (v>=1 && v<=4) drawerBgMode = v; }catch(e){}
+function applyDrawerBg(){
+  for (let i=1;i<=4;i++) document.body.classList.toggle('drawer-bg-'+i, i===drawerBgMode);
+  const lbl = document.querySelector('#btnDrawerBg .tb-icon-label'); if (lbl) lbl.textContent = DRAWER_BG_NAMES[drawerBgMode];
+  try{ localStorage.setItem('ppc_drawer_bg', String(drawerBgMode)); }catch(e){}
+}
+document.getElementById('btnDrawerBg').addEventListener('click', ()=>{ drawerBgMode = drawerBgMode % 4 + 1; applyDrawerBg(); });
+applyDrawerBg();
 function updateGridButton(){
   const btn = document.getElementById('btnGrid');
   const txt = gridVisible ? "Grille d'accroche activée" : "Grille d'accroche désactivée";
