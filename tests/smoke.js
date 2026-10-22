@@ -84,6 +84,11 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     // 11. Numérotation des pastilles (v2.1-113) : pas de doublon, trous comblés, une suite par lettre
     const num = await pg.evaluate(()=>{ const saved = model.pastilles.slice(); model.pastilles = []; selectedTypeId='type-E'; addPastille(100,100); addPastille(150,100); addPastille(200,100); model.pastilles = model.pastilles.filter(p=>p.label!=='E2'); addPastille(250,100); selectedTypeId='type-Rext'; addPastille(300,100); selectedId = model.pastilles[0].id; document.getElementById('selDup').click(); const labels = model.pastilles.map(p=>p.label); model.pastilles = saved; return labels; });
     ok(num.join()==='E1,E3,E2,E4,E5' && new Set(num).size===num.length, 'numérotation : '+num.join(' ')+' (trou comblé, une suite par lettre, copie renumérotée)');
+    // 12. Cadenas / croix en HTML (v2.1-114) : visibles hors de la page
+    await pg.evaluate(()=>{ model.plans[0].x = SHEET_W - model.plans[0].width; render(); onTileChosen('plan'); selectNode(planImageNodes.get(model.plans[0].id), model.plans[0].id); });
+    await pg.waitForTimeout(400);
+    const bd = await pg.evaluate(()=>{ const l = badgeLockEl.getBoundingClientRect(), h = sheetShadowHostEl.getBoundingClientRect(); return { show: badgeOverlay.style.display, out: l.left + l.width/2 > h.right - 1 }; });
+    ok(bd.show==='block' && bd.out, 'cadenas du plan collé au bord droit : visible en dehors de la page');
     ok(errs.length===0, 'aucune erreur JavaScript'+(errs.length?' : '+errs[0]:''));
   } finally { await b.close(); }
   console.log(fails ? '\n'+fails+' ÉCHEC(S)' : '\nTOUS LES TESTS PASSENT');

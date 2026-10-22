@@ -1033,4 +1033,13 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    les étiquettes « CODEn » de TOUTES les pages (une suite par lettre, les trous sont comblés) ; utilisé par la
    pose, par la pastille témoin (même numéro que la prochaine pose) et par Dupliquer. Les pastilles déjà posées
    gardent leur numéro.
+
+   v2.1-114 : demande de Mic — cadenas et croix de suppression visibles EN DEHORS de la page et toujours au premier
+   plan. Cause : ils étaient dessinés dans le canevas Konva, qui s'arrête exactement aux bords de la feuille : un
+   élément collé au bord (plan, texte, pastille) voyait ses icônes coupées. (Rappel : agrandir le canevas au-delà
+   de la feuille est une approche abandonnée.) Correctif : cadenas et croix deviennent de vrais boutons HTML
+   (placeBadges) dans une couche fixe posée sur la zone de plan et découpée à ses bords, au-dessus de la feuille ;
+   leur position écran est recalculée à chaque affichage, défilement, zoom ou redimensionnement. Les anciens
+   objets Konva sont remplacés par des objets de même interface (visible, position en coordonnées feuille,
+   path.data) : le reste du code est inchangé. Taille et distance cadenas-croix constantes à l'écran.
 ```

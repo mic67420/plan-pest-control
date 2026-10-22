@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-113 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-114 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -429,7 +429,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-113</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-114</span></div>
   <div class="sep"></div>
   </div>
 
@@ -669,7 +669,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-113 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-114 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1409,6 +1409,7 @@ function applySheetSize(){
     drawGrid();
     if (typeof updateScrollBands === 'function') updateScrollBands();
   }
+  if (typeof schedulePlaceBadges === 'function') schedulePlaceBadges(); // cadenas / croix suivent la feuille (v2.1-114)
   if (gridLayer.visible() !== gridVisible) setGridVisible(gridVisible);
 }
 
@@ -2351,48 +2352,63 @@ function nodeForId(id){
   if (id === 'legend-frame') return legendGroupNode;
   return planImageNodes.get(id) || pastilleNodes.get(id) || textNodes.get(id) || logoNodes.get(id) || null;
 }
+// v2.1-114 : cadenas et croix de suppression en éléments HTML (et non plus dessinés dans le canevas Konva, qui
+// s'arrête aux bords de la feuille) : ils restent visibles HORS de la page, quand l'élément touche un bord, et
+// toujours au premier plan. Pour ne pas toucher au reste du code, `lockIndicatorGroup` et `lockBadge` gardent
+// l'interface qu'avaient les anciens objets Konva (visible(), position() en coordonnées FEUILLE, path.data()) ;
+// c'est placeBadges() qui convertit en position écran, à chaque affichage, défilement, zoom ou redimensionnement.
+let badgeOverlay = null, badgeLockEl = null, badgeDelEl = null;
+const badgeState = { show:false, lock:{x:0,y:0}, delShow:false, locked:false };
+function placeBadges(){
+  if (!badgeOverlay) return;
+  const wrap = document.getElementById('canvasWrap').getBoundingClientRect();
+  Object.assign(badgeOverlay.style, { left:wrap.left+'px', top:wrap.top+'px', width:wrap.width+'px', height:wrap.height+'px' });
+  badgeOverlay.style.display = badgeState.show ? 'block' : 'none';
+  if (!badgeState.show) return;
+  const host = sheetShadowHostEl.getBoundingClientRect();
+  const px = host.left - wrap.left + badgeState.lock.x*zoom, py = host.top - wrap.top + badgeState.lock.y*zoom;
+  badgeLockEl.style.transform = 'translate('+(px-13)+'px,'+(py-13)+'px)';
+  badgeDelEl.style.display = badgeState.delShow ? 'flex' : 'none';
+  badgeDelEl.style.transform = 'translate('+(px-13)+'px,'+(py+32-13)+'px)'; // 32 px écran sous le cadenas, quel que soit le zoom
+}
+let badgeRAF = 0;
+function schedulePlaceBadges(){ if (!badgeRAF) badgeRAF = requestAnimationFrame(()=>{ badgeRAF = 0; placeBadges(); }); }
 function ensureLockBadge(){
   if (lockIndicatorGroup) return;
-  lockIndicatorGroup = new Konva.Group({ visible:false });
-  // Visuel (v2.1-53) : pastille ronde rouge, liseré blanc et légère ombre, avec un cadenas
-  // BLANC dessiné à l'intérieur — anse refermée si verrouillé, anse relevée et ouverte si
-  // déverrouillé. Taille constante à l'écran quel que soit le zoom (échelle 1/zoom).
-  const g = new Konva.Group({ name:'lock-badge' });
-  g.add(new Konva.Circle({ x:0, y:0, radius:13, fill:'#D6493E', stroke:'#ffffff', strokeWidth:2,
-    hitStrokeWidth:22, // zone de clic/tap élargie autour du cadenas
-    shadowColor:'rgba(0,0,0,0.35)', shadowBlur:4, shadowOffset:{x:0,y:1},
-    shadowForStrokeEnabled:false, perfectDrawEnabled:false }));
-  const path = new Konva.Path({ data:LOCK_PATH_CLOSED, stroke:'#ffffff', strokeWidth:2, lineCap:'round', lineJoin:'round' });
-  g.add(path);
-  // Corps du cadenas + trou de serrure.
-  g.add(new Konva.Rect({ x:-5.6, y:-0.5, width:11.2, height:8.5, cornerRadius:1.8, fill:'#ffffff' }));
-  g.add(new Konva.Circle({ x:0, y:3.2, radius:1.4, fill:'#D6493E' }));
-  // CLIQUABLE (v2.1-58) : un clic (ou un tap rapide au doigt) sur le cadenas verrouille ou
-  // déverrouille l'élément — même action que le bouton 🔓/🔒 de la barre de sélection.
-  g.on('mousedown touchstart', (e)=>{ e.cancelBubble = true; }); // ne déclenche aucun autre outil
-  g.on('click tap', (e)=>{ e.cancelBubble = true; document.getElementById('selLock').click(); });
-  g.on('mouseenter', ()=>{ stage.container().style.cursor = 'pointer'; });
-  g.on('mouseleave', ()=>{ stage.container().style.cursor = ''; });
-  lockIndicatorGroup.add(g);
-  // v2.1-84 : croix de SUPPRESSION (plan uniquement), même style que le cadenas, placée dessous.
-  const del = new Konva.Group({ name:'delete-badge', visible:false });
-  del.add(new Konva.Circle({ x:0, y:0, radius:13, fill:'#D6493E', stroke:'#ffffff', strokeWidth:2, hitStrokeWidth:22,
-    shadowColor:'rgba(0,0,0,0.35)', shadowBlur:4, shadowOffset:{x:0,y:1}, shadowForStrokeEnabled:false, perfectDrawEnabled:false }));
-  del.add(new Konva.Line({ points:[-5,-5,5,5], stroke:'#ffffff', strokeWidth:2.4, lineCap:'round' }));
-  del.add(new Konva.Line({ points:[5,-5,-5,5], stroke:'#ffffff', strokeWidth:2.4, lineCap:'round' }));
-  del.on('mousedown touchstart', (e)=>{ e.cancelBubble = true; });
-  del.on('click tap', (e)=>{
-    e.cancelBubble = true;
+  badgeOverlay = document.createElement('div');
+  badgeOverlay.style.cssText = 'position:fixed;overflow:hidden;pointer-events:none;z-index:420;display:none;';
+  const mk = (label, svg, onClick)=>{
+    const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', label); b.title = label;
+    b.style.cssText = 'position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:#D6493E;padding:0;'
+      + 'display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.4);pointer-events:auto;touch-action:manipulation;cursor:pointer;box-sizing:border-box;';
+    b.innerHTML = svg + '<span style="position:absolute;inset:-9px;"></span>'; // zone de toucher élargie
+    b.addEventListener('pointerdown', (e)=>e.stopPropagation());
+    b.addEventListener('click', (e)=>{ e.stopPropagation(); onClick(); });
+    badgeOverlay.appendChild(b);
+    return b;
+  };
+  // Cadenas blanc : anse refermée si verrouillé, relevée et ouverte sinon (même dessin qu'avant).
+  const lockSvg = (closed)=>'<svg width="16" height="16" viewBox="-8 -9 16 18"><path d="'+(closed ? LOCK_PATH_CLOSED : LOCK_PATH_OPEN)+'" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+    + '<rect x="-5.6" y="-0.5" width="11.2" height="8.5" rx="1.8" fill="#fff"/><circle cx="0" cy="3.2" r="1.4" fill="#D6493E"/></svg>';
+  badgeLockEl = mk('Verrouiller / déverrouiller', lockSvg(false), ()=>document.getElementById('selLock').click());
+  badgeDelEl = mk('Supprimer', '<svg width="16" height="16" viewBox="-8 -8 16 16"><path d="M-5 -5L5 5M5 -5L-5 5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>', ()=>{
     const isTxt = model.textes.some(t=>t.id===selectedId);
     if (!findPlanById(selectedId) && !isTxt) return;
     const sid = selectedId;
     askYesNo(isTxt ? 'Supprimer ce texte ?' : 'Supprimer le plan ?').then(ok=>{ if (ok && selectedId===sid) document.getElementById('selDelete').click(); });
   });
-  del.on('mouseenter', ()=>{ stage.container().style.cursor = 'pointer'; });
-  del.on('mouseleave', ()=>{ stage.container().style.cursor = ''; });
-  lockIndicatorGroup.add(del);
-  uiLayer.add(lockIndicatorGroup);
-  lockBadge = { g, path, del, locked:false };
+  badgeDelEl.style.display = 'none';
+  document.body.appendChild(badgeOverlay);
+  document.getElementById('canvasWrap').addEventListener('scroll', schedulePlaceBadges, { passive:true });
+  window.addEventListener('resize', schedulePlaceBadges);
+  const refreshLockSvg = ()=>{ badgeLockEl.innerHTML = lockSvg(badgeState.locked) + '<span style="position:absolute;inset:-9px;"></span>'; };
+  lockIndicatorGroup = { visible(v){ if (v === undefined) return badgeState.show; badgeState.show = !!v; placeBadges(); } };
+  lockBadge = {
+    g: { position(p){ if (!p) return { x:badgeState.lock.x, y:badgeState.lock.y }; badgeState.lock = { x:p.x, y:p.y }; }, scale(){} },
+    path: { data(d){ badgeState.locked = (d === LOCK_PATH_CLOSED); refreshLockSvg(); } },
+    del: { visible(v){ if (v === undefined) return badgeState.delShow; badgeState.delShow = !!v; }, position(){}, scale(){} },
+    locked:false
+  };
 }
 // v2.1-83 : icône + texte du bouton cadenas de la tuile Plan selon l'état du plan (sélectionné, sinon le 1er).
 const PLAN_LOCK_SHACKLE_CLOSED = 'M7.5 10.5V7.8a4.5 4.5 0 0 1 9 0v2.7';
@@ -2456,7 +2472,7 @@ function updateLockIndicator(duringRotation){
     lockBadge.locked = locked;
     lockBadge.path.data(locked ? LOCK_PATH_CLOSED : LOCK_PATH_OPEN);
   }
-  lockIndicatorGroup.visible(true);
+  lockIndicatorGroup.visible(true); // (rappelle placeBadges)
   uiLayer.batchDraw();
 }
 // Le cadenas (et les icônes de rotation d'un plan) suivent l'élément sélectionné pendant
