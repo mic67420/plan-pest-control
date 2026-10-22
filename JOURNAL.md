@@ -1055,4 +1055,12 @@ ces ~950 lignes (71 Ko) étaient lues par le navigateur à chaque ouverture sans
    éléments sur pastilles blanches, liseré). Les fenêtres d'options (.popover) suivent avec un voile minimum.
    Choix mémorisé sur l'appareil (localStorage). Pur CSS (classes drawer-bg-N sur <body>) : aucun changement de
    comportement.
+
+v2.1-117 — Fond des tiroirs : un seul curseur de transparence, net, sans défilement
+ - Demande de Mic : tiroirs entièrement visibles (pas de barre de défilement verticale), fond net (pas de flou),
+   transparence réglable pour valider la bonne proportion.
+ - Correctif : les 4 modes de v2.1-116 et leur bouton sont remplacés par le curseur « Fond » (0-100 %) en bas du
+   tiroir Vue (variable CSS --drawer-alpha, mémorisée en localStorage). Plus de backdrop-filter ; l'ombre est
+   remplacée par un liseré quand le fond est allégé. Tiroirs et fenêtres d'options : max-height none, overflow
+   visible. Le tiroir reste ouvert pendant le réglage (timer repoussé). Test smoke : 9 barres au lieu de 8.
 ```
