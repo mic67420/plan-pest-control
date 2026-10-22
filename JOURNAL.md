@@ -1063,4 +1063,17 @@ v2.1-117 — Fond des tiroirs : un seul curseur de transparence, net, sans défi
    tiroir Vue (variable CSS --drawer-alpha, mémorisée en localStorage). Plus de backdrop-filter ; l'ombre est
    remplacée par un liseré quand le fond est allégé. Tiroirs et fenêtres d'options : max-height none, overflow
    visible. Le tiroir reste ouvert pendant le réglage (timer repoussé). Test smoke : 9 barres au lieu de 8.
+
+v2.1-118 — Cadre, mains et poignées du plan visibles hors de la page ; appui prolongé = sélection
+ - Demande de Mic : le cadre, les mains de rotation et les poignées de redimensionnement doivent sortir de la page ;
+   un appui prolongé (2 s, essai) sur un plan le sélectionne.
+ - Cause : le canevas Konva s'arrêtait exactement aux bords de la feuille, tout ce qui dépassait était coupé.
+ - Correctif : la zone de dessin déborde de SHEET_MARGIN (120 px) autour de la feuille (stage décalé de la marge, les
+   coordonnées du document restent celles de la feuille). Les couches plan / contenu / grille sont rognées à la feuille
+   (le plan ne dépasse pas visuellement) ; seule la couche UI (cadre, mains, poignées) déborde. Adaptations : helper
+   stagePointer() (position sans marge), planNodeAt / toLocal / rognage (conversion de la marge), export rogné à la
+   feuille, #sheetBox (zone défilable) + #sheetShadowHost (feuille seule), fitZoom centre la feuille. Un appui À VIDE
+   dans la marge n'agit pas (pas de pose, pas de désélection : stage.on filtré, stage.onAny pour le pincement) et fait
+   défiler la vue (marginPan). Appui prolongé 2 s immobile sur un plan non sélectionné : sélection (bascule sur la
+   tuile Plan si un outil était actif). Coût : canevas ≈ 58 % plus grands en pixels.
 ```

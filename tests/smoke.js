@@ -49,7 +49,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     ok(await pg.evaluate(()=>!planImageNodes.get(model.plans[0].id).draggable()), 'plan verrouillé : figé');
     await pg.evaluate(()=>{ model.plans[0].locked=false; render(); });
     // 6. Gomme : tache, trait, accroche H, carré/rond
-    const toClient = (x,y)=>pg.evaluate(([x,y])=>{const r=stage.container().getBoundingClientRect();return {x:r.left+x*zoom,y:r.top+y*zoom};},[x,y]);
+    const toClient = (x,y)=>pg.evaluate(([x,y])=>{const r=sheetShadowHostEl.getBoundingClientRect();return {x:r.left+x*zoom,y:r.top+y*zoom};},[x,y]);
     const white = (x,y)=>pg.evaluate(([x,y])=>{const pl=model.plans[0];const c=planNaturalCanvases.get(pl.id);const k=c.width/pl.width;const d=c.getContext('2d').getImageData(Math.round((x-pl.x)*k),Math.round((y-pl.y)*k),1,1).data;return d[0]>200;},[x,y]);
     const blank = async ()=>{ await pg.evaluate(async()=>{ const pl=model.plans[0]; const c=planNaturalCanvases.get(pl.id); const x=c.getContext('2d'); x.fillStyle='#000'; x.fillRect(0,0,c.width,c.height); const d=planDisplayCanvases.get(pl.id); if(d&&d!==c){const y=d.getContext('2d');y.fillStyle='#000';y.fillRect(0,0,d.width,d.height);} bucketColor='#FFFFFF'; if(activeTool!=='eraser') setTool('eraser'); document.getElementById('rngEraserSize').value=20; eraserShape='square'; updateEraserUI(); }); };
     await blank();

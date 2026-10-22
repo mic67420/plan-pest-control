@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-117 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-118 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -225,11 +225,15 @@
     position:fixed;top:52px;left:0;right:0;bottom:0;
     display:flex;overflow:auto;overscroll-behavior:contain;
   }
-  #sheetShadowHost{box-shadow:var(--sheet-shadow);background:#fff;margin:auto;}
+  /* v2.1-118 : la zone de dessin (#konvaContainer) déborde de SHEET_MARGIN autour de la feuille, pour que cadre,
+     mains et poignées du plan restent visibles et utilisables hors de la page. #sheetBox = zone de dessin entière
+     (c'est elle qui défile et se centre) ; #sheetShadowHost = la feuille blanche seule, avec son ombre. */
+  #sheetBox{position:relative;margin:auto;flex:none;}
+  #sheetShadowHost{position:absolute;box-shadow:var(--sheet-shadow);background:#fff;}
   /* Pendant un pincement à deux doigts, l'ombre (grand flou) est retirée : la repeindre à
      chaque image sur une feuille agrandie coûtait cher (v2.1-62). */
   #sheetShadowHost.pinching{box-shadow:none;}
-  #konvaContainer{background:#fff;touch-action:none;}
+  #konvaContainer{position:absolute;left:0;top:0;touch-action:none;}
   #konvaContainer.cutting-active, #konvaContainer.pipette-active{cursor:crosshair;}
   /* On masque la scrollbar native du navigateur : la navigation passe désormais par les
      bandeaux ci-dessous, plus larges et plus fiables au doigt qu'un appui prolongé. */
@@ -435,7 +439,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-117</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-118</span></div>
   <div class="sep"></div>
   </div>
 
@@ -609,7 +613,7 @@
 </div>
 
 <div id="canvasWrap">
-  <div id="sheetShadowHost"><div id="konvaContainer"></div></div>
+  <div id="sheetBox"><div id="sheetShadowHost"></div><div id="konvaContainer"></div></div>
 </div>
 <div id="hScrollBand" class="scroll-band scroll-band-h"><div id="hScrollThumb" class="scroll-thumb"></div></div>
 <div id="vScrollBand" class="scroll-band scroll-band-v"><div id="vScrollThumb" class="scroll-thumb"></div></div>
@@ -676,7 +680,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-117 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-118 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -701,6 +705,7 @@ const SHEET_W = Math.round(A4_W_MM * MM_TO_PX); // portrait width
 // v2.1-103 : logo recompressé (PNG 256 couleurs, 700 px de large : 14 Ko au lieu de 159 Ko, rendu identique à l'œil).
 const COMPANY_LOGO_DATAURL = "data:image/png;base64,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";
 const SHEET_H = Math.round(A4_H_MM * MM_TO_PX); // portrait height
+const SHEET_MARGIN = 120; // v2.1-118 : marge de dessin autour de la feuille (poignées / mains du plan hors page)
 // Emplacements par défaut des 4 éléments de coin (v2.1-96), mesurés sur les deux documents de test de Mic
 // (feuille A4 : portrait 794 × 1123, paysage 1123 × 794).
 const CORNER_PRESETS = {
@@ -1245,7 +1250,28 @@ document.getElementById('btnNewProject').addEventListener('click', newProject);
 // et redessiner à chaque image, pour une différence quasi invisible. Sans effet sur l'EXPORT,
 // qui fixe son propre pixelRatio (voir captureAllPagesAsImages) : qualité inchangée.
 Konva.pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-const stage = new Konva.Stage({ container: 'konvaContainer', width: SHEET_W, height: SHEET_H });
+const stage = new Konva.Stage({ container: 'konvaContainer', width: SHEET_W+2*SHEET_MARGIN, height: SHEET_H+2*SHEET_MARGIN, x:SHEET_MARGIN, y:SHEET_MARGIN });
+// v2.1-118 : le stage est décalé de SHEET_MARGIN ; toutes les coordonnées du document restent celles de la FEUILLE.
+function sheetW(){ return model.orientation === 'portrait' ? SHEET_W : SHEET_H; }
+function sheetH(){ return model.orientation === 'portrait' ? SHEET_H : SHEET_W; }
+// Position du doigt / de la souris en coordonnées feuille (remplace stage.getPointerPosition(), qui compte la marge).
+function stagePointer(){
+  const p = stage.getPointerPosition();
+  return p ? { x:p.x-SHEET_MARGIN, y:p.y-SHEET_MARGIN } : p;
+}
+function insideSheet(pos){ return !!pos && pos.x >= 0 && pos.y >= 0 && pos.x <= sheetW() && pos.y <= sheetH(); }
+// La marge n'est pas la page : un appui à vide dans la marge ne doit ni poser de pastille, ni lancer un outil, ni
+// désélectionner (avant, ces zones étaient hors du canevas). Seules les poignées / mains (cible ≠ stage) et le
+// pincement (stage.onAny) y restent actifs ; faire défiler au doigt dans la marge est géré à part (marginPan).
+const GATED_START_EVENTS = ['mousedown','touchstart','click','tap','dblclick','dbltap'];
+const stageOnRaw = stage.on.bind(stage);
+stage.onAny = stageOnRaw;
+stage.on = function(types, fn){
+  return stageOnRaw(types, function(e){
+    if (e && e.target === stage && GATED_START_EVENTS.includes(e.type) && !insideSheet(stagePointer())) return;
+    return fn.apply(this, arguments);
+  });
+};
 // (v2.1-62) Plus de couche "fond blanc" à l'écran : le fond blanc est déjà fourni par le CSS
 // (#konvaContainer), et une couche entière de plus coûtait de la mémoire et du temps de
 // composition. Le fond blanc est ajouté uniquement dans l'image EXPORTÉE (voir exportStageDataURL).
@@ -1342,7 +1368,7 @@ transformer.on('transform', ()=>{ if (typeof updateLockIndicator === 'function')
 
 let lastGridKey = null;
 function drawGrid(){
-  const w = stage.width(), h = stage.height();
+  const w = sheetW(), h = sheetH();
   const key = w+'x'+h;
   if (key === lastGridKey) return; // taille inchangée depuis le dernier appel : rien à refaire
   lastGridKey = key;
@@ -1398,17 +1424,25 @@ function render(){
 // ont changé (v2.1-62).
 let lastSheetKey = null;
 const sheetShadowHostEl = document.getElementById('sheetShadowHost');
+const sheetBoxEl = document.getElementById('sheetBox');
 function applySheetSize(){
   const w = model.orientation === 'portrait' ? SHEET_W : SHEET_H;
   const h = model.orientation === 'portrait' ? SHEET_H : SHEET_W;
   const key = w+'x'+h+'@'+zoom;
   if (key !== lastSheetKey){
     lastSheetKey = key;
-    if (stage.width() !== w || stage.height() !== h){
-      stage.width(w); stage.height(h);
-      stage.container().style.width = w+'px';
-      stage.container().style.height = h+'px';
+    const M = SHEET_MARGIN, fw = w+2*M, fh = h+2*M;
+    if (stage.width() !== fw || stage.height() !== fh){
+      stage.width(fw); stage.height(fh);
+      stage.container().style.width = fw+'px';
+      stage.container().style.height = fh+'px';
     }
+    // Les couches de contenu sont rognées aux bords de la feuille (la marge ne montre que le cadre / les poignées).
+    [planLayer, contentLayer, gridLayer].forEach(l=>l.clip({ x:0, y:0, width:w, height:h }));
+    sheetBoxEl.style.width = (fw*zoom)+'px';
+    sheetBoxEl.style.height = (fh*zoom)+'px';
+    sheetShadowHostEl.style.left = (M*zoom)+'px';
+    sheetShadowHostEl.style.top = (M*zoom)+'px';
     sheetShadowHostEl.style.width = (w*zoom)+'px';
     sheetShadowHostEl.style.height = (h*zoom)+'px';
     stage.container().style.transform = `scale(${zoom})`;
@@ -1511,7 +1545,7 @@ function findPlanById(id){ return model.plans.find(p=>p.id===id); }
 // que les outils pixel (pipette, pot, gomme, découpe) sachent sur QUEL plan agir quand il y
 // en a plusieurs sur la même page.
 function planNodeAt(pos){
-  const shape = planLayer.getIntersection(pos);
+  const shape = planLayer.getIntersection({ x:pos.x+SHEET_MARGIN, y:pos.y+SHEET_MARGIN }); // getIntersection attend des coordonnées du stage (marge comprise)
   if (shape && shape.name && shape.name()==='plan-image') return shape;
   return null;
 }
@@ -1519,7 +1553,7 @@ function planNodeAt(pos){
 function toLocal(node, absX, absY){
   const t = node.getAbsoluteTransform().copy();
   t.invert();
-  return t.point({x:absX,y:absY});
+  return t.point({x:absX+SHEET_MARGIN, y:absY+SHEET_MARGIN}); // la transformation absolue compte la marge du stage (v2.1-118)
 }
 
 // Nodes Konva persistants entre deux rendus (pastilles/textes/logos) : on ne les
@@ -2267,7 +2301,7 @@ function startPlanRotation(e, iconIndex){
   // Position de la feuille à l'écran lue UNE SEULE FOIS ici (v2.1-61) : pendant la rotation
   // la feuille ne bouge pas (le doigt est capturé par le geste), inutile de la relire à chaque
   // mouvement — getBoundingClientRect() force le navigateur à recalculer toute la page.
-  const rect = stage.container().getBoundingClientRect();
+  const rect = sheetShadowHostEl.getBoundingClientRect(); // la FEUILLE (et non la zone de dessin, plus large : v2.1-118)
   const pos = { x:(c.x-rect.left)/zoom, y:(c.y-rect.top)/zoom };
   const center = planCenter(pl);
   planRotate.active = {
@@ -2786,7 +2820,7 @@ function pastilleUnderPointer(pos){
 // s'éloigne (pastille verrouillée qui ne bouge pas : le fantôme donnait l'illusion de la déplacer).
 let ghostBlockedByPastille = false;
 stage.on('mousedown touchstart', ()=>{
-  const pos = stage.getPointerPosition();
+  const pos = stagePointer();
   ghostBlockedByPastille = !!(pos && pastilleUnderPointer(pos));
 });
 window.addEventListener('mouseup', ()=>{ ghostBlockedByPastille = false; });
@@ -2831,8 +2865,9 @@ stage.on('mousemove touchmove', (e)=>{
   // resterait collé sous le doigt et ferait doublon avec le point réellement visé.
   if (['place-remote','eraser','cut-rect','cut-point'].includes(activeTool) && isRealTouch(e)) return;
   if (e.evt && e.evt.cancelable) e.evt.preventDefault();
-  const pos = stage.getPointerPosition();
+  const pos = stagePointer();
   if (!pos) return;
+  if (!(e.evt && e.evt.touches) && !insideSheet(pos)){ ghostGroup.destroyChildren(); uiLayer.batchDraw(); return; } // souris dans la marge : pas d'aperçu de pose (v2.1-118)
   updateGhost(pos);
 });
 stage.on('mouseleave touchend touchcancel', ()=>{ ghostGroup.destroyChildren(); uiLayer.batchDraw(); });
@@ -2876,15 +2911,15 @@ function scheduleBottomReserve(){
   bottomReserveRAF = requestAnimationFrame(()=>{ bottomReserveRAF = 0; updateCanvasBottomReserve(); });
 }
 // Convertit un point écran (coordonnées client, ex. centre du viewport visible) en
-// coordonnées internes de la feuille (mêmes coordonnées que stage.getPointerPosition()),
+// coordonnées internes de la feuille (mêmes coordonnées que stagePointer()),
 // en tenant compte du zoom appliqué via transform CSS sur le conteneur Konva.
 function clientPointToStage(clientX, clientY){
-  const rect = stage.container().getBoundingClientRect();
+  const rect = sheetShadowHostEl.getBoundingClientRect(); // la FEUILLE (et non la zone de dessin, plus large : v2.1-118)
   return { x:(clientX-rect.left)/zoom, y:(clientY-rect.top)/zoom };
 }
 // Comme clientPointToStage, mais à partir d'un événement Konva tactile : donne la position
 // RÉELLE du doigt, y compris légèrement en dehors de la feuille (ex. doigt glissé un peu
-// plus bas que le bord inférieur). stage.getPointerPosition() peut en effet la ramener à
+// plus bas que le bord inférieur). stagePointer() peut en effet la ramener à
 // l'intérieur de la feuille dans certains cas limites, ce qui empêchait le curseur déporté
 // (pointe toujours décalée vers le haut par rapport au doigt) d'atteindre le bord du bas :
 // avec cette position brute, le doigt peut être posé légèrement hors feuille pour que la
@@ -2929,7 +2964,7 @@ function setZoomAnchored(z, screenPoint){
   wrap.scrollLeft = logicalX*zoom - (screenPoint.x - wrapRect.left);
   wrap.scrollTop = logicalY*zoom - (screenPoint.y - wrapRect.top);
 }
-stage.on('touchstart', (e)=>{
+stage.onAny('touchstart', (e)=>{
   const touches = e.evt.touches;
   if (!touches) return;
   if (touches.length===2){
@@ -2964,6 +2999,50 @@ stage.on('touchend touchcancel', (e)=>{
     }
   }
 });
+
+/* ---------------------------- Marge autour de la feuille (v2.1-118) -------------------------
+   Défilement au doigt dans la marge : #konvaContainer est en touch-action:none, donc le défilement natif n'y
+   existe plus. Un doigt posé à vide dans la marge fait défiler la vue (comme avant sur le fond gris). */
+let marginPan = null;
+stage.onAny('touchstart', (e)=>{
+  const t = e.evt.touches;
+  marginPan = (t && t.length===1 && e.target===stage && !insideSheet(stagePointer())) ? { x:t[0].clientX, y:t[0].clientY } : null;
+});
+stage.onAny('touchmove', (e)=>{
+  const t = e.evt.touches;
+  if (!marginPan || !t || t.length!==1){ marginPan = null; return; }
+  if (e.evt.cancelable) e.evt.preventDefault();
+  canvasWrapEl.scrollLeft -= t[0].clientX - marginPan.x;
+  canvasWrapEl.scrollTop -= t[0].clientY - marginPan.y;
+  marginPan = { x:t[0].clientX, y:t[0].clientY };
+});
+stage.onAny('touchend touchcancel', ()=>{ marginPan = null; });
+
+/* Appui prolongé sur un plan = sélection automatique (v2.1-118, essai : 2 s, doigt immobile), même quand un outil
+   (ex. pastille) empêche la sélection par simple appui. */
+const PLAN_LONGPRESS_SELECT_MS = 2000, PLAN_LONGPRESS_MOVE_PX = 10;
+let planLongPress = null; // { timer, x, y }
+function cancelPlanLongPress(){ if (planLongPress){ clearTimeout(planLongPress.timer); planLongPress = null; } }
+stage.on('touchstart', (e)=>{
+  cancelPlanLongPress();
+  const t = e.evt.touches;
+  if (!t || t.length!==1) return;
+  const node = e.target;
+  if (!node || !node.name || node.name()!=='plan-image') return;
+  const id = [...planImageNodes.entries()].find(([k,v])=>v===node);
+  if (!id || selectedId===id[0]) return;
+  planLongPress = { x:t[0].clientX, y:t[0].clientY, timer:setTimeout(()=>{
+    planLongPress = null;
+    if (!planImageNodes.has(id[0]) || planImageNodes.get(id[0])!==node) return;
+    if (activeTool!==null) onTileChosen('plan'); // un outil (pastille, texte…) était actif : on passe sur la tuile Plan, comme un appui court le ferait sans outil
+    selectNode(node, id[0]);
+  }, PLAN_LONGPRESS_SELECT_MS) };
+});
+stage.onAny('touchmove', (e)=>{
+  const t = e.evt.touches;
+  if (planLongPress && t && t[0] && Math.hypot(t[0].clientX-planLongPress.x, t[0].clientY-planLongPress.y) > PLAN_LONGPRESS_MOVE_PX) cancelPlanLongPress();
+});
+stage.onAny('touchend touchcancel', cancelPlanLongPress);
 
 /* ---------------------------- Bandeaux de défilement tactiles ------------- */
 // Deux larges bandeaux façon "scrollbar", en bas et à droite de la zone de dessin : on les
@@ -3201,7 +3280,7 @@ stage.on('click tap', (e)=>{
   if (isPinching) return;
   if (justPannedPlan) return; // appui long relâché après avoir déplacé le plan : ne pas coller de pastille (le drapeau s'efface tout seul après coup, voir endPastilleLongPress)
   if (activeTool==='place-remote') return; // géré par le curseur déporté tactile ou par le clic souris ci-dessous
-  const pos = stage.getPointerPosition();
+  const pos = stagePointer();
   if (!pos) return;
   if (e.target !== stage && e.target.getLayer() !== planLayer) return; // clic doit toucher la feuille/plan, pas un élément déjà présent
 
@@ -3309,7 +3388,7 @@ stage.on('click', (e)=>{
   if (activeTool !== 'place-remote') return;
   if (window.TouchEvent && e.evt instanceof TouchEvent) return; // le tactile passe par le curseur déporté ci-dessus
   if (!selectedTypeId){ toast('Sélectionnez d\'abord un type de dispositif.'); return; }
-  const pos = stage.getPointerPosition();
+  const pos = stagePointer();
   if (!pos) return;
   if (e.target !== stage && e.target.getLayer() !== planLayer) return;
   if (!remoteAnchor){
@@ -3662,7 +3741,7 @@ stage.on('mousedown touchstart', (e)=>{
   }
 
   // Souris (précise, pas besoin de déport) : comportement direct inchangé.
-  const rawPos = stage.getPointerPosition();
+  const rawPos = stagePointer();
   if (!rawPos) return;
   if (activeTool==='cut-rect'){
     const targetNode = planNodeAt(rawPos);
@@ -3733,7 +3812,7 @@ stage.on('mousemove touchmove', (e)=>{
   if ((activeTool==='cut-rect' && cutRectStart) || (activeTool==='eraser' && isErasing)){
     if (e.evt && e.evt.cancelable) e.evt.preventDefault();
   }
-  const pos = stage.getPointerPosition();
+  const pos = stagePointer();
   if (!pos) return;
   if (activeTool==='cut-rect' && cutRectStart){ drawCutPreview(pos); }
   // gomme : l'aperçu du trait est mis à jour par updateGhost (v2.1-97), rien à effacer pendant le glissement
@@ -3758,7 +3837,7 @@ stage.on('mouseup touchend touchcancel', (e)=>{
     return;
   }
   const usingRemoteCursor = isRealTouch(e) && remoteCursor && remoteCursor.tool==='eraser';
-  const pos = usingRemoteCursor ? remoteCursor.tip : stage.getPointerPosition();
+  const pos = usingRemoteCursor ? remoteCursor.tip : stagePointer();
   if (!pos){
     // sur certains appareils, la position du dernier point touché n'est plus disponible
     // après touchend : on annule proprement plutôt que de planter.
@@ -3787,7 +3866,7 @@ stage.on('click tap', (e)=>{
   if (activeTool==='cut-point' && !pendingCutPolygon){
     if (isRealTouch(e)) return; // le tactile passe par le curseur déporté générique (touchstart/touchmove/touchend)
     if (e.target !== stage && e.target.getLayer() !== planLayer) return;
-    const pos = stage.getPointerPosition();
+    const pos = stagePointer();
     if (!pos) return;
     if (cutPoints.length===0){
       const targetNode = planNodeAt(pos);
@@ -3858,7 +3937,7 @@ function showCutConfirm(polygonPts){
     listening:false,
     sceneFunc:(ctx, shapeNode)=>{
       ctx.beginPath();
-      ctx.rect(0,0,stage.width(),stage.height());
+      ctx.rect(0,0,sheetW(),sheetH());
       polygonPts.forEach((pt,i)=>{ if(i===0) ctx.moveTo(pt.x,pt.y); else ctx.lineTo(pt.x,pt.y); });
       ctx.closePath();
       ctx.fillStyle = 'rgba(20,26,40,0.5)';
@@ -3926,6 +4005,7 @@ function applyCutPolygon(pointsStage){
   const srcX = Math.round(localMinX*sx), srcY = Math.round(localMinY*sy);
   const srcW = Math.max(1, Math.round(newW*sx)), srcH = Math.max(1, Math.round(newH*sy));
   const newAbsPos = planNode.getAbsoluteTransform().point({x:localMinX, y:localMinY});
+  newAbsPos.x -= SHEET_MARGIN; newAbsPos.y -= SHEET_MARGIN; // retour en coordonnées feuille (v2.1-118)
 
   const cropped = document.createElement('canvas');
   cropped.width = srcW; cropped.height = srcH;
@@ -4088,7 +4168,7 @@ document.getElementById('fileInputPlan').addEventListener('change', async (e)=>{
 // présents) : on peut ainsi accumuler autant de plans que nécessaire sur une même page.
 async function importPlanImageFromDataURL(dataURL, fileName){
   const imgEl = await loadImage(dataURL);
-  const maxW = stage.width()*0.85, maxH = stage.height()*0.85;
+  const maxW = sheetW()*0.85, maxH = sheetH()*0.85;
   const ratio = Math.min(maxW/imgEl.width, maxH/imgEl.height, 1);
   const canvas = document.createElement('canvas');
   canvas.width = imgEl.width; canvas.height = imgEl.height;
@@ -4098,7 +4178,7 @@ async function importPlanImageFromDataURL(dataURL, fileName){
   const offset = (model.plans.length % 6) * 24;
   const pl = {
     id: nextId('plan-'), dataURL, originalDataURL: dataURL,
-    x:(stage.width()-imgEl.width*ratio)/2 + offset, y:(stage.height()-imgEl.height*ratio)/2 + offset,
+    x:(sheetW()-imgEl.width*ratio)/2 + offset, y:(sheetH()-imgEl.height*ratio)/2 + offset,
     width:imgEl.width*ratio, height:imgEl.height*ratio, rotation:0, locked:false,
     brightness:0, contrast:0, saturation:0, hue:0,
     name: fileName ? cleanFileName(fileName.replace(/\.[^.]+$/,'')) : '' // v2.1-81 : sert à pré-remplir le nom du document
@@ -4331,7 +4411,7 @@ function setTool(name){
 document.getElementById('toolPlaceClassic').addEventListener('click', ()=>setTool('place-classic'));
 document.getElementById('toolPlaceRemote').addEventListener('click', ()=>setTool('place-remote'));
 document.getElementById('toolAddText').addEventListener('click', ()=>{
-  const t = { id: nextId('text-'), text:'Nouveau texte', x: stage.width()/2-80, y: stage.height()/2-25,
+  const t = { id: nextId('text-'), text:'Nouveau texte', x: sheetW()/2-80, y: sheetH()/2-25,
     fontSize:22, fontFamily:APP_FONT, color:'#1c2230', background:null, rotation:0,
     width:160, height:50, align:'center', verticalAlign:'middle' };
   model.textes.push(t); selectedId = t.id; pushHistory(); render();
@@ -4364,7 +4444,7 @@ async function handleLogoFile(e, which){
 function openTextEditor(t, node){
   const area = document.getElementById('textEditArea');
   const confirmBtn = document.getElementById('textEditConfirm');
-  const rect = stage.container().getBoundingClientRect();
+  const rect = sheetShadowHostEl.getBoundingClientRect();
   const box = node.getClientRect({relativeTo:stage});
   area.style.left = (rect.left + box.x*zoom) + 'px';
   area.style.top = (rect.top + box.y*zoom) + 'px';
@@ -5097,6 +5177,9 @@ function fitZoom(){
   const availW = wrap.clientWidth - 60, availH = wrap.clientHeight - 60;
   const w = model.orientation==='portrait'?SHEET_W:SHEET_H, h = model.orientation==='portrait'?SHEET_H:SHEET_W;
   setZoom(Math.min(availW/w, availH/h));
+  // v2.1-118 : la zone défilable contient la marge ; on centre la FEUILLE dans la vue.
+  wrap.scrollLeft = Math.max(0, (SHEET_MARGIN + w/2)*zoom - wrap.clientWidth/2);
+  wrap.scrollTop = Math.max(0, (SHEET_MARGIN + h/2)*zoom - wrap.clientHeight/2);
 }
 document.getElementById('btnGrid').addEventListener('click', ()=>{
   gridVisible = !gridVisible;
@@ -5270,7 +5353,7 @@ function prepareStageForExport(){
 // (v2.1-62) : le blanc est donc ajouté ici, derrière l'image, avant l'encodage. Le résultat est
 // identique à l'ancien (feuille opaque, fond blanc) ; mêmes pixelRatio et qualité qu'avant.
 function exportStageDataURL(mimeType, quality, pixelRatio){
-  const cv = stage.toCanvas({ pixelRatio });
+  const cv = stage.toCanvas({ pixelRatio, x:SHEET_MARGIN, y:SHEET_MARGIN, width:sheetW(), height:sheetH() }); // feuille seule, sans la marge (v2.1-118)
   const out = document.createElement('canvas');
   out.width = cv.width; out.height = cv.height;
   const ctx = out.getContext('2d');
