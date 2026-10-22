@@ -1083,4 +1083,10 @@ v2.1-119 — Cadenas décalé par la marge
    du coin du cadre.
  - Correctif : relativeTo: stage (coordonnées feuille). Test smoke ajouté (cadenas collé au coin haut-droit du cadre).
  - Non reproduit : cadre bleu plus petit que l'image (capture de Mic) ; redimensionnement, découpe, filtres, DPR 2 testés OK.
+
+v2.1-120 — Ciseaux : un seul pointage suffit
+ - Cause : le premier appui d'une découpe cherchait un plan SOUS le doigt (planNodeAt) ; à côté du plan ou sur une zone
+   transparente, « Touchez un plan pour le découper » s'affichait alors que le plan était déjà sélectionné (cadre bleu).
+ - Correctif : cutTargetNodeAt() prend le plan déjà sélectionné, où que tombe le doigt, sinon le plan touché
+   (curseur déporté, souris rectangle, souris points). Test smoke ajouté.
 ```

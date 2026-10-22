@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-119 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-120 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -439,7 +439,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-119</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-120</span></div>
   <div class="sep"></div>
   </div>
 
@@ -680,7 +680,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-119 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-120 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1544,6 +1544,13 @@ function findPlanById(id){ return model.plans.find(p=>p.id===id); }
 // Trouve le node Konva du plan visible à une position donnée (coordonnées feuille), pour
 // que les outils pixel (pipette, pot, gomme, découpe) sachent sur QUEL plan agir quand il y
 // en a plusieurs sur la même page.
+// v2.1-120 : cible d'un outil de découpe = le plan DÉJÀ SÉLECTIONNÉ (cadre bleu), où que tombe le doigt ; sinon le plan
+// touché. Avant, un premier appui à côté du plan (ou sur une zone transparente) répondait « Touchez un plan » alors que
+// le plan était sélectionné : il fallait pointer deux fois.
+function cutTargetNodeAt(pos){
+  const sel = selectedId && planImageNodes.get(selectedId);
+  return sel || planNodeAt(pos);
+}
 function planNodeAt(pos){
   const shape = planLayer.getIntersection({ x:pos.x+SHEET_MARGIN, y:pos.y+SHEET_MARGIN }); // getIntersection attend des coordonnées du stage (marge comprise)
   if (shape && shape.name && shape.name()==='plan-image') return shape;
@@ -3158,7 +3165,7 @@ function scheduleRemoteCursorMove(pos){
 // un appui long resté sans effet (voir remoteToolPendingGate ci-dessous).
 function createRemoteCursorForTool(tool, pos){
   if (tool==='place-remote'){ remoteCursor = { tool:'pastille', phase:'anchor', tip: remoteTipFromHandlePos(pos) }; return true; }
-  const targetNode = planNodeAt(pos);
+  const targetNode = cutTargetNodeAt(pos);
   if (!targetNode){ toast('Touchez un plan pour le découper.'); return false; }
   cutTargetPlanId = targetNode.id();
   remoteCursor = { tool, phase: tool==='cut-rect' ? 'start' : undefined, tip: remoteTipFromHandlePos(pos) };
@@ -3744,13 +3751,13 @@ stage.on('mousedown touchstart', (e)=>{
   const rawPos = stagePointer();
   if (!rawPos) return;
   if (activeTool==='cut-rect'){
-    const targetNode = planNodeAt(rawPos);
+    const targetNode = cutTargetNodeAt(rawPos);
     if (!targetNode){ toast('Cliquez sur un plan pour le découper.'); return; }
     cutTargetPlanId = targetNode.id();
     cutRectStart = rawPos;
   }
   else if (activeTool==='eraser'){
-    const targetNode = planNodeAt(rawPos);
+    const targetNode = cutTargetNodeAt(rawPos);
     if (!targetNode){ toast('Cliquez sur un plan pour utiliser la gomme.'); return; }
     eraseTargetPlanId = targetNode.id();
     isErasing=true;
@@ -3869,7 +3876,7 @@ stage.on('click tap', (e)=>{
     const pos = stagePointer();
     if (!pos) return;
     if (cutPoints.length===0){
-      const targetNode = planNodeAt(pos);
+      const targetNode = cutTargetNodeAt(pos);
       if (!targetNode){ toast('Cliquez sur un plan pour le découper.'); return; }
       cutTargetPlanId = targetNode.id();
     }

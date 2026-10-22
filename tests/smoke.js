@@ -95,6 +95,8 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     // 13. Ciseaux et réglages sous la croix du plan (v2.1-115)
     await pg.evaluate(()=>badgeCutEl.click()); await pg.waitForTimeout(250);
     ok(await pg.evaluate(()=>activeTool==='cut-rect'), 'ciseaux du plan : découpe rectangulaire active');
+    ok(await pg.evaluate(()=>{ const sel=selectedId; return !!findPlanById(sel) && createRemoteCursorForTool('cut-rect',{x:2,y:2}) && cutTargetPlanId===sel; }), 'ciseaux : premier appui hors du plan = plan déjà sélectionné pris pour cible (v2.1-120)');
+    await pg.evaluate(()=>{ remoteCursor=null; });
     await pg.evaluate(()=>badgeCutEl.click()); await pg.waitForTimeout(200);
     await pg.evaluate(()=>badgeSetEl.click()); await pg.waitForTimeout(400);
     ok(await pg.evaluate(()=>document.getElementById('popPlanSettings').classList.contains('open')), 'réglages du plan : fenêtre Outils image ouverte');
