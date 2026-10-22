@@ -54,7 +54,7 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
 - `tests/smoke.js` (Playwright, sans réseau) : démarrage, éléments de coin, tuile unique active, hauteur des
   tiroirs, plan verrouillé / déplaçable, gomme, placement déporté, noms des exports. À lancer avant et après
   chaque gros changement (voir l'en-tête du fichier pour les variables LIBS / PLAYWRIGHT / CHROME).
-- Référence fonctionnelle actuelle : **v2.1-114**, commit `2dc9e79` (avant l'essai des boutons ciseaux / réglages sur le plan, v2.1-115).
+- Référence fonctionnelle actuelle : **v2.1-117**, commit `e3e997d` (curseur de fond des tiroirs). Précédentes : v2.1-114 `2dc9e79`, v2.1-115 `96f2e37`.
 - Dernière version validée avant le grand nettoyage (v2.1-102+) : v2.1-101, commit `cbad9f7` (les étiquettes git ne
   sont pas acceptées par le dépôt distant : retrouver la version par ce numéro de commit).
 
