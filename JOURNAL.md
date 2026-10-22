@@ -1101,4 +1101,10 @@ v2.1-122 — Rotation : légende fixe, textes accrochés à 5°
  - Correctif : rotateAllowedFor() (ni plan, ni légende) pour les deux endroits qui règlent rotateEnabled ; transformer
    avec rotationSnaps [0,90,180,270] et rotationSnapTolerance 5 (vaut aussi pour les logos). Une légende déjà tournée
    dans un ancien document garde son angle (non remis à zéro).
+
+v2.1-123 — Zoom conservé après un renommage de poste
+ - Cause : à la fermeture du clavier virtuel, l'événement resize arrive quand le champ n'a plus le focus ; le test
+   « typing » était faux et fitZoom() remettait le zoom et la position à zéro.
+ - Correctif : fitZoom() sur resize seulement si la LARGEUR de la fenêtre change (rotation d'écran, fenêtre PC) ; le
+   clavier ne change que la hauteur.
 ```

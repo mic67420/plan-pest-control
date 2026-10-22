@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-122 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-123 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -439,7 +439,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-122</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-123</span></div>
   <div class="sep"></div>
   </div>
 
@@ -680,7 +680,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-122 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-123 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -5639,6 +5639,7 @@ updateGridButton();
 // évite de refaire 4 fois le travail de mise en page à chaque frame d'un redimensionnement
 // continu (rotation d'écran, ouverture du clavier virtuel, redimensionnement de fenêtre…).
 let resizeRAF = null;
+let lastResizeWidth = window.innerWidth; // v2.1-122 : le clavier virtuel ne change que la HAUTEUR
 window.addEventListener('resize', ()=>{
   if (resizeRAF) return;
   resizeRAF = requestAnimationFrame(()=>{
@@ -5656,7 +5657,11 @@ window.addEventListener('resize', ()=>{
     // d'écran ni un redimensionnement de fenêtre, donc pas une raison de réinitialiser le
     // zoom — c'était très gênant en pratique (le zoom retombait dès qu'on touchait un champ
     // de saisie, ex. pour renommer une pastille).
-    if (!typing) fitZoom();
+    // v2.1-122 : à la FERMETURE du clavier (fin d'un renommage), le champ n'a déjà plus le focus : « typing » est faux et
+    // le zoom retombait. Seul un changement de LARGEUR (rotation d'écran, fenêtre PC) est une vraie raison de recadrer.
+    const widthChanged = window.innerWidth !== lastResizeWidth;
+    lastResizeWidth = window.innerWidth;
+    if (!typing && widthChanged) fitZoom();
   });
 });
 layoutHeader();
