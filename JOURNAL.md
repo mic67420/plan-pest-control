@@ -1186,4 +1186,11 @@ v2.1-131 — Résolution à l'écran sur PC / Mac
    changement « desk ») : ratio = max(plancher, densité d'écran × zoom), plancher = ancien ratio sur téléphone / 2 sur
    ordinateur, plafonné par un budget mémoire (6 M pixels par couche sur téléphone = jamais plus lourd qu'avant, 10 M sur
    ordinateur, soit ~2,6) et 4, par pas de 0,25. Les caches bitmap (pastilles, légende, plans filtrés) sont refaits.
+
+v2.1-132 — Import PDF : messages clairs sur smartphone
+ - Constaté par Mic : « l'import de PDF ne fonctionne pas sur smartphone » (cause exacte non reproduite en simulation : le
+   test PDF passe). Hypothèse principale : le premier import télécharge pdf.js (~1 Mo) sans aucun retour visuel, ou la
+   bibliothèque n'a pas pu être téléchargée.
+ - Correctif de diagnostic : bulle « Lecture du PDF… » / « Création du plan… » pendant le travail, et message d'erreur qui
+   dit pourquoi (réseau, mot de passe, illisible + détail).
 ```
