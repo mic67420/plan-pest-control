@@ -1122,4 +1122,17 @@ v2.1-125 — Icône bleue en bascule, réglages pastille sur une ligne, logos al
  - Logos : plus de barre sombre (supprimée pour tous), cadenas + croix (confirmation « Supprimer ce logo ? ») ; pas d'icône
    bleue, un logo n'a rien à régler.
  - Bouton « Dupliquer » et son code supprimés.
+
+v2.1-126 — Mes documents (5), « ✓ hh:mm » visible, tuile Annuler | Rétablir, flèches de déplacement fin
+ - Mes documents (tiroir Historique > Documents) : base IndexedDB passée en version 3 avec un magasin « docs ». Chaque
+   sauvegarde automatique écrit aussi le document léger sous son docId (seulement s'il contient un plan ou une pastille).
+   idbMaintain() garde les 5 plus récents et ne supprime que les images que plus aucun document n'utilise. « Nouveau
+   projet » et l'ouverture d'un .json rangent d'abord le document en cours (flushAutoSaveNow) ; idbClear() ne retire
+   plus que la sauvegarde courante. Liste : Ouvrir / renommer (✎) / supprimer (🗑) ; le document en cours est marqué.
+   loadDocIntoApp() factorise l'ouverture (fichier ou liste).
+ - Pastille « ✓ 14:32 » à côté de la version (rouge « ⚠ non sauvegardé » en cas d'échec).
+ - 7e tuile coupée en deux (Annuler | Rétablir) à droite de la barre de tuiles, grisées quand il n'y a rien à faire (essai).
+   À 360 px de large, le libellé « Historique » est tronqué.
+ - Flèches ← ↑ ↓ → dans la fenêtre de réglages d'une pastille : 1 unité par appui, répétition en maintenant, un seul
+   pushHistory à la fin de la série.
 ```

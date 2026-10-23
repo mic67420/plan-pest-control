@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-125 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-126 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -73,6 +73,8 @@
   }
   #topbar .brand{font-weight:600;font-size:14px;letter-spacing:.2px;color:var(--ink);white-space:nowrap;flex:none;display:flex;align-items:center;gap:7px;}
   #topbar .brand span{color:var(--accent);}
+  #saveBadge{font-size:10px;font-weight:600;color:#2e8b57 !important;white-space:nowrap;} /* v2.1-126 : « ✓ 14:32 » toujours visible */
+  #saveBadge.err{color:#c0392b !important;}
   #topbar .brand .ver{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;font-weight:600;color:var(--accent-ink);background:var(--accent-soft);border:1px solid rgba(14,111,168,.28);border-radius:5px;padding:2px 5px;letter-spacing:.02em;}
   .tb-group{display:flex;align-items:center;gap:3px;flex:none;}
   .sep{width:1px;height:26px;background:#e3e6eb;flex:none;margin:0 2px;}
@@ -286,6 +288,15 @@
     font-size:10px; font-weight:600; white-space:nowrap; overflow:hidden;
     text-overflow:ellipsis; max-width:100%;
   }
+  /* v2.1-126 (essai) : 7e tuile coupée en deux, Annuler | Rétablir, toujours à portée du pouce */
+  body.mobile-mode #mobileTileBar .mtile-split{ flex:1.5 1 0; min-width:0; display:flex; gap:2px; }
+  body.mobile-mode #mobileTileBar .mtile-split button{
+    flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:center; padding:7px 0 6px;
+    background:#F1F3F6; border:none; border-radius:9px; cursor:pointer; color:var(--ink);
+  }
+  body.mobile-mode #mobileTileBar .mtile-split button .icon{ width:22px; height:22px; }
+  body.mobile-mode #mobileTileBar .mtile-split button:active{ background:var(--accent-soft); }
+  body.mobile-mode #mobileTileBar .mtile-split button:disabled{ opacity:.35; cursor:default; }
   /* "en cours d'utilisation" : soit le tiroir de cette tuile est ouvert, soit (si aucun
      tiroir n'est ouvert) un outil de sa catégorie est actuellement sélectionné. Une seule
      tuile à la fois peut être active (voir updateMobileTileActiveState). */
@@ -372,6 +383,21 @@
   #selSettingsBody #selSizeMinus, #selSettingsBody #selSizePlus{display:none !important;} /* remplacés par la barre − / + (buildRangeB) */
   #selSettingsBody input[type=color]{width:34px;height:32px;border:none;padding:0;border-radius:4px;background:none;}
   #selSettingsBody #selLabel{background:#fff !important;color:#1c2230 !important;border:1px solid #c9ced8 !important;}
+  /* v2.1-126 : liste « Mes documents » */
+  #docsList{display:flex;flex-direction:column;gap:8px;}
+  .doc-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e3e6ec;border-radius:10px;background:#fff;}
+  .doc-row.current{border-color:var(--accent);background:var(--accent-soft);}
+  .doc-row .doc-info{flex:1 1 auto;min-width:0;}
+  .doc-row .doc-name{font-size:13.5px;font-weight:600;color:#1c2230;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .doc-row .doc-meta{font-size:11px;color:#5c6478;}
+  .doc-row button{border:1px solid #d8dce3;background:#F1F3F6;color:#1c2230;border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:600;cursor:pointer;flex:none;}
+  .doc-row button.open{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .doc-empty{font-size:12.5px;color:#5c6478;padding:6px 2px;}
+  #selNudge{display:none;align-items:center;gap:8px;margin-top:10px;}
+  #selNudge.show{display:flex;}
+  #selNudge label{font-size:11px;color:#5c6478;margin-right:4px;}
+  #selNudge button{width:44px;height:38px;border-radius:10px;border:1px solid #d8dce3;background:#F1F3F6;color:#1c2230;font-size:19px;font-weight:700;line-height:1;padding:0;cursor:pointer;touch-action:manipulation;}
+  #selNudge button:active{background:var(--accent-soft);border-color:var(--accent);}
   #selSettingsBody #selSizeWrap{flex:1 1 auto;min-width:0;}
   #selSettingsBody .rngB{min-width:56px;}
   #selSettingsBody #selLabel{width:62px !important;min-width:0;}
@@ -457,7 +483,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-125</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-126</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -468,6 +494,7 @@
     <button class="mtile" data-tile="plan" title="Outils plan"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="14" rx="1.3" fill="#E4EEF4" stroke="#0E6FA8" stroke-width="1.4"/><circle cx="7.5" cy="9" r="1.6" fill="#F0C447" stroke="none"/><path d="M4.2 17 9.5 12l3.5 3.5 3-3.5L20 17" fill="#BFE0F0" stroke="#0E6FA8" stroke-width="1.4" stroke-linejoin="round"/></svg><span class="lbl">Plan</span></button>
     <button class="mtile" data-tile="pastille" title="Pastilles"><svg class="icon" viewBox="0 0 24 24"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12Z" fill="#D6493E" stroke="#8f2c24" stroke-width="1.2" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.6" fill="#FFFFFF" stroke="#8f2c24" stroke-width="1"/></svg><span class="lbl">Pastille</span></button>
     <button class="mtile" data-tile="texte" title="Textes, logos, légende"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="#E4E8ED"/><path d="M7.5 8h9M12 8v9" stroke="#2B3242" stroke-width="1.9" stroke-linecap="round"/></svg><span class="lbl">Texte</span></button>
+    <div class="mtile-split" id="tileUndoRedo"><button type="button" id="mtileUndo" aria-label="Annuler" title="Annuler"></button><button type="button" id="mtileRedo" aria-label="Rétablir" title="Rétablir"></button></div>
   </div>
   <div class="sep"></div>
 
@@ -502,6 +529,13 @@
   <div class="tb-group" data-tile="historique">
     <button class="tb-icon" id="btnUndo" title="Annuler (Ctrl+Z)"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="#E4E8ED"/><path d="M7 8 4 11l3 3" stroke="#2B3242" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 11h8a4.5 4.5 0 1 1 0 9h-1.5" stroke="#0E6FA8" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></button>
     <button class="tb-icon" id="btnRedo" title="Rétablir (Ctrl+Y)"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="#E4E8ED"/><path d="M17 8 20 11l-3 3" stroke="#2B3242" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 11h-8a4.5 4.5 0 1 0 0 9h1.5" stroke="#0E6FA8" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></button>
+    <div class="pop-wrap">
+      <button class="tb-icon" id="btnDocs" title="Mes documents"><svg class="icon" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.2l2 2.3h8.8A1.5 1.5 0 0 1 21 8.8V18a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18Z" fill="#F4D58D" stroke="#B8862B" stroke-width="1.4" stroke-linejoin="round"/><circle cx="16.5" cy="15" r="3.6" fill="#fff" stroke="#2B3242" stroke-width="1.3"/><path d="M16.5 13.2v1.9l1.2.8" fill="none" stroke="#2B3242" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+      <div class="popover" id="popDocs">
+        <div class="pop-section-title">Mes documents (5 derniers, sur cet appareil)</div>
+        <div id="docsList"></div>
+      </div>
+    </div>
     <button class="tb-icon" id="btnSave" title="Enregistrer le projet"><svg class="icon" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" fill="#0E6FA8" stroke="#08425f" stroke-width="1.1" stroke-linejoin="round"/><path d="M8 4v5h7V4" fill="#FFFFFF" stroke="#08425f" stroke-width="1.1"/><rect x="9.7" y="14" width="4.6" height="4" fill="#FFFFFF" stroke="none"/></svg></button>
     <button class="tb-icon" id="btnLoad" title="Ouvrir un projet"><svg class="icon" viewBox="0 0 24 24"><path d="M3.2 6.5A1 1 0 0 1 4.2 5.5h4.7l1.7 2H19a1 1 0 0 1 1 1v1.2H3.2Z" fill="#F6D48A" stroke="#B8862B" stroke-width="1.2" stroke-linejoin="round"/><path d="M2.8 9.7h18.4l-1.8 8.9a1.3 1.3 0 0 1-1.3 1H5.9a1.3 1.3 0 0 1-1.3-1Z" fill="#FBE6BF" stroke="#B8862B" stroke-width="1.2" stroke-linejoin="round"/></svg></button>
     <button class="tb-icon" id="btnPrint" title="Imprimer"><svg class="icon" viewBox="0 0 24 24"><rect x="6.5" y="3.5" width="11" height="5" rx=".8" fill="#FFFFFF" stroke="#5c6478" stroke-width="1.2"/><rect x="3.5" y="8.5" width="17" height="8" rx="1.6" fill="#C9D1DC" stroke="#5c6478" stroke-width="1.2"/><rect x="6.5" y="13.5" width="11" height="7" rx=".8" fill="#FFFFFF" stroke="#5c6478" stroke-width="1.2"/><circle cx="17.5" cy="11" r=".9" fill="#4C9A6A"/></svg></button>
@@ -696,12 +730,19 @@
 <div class="popover" id="popSelSettings">
   <div class="sel-head"><span class="sel-title" id="selSettingsTitle">Réglages</span><button type="button" id="selSettingsClose" aria-label="Fermer les réglages" title="Fermer">✕</button></div>
   <div id="selSettingsBody"></div>
+  <div id="selNudge" title="Déplacer la pastille d'un cran">
+    <label>Position</label>
+    <button type="button" data-dx="-1" data-dy="0" aria-label="Vers la gauche">←</button>
+    <button type="button" data-dx="0" data-dy="-1" aria-label="Vers le haut">↑</button>
+    <button type="button" data-dx="0" data-dy="1" aria-label="Vers le bas">↓</button>
+    <button type="button" data-dx="1" data-dy="0" aria-label="Vers la droite">→</button>
+  </div>
 </div>
 <div id="bubble"></div>
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-125 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-126 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -758,17 +799,20 @@ let historyIndex = 0;
 const IDB_NAME = 'PlanPestControlDB';
 const IDB_STORE = 'autosave';
 const IDB_IMG_STORE = 'images'; // v2.1-105 : les grosses images (plans, logos) sont enregistrées UNE SEULE FOIS, à part
+const IDB_DOCS_STORE = 'docs';   // v2.1-126 : « Mes documents » = les DOC_KEEP derniers documents (version légère, images à part)
+const DOC_KEEP = 5;
 const IDB_KEY = 'currentDoc';
 let idbPromise = null;
 function openIDB(){
   if (idbPromise) return idbPromise;
   idbPromise = new Promise((resolve, reject)=>{
     if (!window.indexedDB){ reject(new Error('IndexedDB indisponible')); return; }
-    const req = indexedDB.open(IDB_NAME, 2); // v2 : ajoute le magasin d'images (les anciennes sauvegardes restent lisibles)
+    const req = indexedDB.open(IDB_NAME, 3); // v2 : magasin d'images ; v3 : magasin « docs » (les anciennes sauvegardes restent lisibles)
     req.onupgradeneeded = ()=>{
       const db = req.result;
       if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
       if (!db.objectStoreNames.contains(IDB_IMG_STORE)) db.createObjectStore(IDB_IMG_STORE);
+      if (!db.objectStoreNames.contains(IDB_DOCS_STORE)) db.createObjectStore(IDB_DOCS_STORE);
     };
     req.onsuccess = ()=>resolve(req.result);
     req.onerror = ()=>reject(req.error);
@@ -803,6 +847,39 @@ function pagesWithImageRefs(srcPages, needed){
     logos: (pg.logos||[]).map(lg=>Object.assign({}, lg, { dataURL:ref(lg.dataURL) })),
   }));
 }
+// Références {__img:clé} présentes dans un document léger.
+function imgRefsOf(snap){
+  const keys = new Set();
+  const scan = (v)=>{ if (v && typeof v === 'object' && v.__img) keys.add(v.__img); };
+  ((snap && snap.pages) || []).forEach(pg=>{ (pg.plans||[]).forEach(pl=>{ scan(pl.dataURL); scan(pl.originalDataURL); }); (pg.logos||[]).forEach(lg=>scan(lg.dataURL)); });
+  return keys;
+}
+// Un document mérite une place dans « Mes documents » seulement s'il contient quelque chose (un projet vide ne doit pas
+// chasser un vrai document de la liste de 5).
+function docHasContent(pgs){ return (pgs||[]).some(pg=>(pg.plans||[]).length || (pg.pastilles||[]).length); }
+// Entretien après chaque sauvegarde : ne garde que les DOC_KEEP documents les plus récents, puis supprime les images que
+// plus aucun document (courant ou liste) n'utilise. Une seule transaction, requêtes chaînées.
+function idbMaintain(db){
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction([IDB_STORE, IDB_IMG_STORE, IDB_DOCS_STORE], 'readwrite');
+    const docs = tx.objectStore(IDB_DOCS_STORE), imgs = tx.objectStore(IDB_IMG_STORE);
+    const all = docs.getAll(), allKeys = docs.getAllKeys(); // `all` est servi avant `allKeys` : les deux sont prêts dans allKeys.onsuccess
+    allKeys.onsuccess = ()=>{
+      const rows = (all.result||[]).map((d,i)=>({ key:allKeys.result[i], doc:d }));
+      rows.sort((a,b)=>(b.doc.savedAt||0)-(a.doc.savedAt||0));
+      const kept = rows.slice(0, DOC_KEEP);
+      rows.slice(DOC_KEEP).forEach(r=>docs.delete(r.key));
+      const cur = tx.objectStore(IDB_STORE).get(IDB_KEY);
+      cur.onsuccess = ()=>{
+        const needed = new Set(imgRefsOf(cur.result));
+        kept.forEach(r=>imgRefsOf(r.doc).forEach(k=>needed.add(k)));
+        const ks = imgs.getAllKeys();
+        ks.onsuccess = ()=>{ (ks.result||[]).forEach(k=>{ if (!needed.has(k)){ imgs.delete(k); storedImgKeys.delete(k); } }); };
+      };
+    };
+    tx.oncomplete = resolve; tx.onerror = ()=>reject(tx.error); tx.onabort = ()=>reject(tx.error);
+  });
+}
 async function idbSave(data){
   try{
     const db = await openIDB();
@@ -810,20 +887,78 @@ async function idbSave(data){
     const light = Object.assign({}, data, { pages: pagesWithImageRefs(data.pages, needed), imgRefs:true });
     const fresh = [...needed.keys()].filter(k=>!storedImgKeys.has(k));
     await new Promise((resolve, reject)=>{
-      const tx = db.transaction([IDB_STORE, IDB_IMG_STORE], 'readwrite');
+      const tx = db.transaction([IDB_STORE, IDB_IMG_STORE, IDB_DOCS_STORE], 'readwrite');
       const imgs = tx.objectStore(IDB_IMG_STORE);
       fresh.forEach(k=>imgs.put(needed.get(k), k));
       tx.objectStore(IDB_STORE).put(light, IDB_KEY);
-      // Images qui ne sont plus utilisées par le document : supprimées dans la même transaction.
-      const cur = imgs.getAllKeys();
-      cur.onsuccess = ()=>{ (cur.result||[]).forEach(k=>{ if (!needed.has(k)){ imgs.delete(k); storedImgKeys.delete(k); } }); };
+      if (data.docId && docHasContent(data.pages)) tx.objectStore(IDB_DOCS_STORE).put(light, data.docId); // même document léger, rangé dans la liste
       tx.oncomplete = resolve;
       tx.onerror = ()=>reject(tx.error);
       tx.onabort = ()=>reject(tx.error);
     });
     fresh.forEach(k=>storedImgKeys.add(k));
+    await idbMaintain(db);
     return true;
   } catch(err){ console.warn('Sauvegarde automatique impossible :', err); return false; }
+}
+// Remet les images d'un document léger (références {__img}) ; un ancien document (images en clair) est rendu tel quel.
+async function idbHydrate(db, snap){
+  if (!snap || !snap.imgRefs) return snap;
+  const keys = imgRefsOf(snap);
+  const imgs = {};
+  await new Promise((resolve, reject)=>{
+    const tx = db.transaction(IDB_IMG_STORE, 'readonly');
+    const st = tx.objectStore(IDB_IMG_STORE);
+    keys.forEach(k=>{ const r = st.get(k); r.onsuccess = ()=>{ imgs[k] = r.result; }; });
+    tx.oncomplete = resolve; tx.onerror = ()=>reject(tx.error);
+  });
+  const back = (v)=>(v && typeof v === 'object' && v.__img) ? (imgs[v.__img] || '') : v;
+  snap.pages.forEach(pg=>{
+    (pg.plans||[]).forEach(pl=>{ pl.dataURL = back(pl.dataURL); pl.originalDataURL = back(pl.originalDataURL); });
+    (pg.logos||[]).forEach(lg=>{ lg.dataURL = back(lg.dataURL); });
+  });
+  keys.forEach(k=>storedImgKeys.add(k)); // déjà en base : inutile de les réécrire
+  return snap;
+}
+// « Mes documents » : métadonnées seulement (rien n'est réhydraté), du plus récent au plus ancien.
+async function idbListDocs(){
+  try{
+    const db = await openIDB();
+    const rows = await new Promise((resolve, reject)=>{
+      const tx = db.transaction(IDB_DOCS_STORE, 'readonly');
+      const r = tx.objectStore(IDB_DOCS_STORE).getAll();
+      r.onsuccess = ()=>resolve(r.result||[]); r.onerror = ()=>reject(r.error);
+    });
+    return rows.map(d=>({ id:d.docId, name:d.docName || '', savedAt:d.savedAt||0, pageCount:(d.pages||[]).length,
+      pastilleCount:(d.pages||[]).reduce((n,pg)=>n+(pg.pastilles||[]).length,0) })).filter(d=>d.id).sort((a,b)=>b.savedAt-a.savedAt);
+  } catch(err){ return []; }
+}
+async function idbLoadDoc(id){
+  const db = await openIDB();
+  const snap = await new Promise((resolve, reject)=>{
+    const tx = db.transaction(IDB_DOCS_STORE, 'readonly');
+    const r = tx.objectStore(IDB_DOCS_STORE).get(id);
+    r.onsuccess = ()=>resolve(r.result||null); r.onerror = ()=>reject(r.error);
+  });
+  return idbHydrate(db, snap);
+}
+async function idbDeleteDoc(id){
+  const db = await openIDB();
+  await new Promise((resolve, reject)=>{
+    const tx = db.transaction(IDB_DOCS_STORE, 'readwrite');
+    tx.objectStore(IDB_DOCS_STORE).delete(id);
+    tx.oncomplete = resolve; tx.onerror = ()=>reject(tx.error);
+  });
+  await idbMaintain(db);
+}
+async function idbRenameDoc(id, name){
+  const db = await openIDB();
+  await new Promise((resolve, reject)=>{
+    const tx = db.transaction(IDB_DOCS_STORE, 'readwrite');
+    const st = tx.objectStore(IDB_DOCS_STORE), r = st.get(id);
+    r.onsuccess = ()=>{ if (r.result){ r.result.docName = name; st.put(r.result, id); } };
+    tx.oncomplete = resolve; tx.onerror = ()=>reject(tx.error);
+  });
 }
 async function idbLoad(){
   try{
@@ -834,37 +969,20 @@ async function idbLoad(){
       req.onsuccess = ()=>resolve(req.result || null);
       req.onerror = ()=>reject(req.error);
     });
-    if (!snap || !snap.imgRefs) return snap; // ancien format (images dans le document) : lu tel quel
-    const keys = new Set();
-    const scan = (v)=>{ if (v && typeof v === 'object' && v.__img) keys.add(v.__img); };
-    snap.pages.forEach(pg=>{ (pg.plans||[]).forEach(pl=>{ scan(pl.dataURL); scan(pl.originalDataURL); }); (pg.logos||[]).forEach(lg=>scan(lg.dataURL)); });
-    const imgs = {};
-    await new Promise((resolve, reject)=>{
-      const tx = db.transaction(IDB_IMG_STORE, 'readonly');
-      const st = tx.objectStore(IDB_IMG_STORE);
-      keys.forEach(k=>{ const r = st.get(k); r.onsuccess = ()=>{ imgs[k] = r.result; }; });
-      tx.oncomplete = resolve; tx.onerror = ()=>reject(tx.error);
-    });
-    const back = (v)=>(v && typeof v === 'object' && v.__img) ? (imgs[v.__img] || '') : v;
-    snap.pages.forEach(pg=>{
-      (pg.plans||[]).forEach(pl=>{ pl.dataURL = back(pl.dataURL); pl.originalDataURL = back(pl.originalDataURL); });
-      (pg.logos||[]).forEach(lg=>{ lg.dataURL = back(lg.dataURL); });
-    });
-    keys.forEach(k=>storedImgKeys.add(k)); // déjà en base : inutile de les réécrire
-    return snap;
+    return await idbHydrate(db, snap);
   } catch(err){ return null; }
 }
+// v2.1-126 : « Nouveau projet » ne détruit plus rien : seule la sauvegarde courante est retirée, le document précédent
+// reste dans « Mes documents » (ses images aussi : idbMaintain ne supprime que les images devenues inutiles).
 async function idbClear(){
   try{
     const db = await openIDB();
     await new Promise((resolve, reject)=>{
-      const tx = db.transaction([IDB_STORE, IDB_IMG_STORE], 'readwrite');
+      const tx = db.transaction(IDB_STORE, 'readwrite');
       tx.objectStore(IDB_STORE).delete(IDB_KEY);
-      tx.objectStore(IDB_IMG_STORE).clear();
       tx.oncomplete = resolve;
       tx.onerror = ()=>reject(tx.error);
     });
-    storedImgKeys.clear();
   } catch(err){ /* rien à faire */ }
 }
 // Sauvegarde automatique allégée (v2.1-63). Avant : un délai de 0,6 s après CHAQUE changement,
@@ -891,11 +1009,17 @@ function setAutoSaveIndicator(text, isError){
   if (!el || !txt) return;
   txt.textContent = text;
   el.style.color = isError ? '#c0392b' : '#5c6478';
+  const badge = document.getElementById('saveBadge');
+  if (badge){
+    const m = /(\d{2}:\d{2})/.exec(text);
+    badge.textContent = isError ? '⚠ non sauvegardé' : (m ? '✓ '+m[1] : '');
+    badge.classList.toggle('err', !!isError);
+  }
 }
 async function doAutoSave(){
   if (!autoSaveDirty) return; // rien n'a changé depuis la dernière sauvegarde
   autoSaveDirty = false;
-  const snapshot = { docVersion:2, pages, currentPageIndex, docName, savedAt: Date.now() };
+  const snapshot = { docVersion:2, pages, currentPageIndex, docName, docId, savedAt: Date.now() };
   const ok = await idbSave(snapshot);
   if (ok){
     const t = new Date(snapshot.savedAt);
@@ -917,9 +1041,13 @@ window.addEventListener('beforeunload', (e)=>{
   const el = document.getElementById('autoSaveIndicator');
   if (el && el.style.color === 'rgb(192, 57, 43)'){ e.preventDefault(); e.returnValue = ''; }
 });
+// Enregistre tout de suite les modifications en attente (avant de remplacer le document ouvert).
+function flushAutoSaveNow(){ clearTimeout(autoSaveTimer); return autoSaveDirty ? doAutoSave() : Promise.resolve(); }
 function newProject(){
-  if (!confirm("Créer un nouveau projet ? Le projet actuel sera définitivement remplacé (pensez à l'exporter avant si besoin).")) return;
+  if (!confirm("Créer un nouveau projet ? Le projet actuel reste disponible dans Historique > Documents (les 5 derniers).")) return;
+  flushAutoSaveNow(); // le projet quitté est rangé dans « Mes documents » avant d'être remplacé
   idbClear();
+  docId = newDocId();
   docName = null; // nouveau projet : le nom sera demandé au premier export (v2.1-79)
   pages = [createEmptyModel()];
   currentPageIndex = 0;
@@ -942,6 +1070,8 @@ function newProject(){
 let zoom = 1;
 let isPinching = false;
 let selectedId = null;
+function newDocId(){ return 'doc-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+let docId = newDocId();         // v2.1-126 : identifiant du document (clé dans « Mes documents »)
 let docName = null;           // v2.1-79 : nom du document ouvert, utilisé pour tous les fichiers exportés
 let updateReady = false;      // v2.1-73 : une nouvelle version a été détectée (déclaré tôt : hideBubble() peut être appelé dès l'initialisation)
 let activeTool = null;        // 'place-classic' | 'place-remote' | 'pipette' | 'paint-bucket' | 'cut-rect' | 'cut-point' | 'eraser' | null
@@ -1128,7 +1258,16 @@ function redo(){
 function updateHistoryButtons(){
   document.getElementById('btnUndo').disabled = historyIndex <= 0;
   document.getElementById('btnRedo').disabled = historyIndex >= history.length - 1;
+  document.getElementById('mtileUndo').disabled = historyIndex <= 0; // v2.1-126 : tuile Annuler | Rétablir
+  document.getElementById('mtileRedo').disabled = historyIndex >= history.length - 1;
 }
+(function(){
+  const u = document.getElementById('mtileUndo'), r = document.getElementById('mtileRedo');
+  u.innerHTML = document.getElementById('btnUndo').innerHTML; // mêmes icônes que le tiroir Historique
+  r.innerHTML = document.getElementById('btnRedo').innerHTML;
+  u.addEventListener('click', ()=>undo());
+  r.addEventListener('click', ()=>redo());
+})();
 
 /* ---------------------------- Gestion des pages / étages ------------------ */
 function updatePageIndicator(){
@@ -2630,8 +2769,30 @@ function openSelectionSettings(){
   pop.style.top = Math.round(bar.bottom + 6) + 'px';
   pop.classList.add('open');
   selSettingsFor = selectedId;
+  document.getElementById('selNudge').classList.toggle('show', isPast); // flèches de déplacement fin : pastille seulement
   refreshSelectionUI();
 }
+// v2.1-126 : flèches de déplacement fin de la pastille sélectionnée. 1 unité de feuille par appui (maintenir = répétition) ;
+// un seul pushHistory à la fin de la série, pour qu'un « Annuler » reprenne toute la série d'un coup.
+(function(){
+  let timer = null, rep = null, dirty = false;
+  const step = (dx, dy)=>{
+    const pa = model.pastilles.find(q=>q.id===selectedId); if (!pa) return;
+    if (pa.locked){ showTimedBubble('Pastille verrouillée : déverrouillez-la d\'abord'); return; }
+    pa.x += dx; pa.y += dy; dirty = true;
+    scheduleRender();
+  };
+  const stop = ()=>{ clearTimeout(timer); clearInterval(rep); timer = rep = null; if (dirty){ dirty = false; pushHistory(); } };
+  document.querySelectorAll('#selNudge button').forEach(b=>{
+    const dx = +b.dataset.dx, dy = +b.dataset.dy;
+    b.addEventListener('pointerdown', (e)=>{
+      e.preventDefault(); e.stopPropagation();
+      step(dx, dy);
+      timer = setTimeout(()=>{ rep = setInterval(()=>step(dx, dy), 60); }, 400);
+    });
+    ['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev, stop));
+  });
+})();
 document.getElementById('selSettingsClose').addEventListener('click', (e)=>{ e.stopPropagation(); closeSelectionSettings(); });
 document.getElementById('popSelSettings').addEventListener('click', (e)=>e.stopPropagation());
 function refreshSelectionUI(){
@@ -4900,6 +5061,46 @@ function bindPopover(triggerId, popId){
 document.addEventListener('click', closeAllPopovers);
 bindPopover('btnExportMenu','popExport');
 bindPopover('btnPlanSettings','popPlanSettings');
+bindPopover('btnDocs','popDocs');
+// v2.1-126 : « Mes documents » — les 5 derniers documents rangés automatiquement (voir idbSave / idbMaintain).
+async function renderDocsList(){
+  const box = document.getElementById('docsList');
+  const docs = await idbListDocs();
+  box.innerHTML = '';
+  if (!docs.length){ box.innerHTML = '<div class="doc-empty">Aucun document pour l\'instant : ils apparaissent ici dès qu\'un plan ou une pastille est ajouté.</div>'; return; }
+  docs.forEach(d=>{
+    const isCur = d.id === docId;
+    const row = document.createElement('div'); row.className = 'doc-row'+(isCur ? ' current' : '');
+    const when = new Date(d.savedAt).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const info = document.createElement('div'); info.className = 'doc-info';
+    const nm = document.createElement('div'); nm.className = 'doc-name'; nm.textContent = (d.name || 'Sans nom') + (isCur ? ' (en cours)' : '');
+    const mt = document.createElement('div'); mt.className = 'doc-meta'; mt.textContent = when+' · '+d.pageCount+' page'+(d.pageCount>1?'s':'')+' · '+d.pastilleCount+' pastille'+(d.pastilleCount>1?'s':'');
+    info.append(nm, mt); row.appendChild(info);
+    const btn = (txt, cls, fn, title)=>{ const b = document.createElement('button'); b.type='button'; b.textContent = txt; if (cls) b.className = cls; if (title) b.title = title; b.addEventListener('click', (e)=>{ e.stopPropagation(); fn(); }); row.appendChild(b); };
+    if (!isCur) btn('Ouvrir', 'open', ()=>openSavedDoc(d.id));
+    btn('✎', '', async ()=>{
+      const n = await askDocName(d.name || '');
+      if (!n) return;
+      if (isCur){ docName = n; scheduleAutoSave(); } else await idbRenameDoc(d.id, n);
+      renderDocsList();
+    }, 'Renommer');
+    if (!isCur) btn('🗑', '', async ()=>{
+      if (await askYesNo('Supprimer « '+(d.name||'Sans nom')+' » ?')){ await idbDeleteDoc(d.id); renderDocsList(); }
+    }, 'Supprimer');
+    box.appendChild(row);
+  });
+}
+document.getElementById('btnDocs').addEventListener('click', ()=>{ renderDocsList(); });
+async function openSavedDoc(id){
+  closeAllPopovers(); closeAllTileDrawers();
+  await flushAutoSaveNow(); // le document en cours est rangé avant d'être remplacé
+  const snap = await idbLoadDoc(id);
+  if (!snap || !Array.isArray(snap.pages) || !snap.pages.length){ toast('Document introuvable.'); return; }
+  pages = snap.pages;
+  currentPageIndex = Math.min(snap.currentPageIndex||0, pages.length-1);
+  await loadDocIntoApp(snap.docName || null, snap.docId || id);
+  toast('Document ouvert : '+(snap.docName || 'Sans nom'));
+}
 bindPopover('btnAddTypeMenu','popAddType');
 document.getElementById('btnAddTypeMenu').addEventListener('click', ()=>{
   // Ouverture "fraîche" depuis l'icône ＋ : on repart toujours d'un formulaire vierge
@@ -5320,6 +5521,23 @@ document.getElementById('btnSave').addEventListener('click', async ()=>{
   URL.revokeObjectURL(url);
   toast('Projet enregistré ('+pages.length+' page'+(pages.length>1?'s':'')+').');
 });
+// Met en place les `pages` / `currentPageIndex` déjà posés (fichier ouvert ou document de la liste) : migration, modèle,
+// canevas des plans, historique neuf, zoom ajusté (fitZoom : voir le commentaire historique du .json).
+async function loadDocIntoApp(name, id){
+  pages.forEach(migratePlanFormat);
+  docName = name; docId = id;
+  model = pages[currentPageIndex];
+  idCounter = 100000; // évite les collisions d'ID
+  selectedId = null;
+  resetContentNodeCaches();
+  ensureDefaultDeviceTypes();
+  await rehydratePlanCanvas();
+  history = [cloneDoc()]; historyIndex = 0; updateHistoryButtons();
+  updateOrientButtons(); updatePageIndicator();
+  fitZoom(); // sans ça, le zoom restait celui actif AVANT l'ouverture — d'où un rendu très différent d'une fois à l'autre
+  render();
+  scheduleAutoSave();
+}
 document.getElementById('btnLoad').addEventListener('click', ()=>document.getElementById('fileInputProject').click());
 document.getElementById('fileInputProject').addEventListener('change', async (e)=>{
   const file = e.target.files[0]; if (!file) return;
@@ -5328,6 +5546,7 @@ document.getElementById('fileInputProject').addEventListener('change', async (e)
   try{
     const parsed = JSON.parse(text);
     // Compatibilité : un ancien fichier v1 est un modèle de page unique (sans "pages").
+    flushAutoSaveNow(); // le document ouvert jusqu'ici est rangé dans « Mes documents »
     if (parsed && Array.isArray(parsed.pages)){
       pages = parsed.pages;
       currentPageIndex = Math.min(parsed.currentPageIndex||0, pages.length-1);
@@ -5335,20 +5554,7 @@ document.getElementById('fileInputProject').addEventListener('change', async (e)
       pages = [parsed];
       currentPageIndex = 0;
     }
-    pages.forEach(migratePlanFormat);
-    docName = openedName || parsed.docName || null; // v2.1-79 : les exports reprennent le nom du fichier ouvert
-    model = pages[currentPageIndex];
-    idCounter = 100000; // évite les collisions d'ID
-    selectedId = null;
-    resetContentNodeCaches();
-    ensureDefaultDeviceTypes();
-    await rehydratePlanCanvas();
-    history = [cloneDoc()]; historyIndex = 0; updateHistoryButtons();
-    updateOrientButtons(); updatePageIndicator();
-    fitZoom(); // sans ça, le zoom restait celui actif AVANT l'ouverture du fichier — d'où un
-               // rendu très différent d'une fois à l'autre selon l'état préalable du zoom
-    render();
-    scheduleAutoSave();
+    await loadDocIntoApp(openedName || parsed.docName || null, newDocId());
     toast('Projet chargé ('+pages.length+' page'+(pages.length>1?'s':'')+').');
   } catch(err){ toast('Fichier de projet invalide.'); }
   e.target.value='';
@@ -5625,7 +5831,7 @@ const SHORT_ICON_LABELS = {
   'Déplacer cette page vers la gauche':'Page ←','Déplacer cette page vers la droite':'Page →',
   'Supprimer la page courante':'Suppr. page','Nouveau projet':'Nouveau',
   'Orientation portrait':'Portrait','Orientation paysage':'Paysage','Zoom arrière':'Zoom −','Zoom avant':'Zoom +',
-  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Ouvrir un projet':'Ouvrir',
+  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Ouvrir un projet':'Ouvrir',
   'Importer un plan':'Importer','Découpe rectangulaire':'Découpe □','Découpe point par point':'Découpe pts',
   'Outils image : pipette, pot de peinture, gomme, réglages':'Outils image','Pot de peinture intelligent':'Pot peinture',
   'Gomme carrée':'Gomme','Placement classique':'Classique','Placement déporté':'Déporté',
@@ -5744,6 +5950,7 @@ function ensureDefaultDeviceTypes(){
     pages.forEach(migratePlanFormat);
     currentPageIndex = Math.min(saved.currentPageIndex||0, pages.length-1);
     docName = saved.docName || null;
+    docId = saved.docId || newDocId(); // ancien format : identifiant créé maintenant
     model = pages[currentPageIndex];
     idCounter = 100000; // évite toute collision d'ID avec la session restaurée
     ensureDefaultDeviceTypes();

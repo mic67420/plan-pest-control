@@ -104,6 +104,32 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     ok(await pg.evaluate(()=>{ selectNode(textNodes.get(model.textes[0].id), model.textes[0].id); const tx=transformer.rotateEnabled(); selectNode(legendGroupNode, 'legend-frame'); const lg=transformer.rotateEnabled(); return tx && !lg && transformer.rotationSnapTolerance()===5; }), 'rotation : texte oui (accroche 5°), légende non (v2.1-122)');
     ok(await pg.evaluate(async()=>{ closeAllPopovers(); selectNode(legendGroupNode,'legend-frame'); updateLockIndicator(); const badges = badgeState.delShow && badgeState.setShow; badgeSetEl.click(); const open = document.getElementById('popSelSettings').classList.contains('open') && document.getElementById('selColorWrap').parentElement.id==='selSettingsBody'; document.getElementById('selSettingsClose').click(); return badges && open && getComputedStyle(document.getElementById('selectionBar')).display==='none' && !document.getElementById('popSelSettings').classList.contains('open'); }), 'légende : croix + icône bleue, réglages dans une fenêtre fermable, plus de barre sombre (v2.1-124)');
     ok(await pg.evaluate(()=>{ selectNode(legendGroupNode,'legend-frame'); updateLockIndicator(); badgeSetEl.click(); const o1 = document.getElementById('popSelSettings').classList.contains('open'); badgeSetEl.click(); const o2 = document.getElementById('popSelSettings').classList.contains('open'); return o1 && !o2 && !document.getElementById('selDup'); }), '2e appui sur l\'icône bleue = referme les réglages ; plus de bouton Dupliquer (v2.1-125)');
+    // 14. v2.1-126 : pastille « ✓ hh:mm », tuile Annuler | Rétablir, flèches de déplacement fin, « Mes documents » (5 max, images conservées)
+    ok(await pg.evaluate(async()=>{ autoSaveDirty = true; await doAutoSave(); return /^✓ \d\d:\d\d$/.test(document.getElementById('saveBadge').textContent); }), 'sauvegarde : pastille « ✓ hh:mm » visible dans le bandeau');
+    ok(await pg.evaluate(()=>{ const n0 = model.pastilles.length; addPastille(50,50); const dis1 = document.getElementById('mtileUndo').disabled; document.getElementById('mtileUndo').click(); const ok1 = model.pastilles.length===n0 && !document.getElementById('mtileRedo').disabled; document.getElementById('mtileRedo').click(); return !dis1 && ok1 && model.pastilles.length===n0+1; }), 'tuile Annuler | Rétablir : annule puis rétablit');
+    ok(await pg.evaluate(()=>{ const pa = model.pastilles[model.pastilles.length-1]; pa.locked = false; selectNode(pastilleNodes.get(pa.id), pa.id); updateLockIndicator(); openSelectionSettings(); const x0 = pa.x, y0 = pa.y; const btn = d=>document.querySelector('#selNudge button[data-dx="'+d[0]+'"][data-dy="'+d[1]+'"]'); const down = b=>b.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); const up = b=>b.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); down(btn([1,0])); up(btn([1,0])); down(btn([0,-1])); up(btn([0,-1])); const r = pa.x===x0+1 && pa.y===y0-1 && document.getElementById('selNudge').classList.contains('show'); closeSelectionSettings(); return r; }), 'flèches de déplacement fin : +1 à droite, -1 en haut');
+    const docsRes = await pg.evaluate(async()=>{
+      window.confirm = ()=>true;
+      const first = docId; autoSaveDirty = true; await doAutoSave();
+      const keep = { id:first, plans:model.plans.length };
+      for (let i=0;i<6;i++){ newProject(); await new Promise(r=>setTimeout(r,150)); selectedTypeId = model.deviceTypes[0].id; addPastille(100+i,100); autoSaveDirty = true; await doAutoSave(); }
+      const list = await idbListDocs();
+      return { n:list.length, firstStill:list.some(d=>d.id===first), keep };
+    });
+    ok(docsRes.n===5 && !docsRes.firstStill, 'Mes documents : 5 au maximum, le plus ancien est écarté ('+docsRes.n+')');
+    const docs2 = await pg.evaluate(async()=>{
+      newProject(); await new Promise(r=>setTimeout(r,150));
+      await importPlanImageFromDataURL(document.createElement('canvas').toDataURL ? (()=>{ const c=document.createElement('canvas'); c.width=300; c.height=200; const x=c.getContext('2d'); x.fillStyle='#456'; x.fillRect(0,0,300,200); return c.toDataURL(); })() : '', 'Doc A.png');
+      docName = 'Doc A'; render(); autoSaveDirty = true; await doAutoSave();
+      const idA = docId;
+      newProject(); await new Promise(r=>setTimeout(r,150));
+      selectedTypeId = model.deviceTypes[0].id; addPastille(10,10); docName = 'Doc B'; autoSaveDirty = true; await doAutoSave();
+      await openSavedDoc(idA);
+      const listed = await idbListDocs();
+      const A = listed.find(d=>d.id===idA);
+      return { opened: docId===idA && docName==='Doc A', plans: model.plans.length, img: !!(model.plans[0] && model.plans[0].dataURL.length>500), name: A && A.name };
+    });
+    ok(docs2.opened && docs2.plans===1 && docs2.img && docs2.name==='Doc A', 'Mes documents : un document rangé se rouvre avec son plan et son nom');
     ok(errs.length===0, 'aucune erreur JavaScript'+(errs.length?' : '+errs[0]:''));
   } finally { await b.close(); }
   console.log(fails ? '\n'+fails+' ÉCHEC(S)' : '\nTOUS LES TESTS PASSENT');
