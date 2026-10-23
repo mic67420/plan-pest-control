@@ -1209,4 +1209,8 @@ v2.1-135 — Import PDF Android : même message avec v2.1-134
    bibliothèque ; notre test « 0 octet » aurait donné un autre texte). pdf.js transfère le tampon au worker.
  - Correctif : on lui donne une COPIE ; en cas d'échec, 2e voie par adresse blob: (sans transfert). Le message d'erreur
    indique la version et la taille du fichier lu pour aider au diagnostic.
+
+Retour à la v2.1-135 (demande de Mic)
+ - Le « 0 octet » venait du fichier PDF choisi par Mic, pas de l'application : la v2.1-136 (bouton « PDF » dédié) est
+   annulée (git revert de f869dcf). Le code redevient celui de la v2.1-135, numéro de version compris.
 ```
