@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-132 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-133 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -417,7 +417,8 @@
   body.sun-mode .tb-icon{ background:#fff !important; border:1.5px solid #000 !important; }
   body.sun-mode .tb-icon.active{ background:#003d73 !important; }
   body.sun-mode .tb-icon.active .tb-icon-label{ color:#fff; }
-  body.sun-mode.mobile-mode .tb-group.mobile-open, body.sun-mode .popover{ background:#fff !important; border:2px solid #000 !important; box-shadow:none; }
+  /* v2.1-133 : le fond reste réglable par le curseur « Fond » (avant : blanc forcé, donc transparence sans effet en mode soleil) */
+  body.sun-mode.mobile-mode .tb-group.mobile-open, body.sun-mode .popover{ background:rgba(255,255,255,var(--drawer-alpha,1)) !important; border:2px solid #000 !important; box-shadow:none; }
   body.sun-mode #canvasWrap{ background:#9aa0aa; }
   body.sun-mode .doc-row{ border:2px solid #000; }
   /* v2.1-126 : liste « Mes documents » */
@@ -520,7 +521,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-132</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-133</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -783,7 +784,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-132 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-133 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip

@@ -1193,4 +1193,8 @@ v2.1-132 — Import PDF : messages clairs sur smartphone
    bibliothèque n'a pas pu être téléchargée.
  - Correctif de diagnostic : bulle « Lecture du PDF… » / « Création du plan… » pendant le travail, et message d'erreur qui
    dit pourquoi (réseau, mot de passe, illisible + détail).
+
+v2.1-133 — Mode soleil : le fond des tiroirs reste transparent
+ - Cause : la règle body.sun-mode imposait background:#fff !important aux tiroirs et fenêtres, annulant le curseur « Fond ».
+ - Correctif : même règle avec rgba(255,255,255,var(--drawer-alpha)) ; bordures noires conservées. Test smoke ajouté.
 ```
