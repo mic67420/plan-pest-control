@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-135 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-136 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -87,7 +87,7 @@
   .tb-icon:disabled{opacity:.35;cursor:not-allowed;}
   .tb-icon:disabled:hover{background:transparent;}
   #zoomLabel{font-size:12px;color:#6a7386;width:40px;text-align:center;flex:none;}
-  #fileInputPlan,#fileInputLogoA,#fileInputLogoB,#fileInputProject{
+  #fileInputPlan,#fileInputPdf,#fileInputLogoA,#fileInputLogoB,#fileInputProject{
     position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;
   }
   .tb-slider{display:flex;align-items:center;gap:5px;font-size:10.5px;color:#5c6478;flex:none;padding:0 4px;}
@@ -521,7 +521,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-135</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-136</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -594,6 +594,7 @@
 
   <div class="tb-group" data-tile="plan">
     <button class="tb-icon" id="toolImportPlan" title="Importer un plan"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="14" rx="1.3" fill="#E4EEF4" stroke="#0E6FA8" stroke-width="1.4"/><circle cx="7.5" cy="9" r="1.6" fill="#F0C447" stroke="none"/><path d="M4.2 17 9.5 12l3.5 3.5 3-3.5L20 17" fill="#BFE0F0" stroke="#0E6FA8" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+    <button class="tb-icon" id="toolImportPdf" title="Importer un PDF"><svg class="icon" viewBox="0 0 24 24"><path d="M6 2.5h8.5L19 7v13.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z" fill="#FFFFFF" stroke="#2B3242" stroke-width="1.4" stroke-linejoin="round"/><path d="M14.5 2.5V7H19" fill="none" stroke="#2B3242" stroke-width="1.4" stroke-linejoin="round"/><rect x="3" y="12.5" width="13" height="6.5" rx="1.3" fill="#D6493E"/><text x="9.5" y="17.6" text-anchor="middle" font-family="Arial,sans-serif" font-size="5" font-weight="700" fill="#fff">PDF</text></svg></button>
     <button class="tb-icon" id="toolLockPlan" title="Verrouiller le plan"><svg class="icon" viewBox="0 0 24 24"><path d="M7.5 10.5V7.8a4.5 4.5 0 0 1 9 0v2.7" fill="none" stroke="#8A6A1F" stroke-width="1.7" stroke-linecap="round"/><rect x="5.5" y="10.3" width="13" height="9.7" rx="1.8" fill="#F0C447" stroke="#8A6A1F" stroke-width="1.3"/><circle cx="12" cy="14.5" r="1.5" fill="#8A6A1F" stroke="none"/><path d="M12 15.8v1.6" stroke="#8A6A1F" stroke-width="1.4" stroke-linecap="round"/></svg></button>
     <button class="tb-icon" id="toolCutRect" title="Découpe rectangulaire"><svg class="icon" viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="12" height="12" rx="1" fill="none" stroke="#0E6FA8" stroke-width="1.4" stroke-dasharray="2.6 2.2"/><path d="M18.5 3.5v3.2M18.5 3.5l2.4 1.6M18.5 3.5l-2.4 1.6" stroke="#8A93A3" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 15.5l6 5.5" stroke="#2B3242" stroke-width="1" fill="none"/><path d="M20 19.3c1 1 2 .9 2-.1s-1-1.9-2-.9" fill="#D6493E" stroke="#2B3242" stroke-width=".8"/></svg></button>
     <button class="tb-icon" id="toolCutPoint" title="Découpe point par point"><svg class="icon" viewBox="0 0 24 24"><path d="M4.5 8 9.5 4l8.5 3-2 8.5-7.5 3.5-4-5Z" fill="none" stroke="#0E6FA8" stroke-width="1.4" stroke-dasharray="2.4 2" stroke-linejoin="round"/><circle cx="4.5" cy="8" r="1.5" fill="#0E6FA8" stroke="#FFFFFF" stroke-width=".8"/><circle cx="9.5" cy="4" r="1.5" fill="#0E6FA8" stroke="#FFFFFF" stroke-width=".8"/><circle cx="18" cy="7" r="1.5" fill="#0E6FA8" stroke="#FFFFFF" stroke-width=".8"/></svg></button>
@@ -763,6 +764,7 @@
 <textarea id="textEditArea"></textarea>
 <button id="textEditConfirm">✓ Valider</button>
 
+<input type="file" id="fileInputPdf" accept="application/pdf">
 <input type="file" id="fileInputPlan" accept="image/*,.heic,.heif,.svg,.avif,.webp,application/pdf,.pdf">
 <input type="file" id="fileInputLogoA" accept="image/*,.heic,.heif,.svg,.avif,.webp">
 <input type="file" id="fileInputLogoB" accept="image/*,.heic,.heif,.svg,.avif,.webp">
@@ -784,7 +786,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-135 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-136 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -4486,7 +4488,10 @@ document.getElementById('toolResetCuts').addEventListener('click', async ()=>{
 
 /* ---------------------------- Import du/des plan(s) --------------------------- */
 document.getElementById('toolImportPlan').addEventListener('click', ()=>document.getElementById('fileInputPlan').click());
-document.getElementById('fileInputPlan').addEventListener('change', async (e)=>{
+// v2.1-136 : bouton « PDF » dédié (sélecteur limité aux PDF). Avec le sélecteur mixte « images + PDF », Android renvoyait un
+// fichier de 0 octet pour certains PDF (constaté par Mic : « 0 o ») ; un sélecteur 100 % PDF passe par l'explorateur de fichiers.
+document.getElementById('toolImportPdf').addEventListener('click', ()=>document.getElementById('fileInputPdf').click());
+['fileInputPlan','fileInputPdf'].forEach(id=>document.getElementById(id).addEventListener('change', async (e)=>{
   const file = e.target.files[0];
   if (!file) return;
   try{
@@ -4495,7 +4500,7 @@ document.getElementById('fileInputPlan').addEventListener('change', async (e)=>{
     toast(file.name+' importé.');
   } catch(err){ if (!(err instanceof ImportCancelled)) toast(err.userMessage || ('Format non pris en charge ou fichier illisible : '+file.name)); }
   e.target.value='';
-});
+}));
 // Réutilisée à la fois par l'import via bouton et par le collage (Ctrl/Cmd+V) d'une image
 // copiée ailleurs (clic droit "Copier l'image", capture d'écran, etc.). Ajoute un NOUVEAU
 // plan à la page courante à chaque appel (un import ne remplace plus les plans déjà
@@ -4602,7 +4607,7 @@ async function pdfToImageDataURL(file, choosePage){
     // (document Drive, Téléchargements…) devient illisible au bout de quelques secondes : relu après le chargement de
     // la bibliothèque, il arrivait « vide, taille zéro octet » (constaté par Mic).
     const buf = new Uint8Array(await file.arrayBuffer());
-    if (!buf.length) throw new Error('fichier vide : choisissez-le depuis « Téléchargements » ou téléchargez-le d\'abord sur le téléphone');
+    if (!buf.length) throw new Error('fichier vide : utilisez le bouton PDF et choisissez-le depuis « Téléchargements » (pas Drive / récents)');
     const lib = await loadPdfLib();
     try{
       doc = await lib.getDocument({ data:buf.slice() }).promise; // copie : pdf.js « transfère » (vide) le tampon qu'on lui donne
@@ -4617,7 +4622,7 @@ async function pdfToImageDataURL(file, choosePage){
     console.warn('Import PDF :', err);
     const msg = (err && err.name === 'PasswordException') ? 'PDF protégé par mot de passe.'
       : (/réseau|Failed to fetch|NetworkError|indisponible/i.test(String(err && err.message))) ? 'PDF : bibliothèque de lecture non téléchargée (vérifiez le réseau).'
-      : 'PDF illisible : '+String(err && err.message || err).slice(0,80)+' [v2.1-135, '+(file.size|0)+' o]';
+      : 'PDF illisible : '+String(err && err.message || err).slice(0,80)+' [v2.1-136, '+(file.size|0)+' o]';
     throw Object.assign(new Error(msg), { userMessage: msg });
   }
   hideBubble();
@@ -6214,7 +6219,7 @@ const SHORT_ICON_LABELS = {
   'Déplacer cette page vers la gauche':'Page ←','Déplacer cette page vers la droite':'Page →',
   'Supprimer la page courante':'Suppr.','Nouveau projet':'Nouveau',
   'Orientation portrait':'Portrait','Orientation paysage':'Paysage','Zoom arrière':'Zoom −','Zoom avant':'Zoom +',
-  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Page récapitulative des postes':'Récap.','Plein soleil':'Soleil','Ouvrir un projet':'Ouvrir',
+  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Importer un PDF':'PDF','Page récapitulative des postes':'Récap.','Plein soleil':'Soleil','Ouvrir un projet':'Ouvrir',
   'Importer un plan':'Importer','Découpe rectangulaire':'Découpe □','Découpe point par point':'Découpe pts',
   'Outils image : pipette, pot de peinture, gomme, réglages':'Outils image','Pot de peinture intelligent':'Pot peinture',
   'Gomme carrée':'Gomme','Placement classique':'Classique','Placement déporté':'Déporté',
