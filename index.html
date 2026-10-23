@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-124 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-125 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -363,7 +363,7 @@
   #popSelSettings .sel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
   #popSelSettings .sel-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5c6478;}
   #selSettingsClose{width:30px;height:30px;border-radius:50%;border:1px solid #d8dce3;background:#fff;color:#2B3242;font-size:16px;line-height:1;padding:0;cursor:pointer;}
-  #selSettingsBody{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  #selSettingsBody{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;} /* v2.1-125 : une seule ligne sur smartphone */
   #selSettingsBody > *{display:inline-flex;}
   #selSettingsBody button{background:#F1F3F6;border:1px solid #d8dce3;color:#1c2230;border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:600;cursor:pointer;}
   #selSettingsBody button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
@@ -372,7 +372,11 @@
   #selSettingsBody #selSizeMinus, #selSettingsBody #selSizePlus{display:none !important;} /* remplacés par la barre − / + (buildRangeB) */
   #selSettingsBody input[type=color]{width:34px;height:32px;border:none;padding:0;border-radius:4px;background:none;}
   #selSettingsBody #selLabel{background:#fff !important;color:#1c2230 !important;border:1px solid #c9ced8 !important;}
-  #selSettingsBody #selSizeWrap{flex:1 1 220px;}
+  #selSettingsBody #selSizeWrap{flex:1 1 auto;min-width:0;}
+  #selSettingsBody .rngB{min-width:56px;}
+  #selSettingsBody #selLabel{width:62px !important;min-width:0;}
+  #selSettingsBody #selLabelConfirm{padding:8px 10px;}
+  #selSettingsBody #selColorLabel{display:none;} /* le carré de couleur suffit : gagne de la place */
   #selectionBarHandle{
     display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex:none;
     border-radius:7px;background:#2c3650;cursor:grab;touch-action:none;
@@ -453,7 +457,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-124</span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-125</span></div>
   <div class="sep"></div>
   </div>
 
@@ -664,7 +668,6 @@
     <button id="selBgNone" title="Fond transparent (aucun fond)">∅</button>
   </span>
   <button id="selLock" title="Verrouiller/déverrouiller cet élément">🔓</button>
-  <button id="selDup">Dupliquer</button>
   <button id="selDelete">Supprimer</button>
 </div>
 
@@ -698,7 +701,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-124 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-125 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2475,9 +2478,10 @@ function ensureLockBadge(){
     // v2.1-124 : la croix sert aussi à la légende (masquer) et aux pastilles (suppression directe, comme l'ancien bouton)
     if (model.pastilles.some(p=>p.id===selectedId)){ document.getElementById('selDelete').click(); return; }
     const isLeg = selectedId === 'legend-frame';
-    if (!findPlanById(selectedId) && !isTxt && !isLeg) return;
+    const isLogo = model.logos.some(l=>l.id===selectedId);
+    if (!findPlanById(selectedId) && !isTxt && !isLeg && !isLogo) return;
     const sid = selectedId;
-    askYesNo(isLeg ? 'Masquer la légende ?' : isTxt ? 'Supprimer ce texte ?' : 'Supprimer le plan ?').then(ok=>{ if (ok && selectedId===sid) document.getElementById('selDelete').click(); });
+    askYesNo(isLeg ? 'Masquer la légende ?' : isTxt ? 'Supprimer ce texte ?' : isLogo ? 'Supprimer ce logo ?' : 'Supprimer le plan ?').then(ok=>{ if (ok && selectedId===sid) document.getElementById('selDelete').click(); });
   });
   badgeDelEl.style.display = 'none';
   // v2.1-115 : ciseaux = découpe rectangulaire prête en un appui ; réglage = fenêtre « Outils image » ouverte directement.
@@ -2489,11 +2493,16 @@ function ensureLockBadge(){
     schedulePlaceBadges();
   });
   badgeSetEl = toolBtn('Réglages', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.2" fill="#0E6FA8"/><circle cx="15" cy="12" r="2.2" fill="#0E6FA8"/><circle cx="8" cy="17" r="2.2" fill="#0E6FA8"/></svg>', ()=>{
+    // v2.1-125 : un 2e appui sur l'icône bleue referme la fenêtre d'options déjà ouverte.
+    const popSel = document.getElementById('popSelSettings'), popPlan = document.getElementById('popPlanSettings');
+    const texteOuvert = !!document.querySelector('.tb-group[data-tile="texte"].mobile-open');
+    if (popSel.classList.contains('open') || popPlan.classList.contains('open') || (texteOuvert && model.textes.some(t=>t.id===selectedId))){
+      closeSelectionSettings(); closeAllPopovers(); closeAllTileDrawers(); return;
+    }
     if (!findPlanById(selectedId)){ openSelectionSettings(); return; } // pastille / légende / texte (v2.1-124)
     onTileChosen('plan');
     openTileDrawer('plan', false);
-    const pop = document.getElementById('popPlanSettings');
-    if (pop && !pop.classList.contains('open')) document.getElementById('btnPlanSettings').click();
+    document.getElementById('btnPlanSettings').click();
   });
   document.body.appendChild(badgeOverlay);
   document.getElementById('canvasWrap').addEventListener('scroll', schedulePlaceBadges, { passive:true });
@@ -2560,8 +2569,9 @@ function updateLockIndicator(duringRotation){
   lockBadge.g.scale({ x:1/zoom, y:1/zoom });
   // Croix de suppression : seulement pour un plan, juste sous le cadenas (v2.1-84).
   const isPlanSel2 = !!findPlanById(selectedId) || model.textes.some(t=>t.id===selectedId); // plan ou texte (v2.1-107)
+  const isLogoSel = model.logos.some(l=>l.id===selectedId); // v2.1-125 : le logo a cadenas + croix (pas d'icône bleue : rien à régler)
   const hasBadgeSet = isPlanSel2 || selectedId==='legend-frame' || !!pastille; // v2.1-124 : croix + icône bleue aussi pour légende et pastille
-  lockBadge.del.visible(hasBadgeSet);
+  lockBadge.del.visible(hasBadgeSet || isLogoSel);
   lockBadge.tools.visible(!!findPlanById(selectedId)); // ciseaux : plan seulement (v2.1-115)
   lockBadge.set.visible(hasBadgeSet);
   if (hasBadgeSet){
@@ -2638,7 +2648,7 @@ function refreshSelectionUI(){
   const isTextSel = model.textes.some(t=>t.id===selectedId);
   placeTextOptions(isTextSel);
   // v2.1-124 : plus de barre sombre non plus pour la légende ni les pastilles (cadenas + croix + icône bleue sur l'élément) ; seuls les logos la gardent
-  bar.style.display = (findPlanById(selectedId) || isTextSel || selectedId==='legend-frame' || model.pastilles.some(q=>q.id===selectedId)) ? 'none' : 'flex';
+  bar.style.display = 'none'; // v2.1-125 : plus de barre sombre du tout (logos compris) ; tout passe par cadenas + croix + icône bleue
   if (isTextSel && lastTextDrawerId !== selectedId){
     // Nouveau texte sélectionné : la tuile Texte devient active et son tiroir s'ouvre sur les options.
     lastTextDrawerId = selectedId;
@@ -2704,7 +2714,6 @@ function refreshSelectionUI(){
     colorWrap.style.display = 'none';
     bgWrap.style.display = 'none';
   }
-  document.getElementById('selDup').style.display = isLegend ? 'none' : 'inline-block';
   document.getElementById('selDelete').textContent = 'Supprimer';
   // Le verrou (bandeau du haut) reflète l'état du plan actuellement sélectionné, s'il y en a un.
   document.getElementById('toolLockPlan').classList.toggle('active', !!(pl && pl.locked));
@@ -2766,35 +2775,7 @@ document.getElementById('selLock').addEventListener('click', ()=>{
   toast(obj.locked ? 'Élément verrouillé (déplacement bloqué).' : 'Élément déverrouillé.');
   pushHistory(); render();
 });
-document.getElementById('selDup').addEventListener('click', ()=>{
-  if (selectedId==='legend-frame') return;
-  const p = model.pastilles.find(p=>p.id===selectedId);
-  if (p){
-    const np = {...p, id: nextId('past-'), x:p.x+24, y:p.y+24};
-    if (p.label) np.label = nextPastilleLabel(p.typeId); // la copie reçoit le prochain numéro libre (v2.1-113), plus un doublon
-    model.pastilles.push(np); selectedId = np.id; pushHistory(); render(); return;
-  }
-  const t = model.textes.find(t=>t.id===selectedId);
-  if (t){
-    const nt = {...t, id: nextId('text-'), x:t.x+16, y:t.y+16};
-    model.textes.push(nt); selectedId = nt.id; pushHistory(); render(); return;
-  }
-  const pl = findPlanById(selectedId);
-  if (pl){
-    const npl = {...pl, id: nextId('plan-'), x:pl.x+24, y:pl.y+24};
-    model.plans.push(npl);
-    // Le nouveau plan partage temporairement le même canevas pixel (copie légère) : toute
-    // future retouche pixel (gomme/pot/découpe) recrée son propre canevas indépendant.
-    const srcCanvas = planNaturalCanvases.get(pl.id);
-    if (srcCanvas){
-      const copy = document.createElement('canvas');
-      copy.width = srcCanvas.width; copy.height = srcCanvas.height;
-      copy.getContext('2d').drawImage(srcCanvas,0,0);
-      setPlanCanvas(npl.id, copy, npl.dataURL);
-    }
-    selectedId = npl.id; pushHistory(); render(); return;
-  }
-});
+// v2.1-125 : bouton « Dupliquer » supprimé (demande de Mic).
 // Convertit une couleur stockée en "#rrggbb" (seul format accepté par <input type=color>),
 // avec une valeur de repli si elle est absente ou dans un autre format.
 function toHexColor(c, fallback){

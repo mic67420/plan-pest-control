@@ -1115,4 +1115,11 @@ v2.1-124 — Pastilles et légende : même présentation que le plan (cadenas, c
    couleur) et légende (police, fond, ∅) -> nouvelle fenêtre claire #popSelSettings avec croix de fermeture, sous la
    barre de tuiles. Les contrôles de l'ancienne barre y sont déplacés (mêmes ids et écouteurs) ; la fenêtre se ferme
    quand la sélection change. Seuls les logos gardent la barre sombre. Le bouton « Dupliquer » disparaît avec la barre.
+
+v2.1-125 — Icône bleue en bascule, réglages pastille sur une ligne, logos alignés, « Dupliquer » supprimé
+ - Un 2e appui sur l'icône bleue referme la fenêtre d'options (plan, pastille, légende, tiroir Texte).
+ - Fenêtre des réglages de pastille sur UNE ligne (nom, ✓, taille, couleur) : flex nowrap, libellé « Couleur » masqué.
+ - Logos : plus de barre sombre (supprimée pour tous), cadenas + croix (confirmation « Supprimer ce logo ? ») ; pas d'icône
+   bleue, un logo n'a rien à régler.
+ - Bouton « Dupliquer » et son code supprimés.
 ```
