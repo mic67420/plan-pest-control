@@ -1209,11 +1209,4 @@ v2.1-135 — Import PDF Android : même message avec v2.1-134
    bibliothèque ; notre test « 0 octet » aurait donné un autre texte). pdf.js transfère le tampon au worker.
  - Correctif : on lui donne une COPIE ; en cas d'échec, 2e voie par adresse blob: (sans transfert). Le message d'erreur
    indique la version et la taille du fichier lu pour aider au diagnostic.
-
-v2.1-136 — Import PDF Android : fichier de 0 octet -> bouton « PDF » dédié
- - Constat (message de la v2.1-135) : « fichier vide ... [0 o] » — c'est le fichier fourni par le sélecteur Android qui fait
-   0 octet, avant toute lecture par l'appli. Probable effet du sélecteur mixte « images + PDF » (accept image/*,.pdf) et/ou
-   d'un fichier de Drive / récents non téléchargé.
- - Correctif : bouton « PDF » dans le tiroir Plan avec son propre champ fichier limité aux PDF (explorateur de fichiers
-   classique) ; même traitement que l'import de plan. Message d'erreur renvoie vers ce bouton.
 ```
