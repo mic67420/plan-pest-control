@@ -1144,4 +1144,14 @@ v2.1-127 — Tuile « Fichier », tout verrouiller, plein soleil, choix des page
    question ; annuler = aucun export. La page « Récapitulatif » (v2.1-128) est décochée par défaut.
  - Légende : si elle dépasserait le bas de la page depuis sa position, 2 puis 3 colonnes (jamais plus) ; si la largeur
    sort à droite, x est ramené juste assez à gauche (même principe que le recentrage « hors feuille »).
+
+v2.1-128 — Page « Récapitulatif des postes »
+ - Bouton « Récap. » (tiroir Page) : ajoute une page en plus (model.recap, une seule par document, 11 pages max) dont le
+   tableau est dessiné par renderRecapPage() : postes utilisés × pages (P1, P2…) + total par poste et total général,
+   recalculé depuis les autres pages (recapGroup, reconstruit seulement si les nombres changent). Les logos et textes de
+   la page 1 sont repris, la légende est masquée. Indicateur « Récap n/N ».
+ - Elle s'exporte comme une page ordinaire, mais est DÉCOCHÉE par défaut dans « Pages à exporter » (le client n'en a pas
+   besoin) ; la cocher l'ajoute au PDF / PPTX / PNG / JPEG.
+ - Test smoke : tableau calculé, unique, décochée par défaut (le test cherche la carte de dialogue par son z-index, un
+   « Annuler » du tiroir Fichier le faisait attendre indéfiniment).
 ```

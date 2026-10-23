@@ -136,6 +136,28 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     const cols = await pg.evaluate(()=>{ model.legend.visible = true; model.legend.onlyUsed = false; model.legend.locked = false; const h = sheetH(); model.legend.x = 100; model.legend.y = h - 300; model.legend.scale = 1; legendGroupNode && legendGroupNode.destroy(); legendGroupNode = null; render(); const w = legendGroupNode.getClientRect({relativeTo:stage}).width; model.legend.y = 40; legendGroupNode.destroy(); legendGroupNode = null; render(); const w1 = legendGroupNode.getClientRect({relativeTo:stage}).width; return { bas:Math.round(w), haut:Math.round(w1) }; });
     ok(cols.bas > cols.haut*1.5, 'légende : colonnes automatiques quand elle déborderait en bas ('+cols.haut+' px en haut, '+cols.bas+' px en bas)');
     ok(await pg.evaluate(async()=>(await askPagesToExport()).join()==='0' || pages.length>1), 'export : une seule page = aucune question');
+    // 16. v2.1-128 : page « Récapitulatif » (comptes par page + total, décochée à l'export)
+    const rec = await pg.evaluate(async()=>{
+      const n0 = pages.length;
+      selectedTypeId = model.deviceTypes[0].id; addPastille(120,120); addPastille(140,140);
+      document.getElementById('btnPageAdd').click(); document.getElementById('btnConfirmPageCopy') ? document.getElementById('btnConfirmPageCopy').click() : null;
+      await new Promise(r=>setTimeout(r,500));
+      if (pages.length===n0) addBlankPage(0);
+      await new Promise(r=>setTimeout(r,500));
+      selectedTypeId = model.deviceTypes[0].id; addPastille(100,100);
+      document.getElementById('btnPageRecap').click(); await new Promise(r=>setTimeout(r,600));
+      const texts = recapGroup.find('Text').map(x=>x.text());
+      const ok1 = model.recap && texts.includes('Récapitulatif des postes') && texts.includes('Total général');
+      const dlg = askPagesToExport(); await new Promise(r=>setTimeout(r,100));
+      const card = [...document.body.children].filter(e=>e.style && e.style.zIndex==='950').pop();
+      const defaults = [...card.querySelectorAll('input[type=checkbox]')].map(b=>b.checked);
+      [...card.querySelectorAll('button')].find(b=>b.textContent==='Annuler').click();
+      const res = await dlg;
+      const n = pages.length;
+      document.getElementById('btnPageRecap').click(); await new Promise(r=>setTimeout(r,300));
+      return { ok1, defaults, cancelled: res===null, uniq: pages.filter(pg=>pg.recap).length===1, n };
+    });
+    ok(rec.ok1 && rec.uniq && rec.cancelled && rec.defaults.length>=2 && rec.defaults[rec.defaults.length-1]===false && rec.defaults[0]===true, 'page récapitulative : tableau calculé, une seule, décochée par défaut à l\'export ('+JSON.stringify(rec.defaults)+')');
     ok(errs.length===0, 'aucune erreur JavaScript'+(errs.length?' : '+errs[0]:''));
   } finally { await b.close(); }
   console.log(fails ? '\n'+fails+' ÉCHEC(S)' : '\nTOUS LES TESTS PASSENT');
