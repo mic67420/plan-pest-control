@@ -1236,4 +1236,12 @@ v2.1-139 — Nouvelles icônes, lot 3 (tiroirs Fichier et Plan) + 4 icônes refa
 v2.1-140 — Nouvelles icônes, lot 4 (tiroirs Pastille et Texte)
  - Pastille : placement classique / déporté, grille, postes. Texte : « T » de la tuile (plus lisible que le T fin de la
    feuille), logo entreprise (maison + losange), logo client (appareil photo en pointillés), légende.
+
+v2.1-141 — Nouvelles icônes, lot 5 (dernier) : pastilles rondes, Outils image, export
+ - Pastilles rondes sur le plan : croix, ciseaux et réglages = les icônes rondes fournies (le dessin fait tout le bouton) ;
+   cadenas = même rond rouge avec cadenas blanc (fermé / ouvert) composé à partir du rond de la croix ; découpe en cours =
+   anneau orange. Menu Outils image : pipette, pot, gomme, luminosité, contraste (dégradé de la feuille remplacé par un
+   aplat), saturation, teinte. Menu d'export : icône devant PNG / JPEG / PDF / PPTX.
+ - Le jeu d'icônes est complet ; les copies de travail (feuilles SVG, découpes, apply.py / patch5.py) sont dans le dossier
+   temporaire de la session, pas dans le dépôt.
 ```
