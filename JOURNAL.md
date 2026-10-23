@@ -1232,4 +1232,8 @@ v2.1-139 — Nouvelles icônes, lot 3 (tiroirs Fichier et Plan) + 4 icônes refa
  - Cadenas : deux dessins dans le bouton (fermé / ouvert), choisis par la classe is-open (plan déverrouillé ; « tout
    verrouiller » : cadenas ouvert quand tout est déjà verrouillé = l'action proposée est de déverrouiller). L'ancien code
    qui modifiait le tracé de l'anse (PLAN_LOCK_SHACKLE_*) n'est plus utilisé.
+
+v2.1-140 — Nouvelles icônes, lot 4 (tiroirs Pastille et Texte)
+ - Pastille : placement classique / déporté, grille, postes. Texte : « T » de la tuile (plus lisible que le T fin de la
+   feuille), logo entreprise (maison + losange), logo client (appareil photo en pointillés), légende.
 ```
