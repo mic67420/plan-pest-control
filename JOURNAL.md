@@ -1107,4 +1107,12 @@ v2.1-123 — Zoom conservé après un renommage de poste
    « typing » était faux et fitZoom() remettait le zoom et la position à zéro.
  - Correctif : fitZoom() sur resize seulement si la LARGEUR de la fenêtre change (rotation d'écran, fenêtre PC) ; le
    clavier ne change que la hauteur.
+
+v2.1-124 — Pastilles et légende : même présentation que le plan (cadenas, croix, icône bleue)
+ - Demande de Mic : le plan sert de référence ; plus de barre sombre en bas pour la légende, les textes et les pastilles.
+ - Correctif : la croix rouge existe aussi pour la légende (« Masquer la légende ? ») et la pastille (suppression directe) ;
+   l'icône bleue ouvre les réglages : texte -> tiroir Texte (déjà existant), pastille (nom, ✓, taille avec barre − / +,
+   couleur) et légende (police, fond, ∅) -> nouvelle fenêtre claire #popSelSettings avec croix de fermeture, sous la
+   barre de tuiles. Les contrôles de l'ancienne barre y sont déplacés (mêmes ids et écouteurs) ; la fenêtre se ferme
+   quand la sélection change. Seuls les logos gardent la barre sombre. Le bouton « Dupliquer » disparaît avec la barre.
 ```
