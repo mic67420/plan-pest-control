@@ -1213,4 +1213,11 @@ v2.1-135 — Import PDF Android : même message avec v2.1-134
 Retour à la v2.1-135 (demande de Mic)
  - Le « 0 octet » venait du fichier PDF choisi par Mic, pas de l'application : la v2.1-136 (bouton « PDF » dédié) est
    annulée (git revert de f869dcf). Le code redevient celui de la v2.1-135, numéro de version compris.
+
+v2.1-137 — Nouvelles icônes, lot 1 (les 6 tuiles)
+ - Icônes SVG fournies par Mic (feuilles générées puis vectorisées) : découpées une à une (groupes de tracés par case de la
+   grille), viewBox carrée resserrée, 1 décimale, intégrées en ligne dans les 6 tuiles (Page, Vue, Fichier, Plan, Pastille,
+   Texte). Lots suivants à valider un par un : tiroirs Page / Vue, Fichier / Plan, Pastille / Texte, pastilles rondes
+   (cadenas, croix, ciseaux, réglages) et menu « Outils image ». Icônes à refaire : cadenas ouvert, dossier + horloge,
+   export, import.
 ```
