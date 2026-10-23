@@ -158,6 +158,26 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       return { ok1, defaults, cancelled: res===null, uniq: pages.filter(pg=>pg.recap).length===1, n };
     });
     ok(rec.ok1 && rec.uniq && rec.cancelled && rec.defaults.length>=2 && rec.defaults[rec.defaults.length-1]===false && rec.defaults[0]===true, 'page récapitulative : tableau calculé, une seule, décochée par défaut à l\'export ('+JSON.stringify(rec.defaults)+')');
+    // 17. v2.1-129 : import de formats variés (SVG, WebP, HEIC simulé) -> PNG / JPEG intégrables
+    const fmt = await pg.evaluate(async()=>{
+      const out = {};
+      const svg = new File(['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><rect width="200" height="100" fill="#0a0"/></svg>'], 'logo.svg', { type:'image/svg+xml' });
+      const d1 = await fileToImageDataURL(svg); const i1 = await loadImage(d1);
+      out.svg = d1.startsWith('data:image/png') && i1.width===2000 && i1.height===1000;
+      const c = document.createElement('canvas'); c.width = 40; c.height = 30; c.getContext('2d').fillRect(0,0,40,30);
+      const webp = await new Promise(r=>c.toBlob(r, 'image/webp'));
+      const d2 = await fileToImageDataURL(new File([webp], 'photo.webp', { type:'image/webp' }));
+      out.webp = d2.startsWith('data:image/png');
+      window.heic2any = async({ blob })=>{ const cc = document.createElement('canvas'); cc.width = 20; cc.height = 10; cc.getContext('2d').fillRect(0,0,20,10); return new Promise(r=>cc.toBlob(r, 'image/jpeg')); };
+      const d3 = await fileToImageDataURL(new File([new Uint8Array([0,0,0,24])], 'IMG_0001.HEIC', { type:'image/heic' }));
+      out.heic = d3.startsWith('data:image/jpeg');
+      delete window.heic2any;
+      const png = c.toDataURL('image/png'); const d4 = await fileToImageDataURL(new File([await (await fetch(png)).blob()], 'a.png', { type:'image/png' }));
+      out.png = d4 === png;
+      return out;
+    });
+    ok(fmt.svg && fmt.webp && fmt.heic && fmt.png, 'import : SVG (2000 px), WebP, HEIC (bibliothèque simulée) convertis ; PNG gardé tel quel ('+JSON.stringify(fmt)+')');
+    ok(await pg.evaluate(()=>[...document.querySelectorAll('.tb-group')].every(g=>true) && (()=>{ closeAllTileDrawers(); const res = ['page','historique','plan','texte'].map(tile=>{ openTileDrawer(tile,true); const g = document.querySelector('.tb-group[data-tile="'+tile+'"]'); const tops = new Set([...g.querySelectorAll('.tb-icon')].filter(b=>b.getBoundingClientRect().width>0).map(b=>Math.round(b.getBoundingClientRect().top))); closeAllTileDrawers(); return tops.size; }); return res.every(n=>n===1); })()), 'tiroirs Page, Fichier, Plan, Texte : toutes les icônes sur une seule ligne (430 px)');
     ok(errs.length===0, 'aucune erreur JavaScript'+(errs.length?' : '+errs[0]:''));
   } finally { await b.close(); }
   console.log(fails ? '\n'+fails+' ÉCHEC(S)' : '\nTOUS LES TESTS PASSENT');

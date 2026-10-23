@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-128 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-129 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -333,6 +333,24 @@
   }
   body.mobile-mode .tb-icon .icon{width:22px;height:22px;}
   body.mobile-mode .sep{height:36px;}
+  /* v2.1-129 : icônes de chaque tiroir sur UNE ligne en portrait (largeur partagée, plus de 64 px fixes). Les conteneurs
+     .pop-wrap deviennent « transparents » pour que leurs boutons se partagent la ligne ; le menu déroulant garde sa position fixe. */
+  body.mobile-mode .tb-group.mobile-open{ gap:2px; padding:8px 6px; }
+  body.mobile-mode .tb-group.mobile-open .pop-wrap{ display:contents; }
+  body.mobile-mode .tb-group.mobile-open > .tb-icon, body.mobile-mode .tb-group.mobile-open .pop-wrap > .tb-icon{ flex:1 1 0; width:auto; min-width:34px; padding-left:1px; padding-right:1px; }
+  body.mobile-mode .tb-group.mobile-open .tb-icon .tb-icon-label{ font-size:9px; letter-spacing:-.1px; }
+  body.mobile-mode .tb-group.mobile-open .sep{ margin:0; }
+  body.mobile-mode .tb-group.mobile-open #zoomLabel{ width:34px; font-size:11px; }
+  body.mobile-mode .tb-group.mobile-open #pageIndicator{ min-width:0 !important; flex:1 1 0; padding:0 !important; font-size:11px !important; }
+  body.mobile-mode #autoSaveIndicator{ display:none !important; } /* l'heure de sauvegarde est affichée dans le bandeau (✓ hh:mm) */
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .row-break{ flex:0 0 100%; height:0; }
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-wrap{ flex:1 1 120px; min-width:0; }
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-btn{ min-width:0; width:100%; }
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-ctl{ flex:1 1 110px; min-width:0; }
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-ctl .rngB{ min-width:30px; width:auto; flex:1 1 0; }
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-ctl-row{ min-width:0; gap:3px; }
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-ctl-row .val{ display:none; } /* la valeur est lisible sur la pastille témoin */
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-preview{ flex:none; }
   body.mobile-mode .dd-btn{height:52px;min-width:170px;font-size:14px;}
   body.mobile-mode .dd-swatch{width:24px;height:24px;}
   body.mobile-mode .tb-slider input[type=range]{width:76px;height:26px;}
@@ -495,7 +513,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-128</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-129</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -647,6 +665,7 @@
       <div class="size-preview-shape" id="pastilleSizePreviewShape"></div>
       <span class="size-preview-note" id="pastilleSizePreviewNote"></span>
     </div>
+    <div class="row-break"></div>
     <button class="tb-icon" id="toolPlaceClassic" title="Placement classique (1 clic)"><svg class="icon" viewBox="0 0 24 24"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12Z" fill="#D6493E" stroke="#8f2c24" stroke-width="1.2" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.6" fill="#FFFFFF" stroke="#8f2c24" stroke-width="1"/></svg></button>
     <button class="tb-icon" id="toolPlaceRemote" title="Placement déporté (point réel + pastille)"><svg class="icon" viewBox="0 0 24 24"><path d="M10 18.5s5.5-5.7 5.5-9.6A5.5 5.5 0 1 0 4.5 8.9c0 2.5 1.8 5.2 3.4 7.1" fill="#0E6FA8" stroke="#08425f" stroke-width="1.1" stroke-linejoin="round"/><circle cx="10" cy="8.4" r="2.1" fill="#FFFFFF" stroke="#08425f" stroke-width=".9"/><path d="M14.5 15.5l5.5 5.5M20.5 21H16v-4.5" stroke="#2B3242" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <button class="tb-icon" id="btnGrid" title="Grille d'accroche"><svg class="icon" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="1.3" fill="#E4F1F8" stroke="#0E6FA8" stroke-width="1.4"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17" stroke="#8FC2DC" stroke-width="1.1"/></svg></button>
@@ -736,9 +755,9 @@
 <textarea id="textEditArea"></textarea>
 <button id="textEditConfirm">✓ Valider</button>
 
-<input type="file" id="fileInputPlan" accept="image/png,image/jpeg,image/bmp">
-<input type="file" id="fileInputLogoA" accept="image/*">
-<input type="file" id="fileInputLogoB" accept="image/*">
+<input type="file" id="fileInputPlan" accept="image/*,.heic,.heif,.svg,.avif,.webp">
+<input type="file" id="fileInputLogoA" accept="image/*,.heic,.heif,.svg,.avif,.webp">
+<input type="file" id="fileInputLogoB" accept="image/*,.heic,.heif,.svg,.avif,.webp">
 <input type="file" id="fileInputProject" accept="application/json">
 
 <div id="toast"></div>
@@ -757,7 +776,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-128 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-129 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1288,7 +1307,7 @@ function updateHistoryButtons(){
 /* ---------------------------- Gestion des pages / étages ------------------ */
 function updatePageIndicator(){
   const el = document.getElementById('pageIndicator');
-  if (el) el.textContent = (model && model.recap ? 'Récap ' : 'Page ') + (currentPageIndex+1) + '/' + pages.length;
+  if (el){ el.textContent = (currentPageIndex+1) + '/' + pages.length; el.title = (model && model.recap ? 'Page récapitulative ' : 'Page ') + (currentPageIndex+1) + ' sur ' + pages.length; } // compact : tient dans le tiroir (v2.1-129)
   const prevBtn = document.getElementById('btnPagePrev');
   const nextBtn = document.getElementById('btnPageNext');
   const moveLeftBtn = document.getElementById('btnPageMoveLeft');
@@ -4462,9 +4481,11 @@ document.getElementById('toolImportPlan').addEventListener('click', ()=>document
 document.getElementById('fileInputPlan').addEventListener('change', async (e)=>{
   const file = e.target.files[0];
   if (!file) return;
-  const dataURL = await fileToDataURL(file);
-  await importPlanImageFromDataURL(dataURL, file.name);
-  toast(file.name+' importé.');
+  try{
+    const dataURL = await fileToImageDataURL(file);
+    await importPlanImageFromDataURL(dataURL, file.name);
+    toast(file.name+' importé.');
+  } catch(err){ toast('Format d\'image non pris en charge : '+file.name); }
   e.target.value='';
 });
 // Réutilisée à la fois par l'import via bouton et par le collage (Ctrl/Cmd+V) d'une image
@@ -4496,6 +4517,70 @@ async function importPlanImageFromDataURL(dataURL, fileName){
   await autoInsertClientLogoPlaceholder();
   selectedId = pl.id;
   pushHistory(); render();
+}
+// v2.1-129 : import de TOUS les formats d'image courants. Le document ne garde que du PNG ou du JPEG (les seuls formats
+// que jsPDF / PptxGenJS savent intégrer) : tout le reste est converti à l'import.
+//  - PNG / JPEG : conservés tels quels (aucune recompression).
+//  - SVG : dessiné dans un canevas (taille d'après width/height ou viewBox, ~2000 px de large) puis enregistré en PNG.
+//  - HEIC / HEIF : décodé par le navigateur s'il sait (Safari) puis converti en JPEG ; sinon bibliothèque heic2any,
+//    chargée seulement à ce moment-là (Chrome / Android / PC ne lisent pas le HEIC).
+//  - WebP, AVIF, GIF, BMP… : décodés par le navigateur puis enregistrés en PNG.
+let heicLibPromise = null;
+function loadHeicLib(){
+  if (window.heic2any) return Promise.resolve(window.heic2any);
+  if (!heicLibPromise) heicLibPromise = new Promise((res, rej)=>{
+    const sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+    sc.onload = ()=>window.heic2any ? res(window.heic2any) : rej(new Error('heic2any absent'));
+    sc.onerror = ()=>{ heicLibPromise = null; rej(new Error('heic2any indisponible (réseau ?)')); };
+    document.head.appendChild(sc);
+  });
+  return heicLibPromise;
+}
+function canvasToDataURL(img, w, h, mime){
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d');
+  if (mime === 'image/jpeg'){ x.fillStyle = '#ffffff'; x.fillRect(0,0,w,h); } // pas de transparence en JPEG
+  x.drawImage(img, 0, 0, w, h);
+  return c.toDataURL(mime, 0.92);
+}
+async function svgToPngDataURL(file){
+  let text = await file.text();
+  const root = /<svg\b[^>]*>/i.exec(text);
+  if (!root) throw new Error('SVG invalide');
+  const tag = root[0];
+  const num = (re)=>{ const m = re.exec(tag); return m ? parseFloat(m[1]) : NaN; };
+  let w = num(/\swidth\s*=\s*["']?([\d.]+)/i), h = num(/\sheight\s*=\s*["']?([\d.]+)/i);
+  const vb = /viewBox\s*=\s*["']\s*[-\d.]+[ ,]+[-\d.]+[ ,]+([\d.]+)[ ,]+([\d.]+)/i.exec(tag);
+  if ((!(w>0) || !(h>0)) && vb){ w = parseFloat(vb[1]); h = parseFloat(vb[2]); }
+  if (!(w>0) || !(h>0)){ w = 1000; h = 1000; }
+  // Sans width/height explicites, certains navigateurs donnent une taille nulle : on les impose dans la balise.
+  if (!/\swidth\s*=/i.test(tag) || !/\sheight\s*=/i.test(tag)){
+    text = text.replace(/<svg\b/i, '<svg width="'+w+'" height="'+h+'"');
+  }
+  const url = URL.createObjectURL(new Blob([text], { type:'image/svg+xml' }));
+  try{
+    const img = await loadImage(url);
+    const k = Math.min(10, 2000/Math.max(w,h)); // ~2000 px sur le grand côté, sans dépasser x10
+    return canvasToDataURL(img, Math.max(1,Math.round(w*k)), Math.max(1,Math.round(h*k)), 'image/png');
+  } finally { URL.revokeObjectURL(url); }
+}
+async function fileToImageDataURL(file){
+  const name = (file.name||'').toLowerCase(), type = (file.type||'').toLowerCase();
+  if (type === 'image/svg+xml' || name.endsWith('.svg')) return svgToPngDataURL(file);
+  const isHeic = /hei[cf]/.test(type) || /\.(heic|heif)$/.test(name);
+  let dataURL = await fileToDataURL(file);
+  if (!isHeic && (type === 'image/png' || type === 'image/jpeg' || /^data:image\/(png|jpeg);/.test(dataURL))) return dataURL; // déjà dans un format intégrable
+  try{
+    const img = await loadImage(dataURL); // le navigateur sait lire ce format
+    return canvasToDataURL(img, img.naturalWidth, img.naturalHeight, isHeic ? 'image/jpeg' : 'image/png');
+  } catch(err){
+    if (!isHeic) throw err;
+  }
+  const heic2any = await loadHeicLib();
+  const out = await heic2any({ blob:file, toType:'image/jpeg', quality:0.92 });
+  const blob = Array.isArray(out) ? out[0] : out;
+  return fileToDataURL(blob);
 }
 function fileToDataURL(file){
   return new Promise((res,rej)=>{
@@ -4530,7 +4615,7 @@ window.addEventListener('paste', async (e)=>{
   const blob = imageItem.getAsFile();
   if (!blob) return;
   try{
-    const dataURL = await fileToDataURL(blob);
+    const dataURL = await fileToImageDataURL(blob);
     await importPlanImageFromDataURL(dataURL);
     toast('Image collée importée comme plan.');
   } catch(err){ toast("Impossible d'importer l'image collée."); }
@@ -4727,8 +4812,9 @@ document.getElementById('fileInputLogoA').addEventListener('change', (e)=>handle
 document.getElementById('fileInputLogoB').addEventListener('change', (e)=>handleLogoFile(e,'client'));
 async function handleLogoFile(e, which){
   const file = e.target.files[0]; if (!file) return;
-  const dataURL = await fileToDataURL(file);
-  const img = await loadImage(dataURL);
+  let dataURL, img;
+  try{ dataURL = await fileToImageDataURL(file); img = await loadImage(dataURL); }
+  catch(err){ toast('Format d\'image non pris en charge : '+file.name); e.target.value=''; return; }
   const maxW = which==='entreprise' ? 240 : 160, maxH = which==='entreprise' ? 150 : 100;
   const ratio = Math.min(maxW/img.width, maxH/img.height, 1);
   // Un remplacement manuel retire l'ancien logo de la même catégorie plutôt que de
@@ -5955,9 +6041,9 @@ document.body.classList.add('mobile-mode'); // mode smartphone (bandeau en tuile
 // recopier)" devient juste "Ajouter un étage").
 // v2.1-92 : libellés COURTS (une seule ligne sous l'icône) ; l'infobulle (title) garde le texte complet.
 const SHORT_ICON_LABELS = {
-  'Page précédente':'Précédente','Page suivante':'Suivante','Ajouter un étage':'+ Étage',
+  'Page précédente':'Préc.','Page suivante':'Suiv.','Ajouter un étage':'+ Étage',
   'Déplacer cette page vers la gauche':'Page ←','Déplacer cette page vers la droite':'Page →',
-  'Supprimer la page courante':'Suppr. page','Nouveau projet':'Nouveau',
+  'Supprimer la page courante':'Suppr.','Nouveau projet':'Nouveau',
   'Orientation portrait':'Portrait','Orientation paysage':'Paysage','Zoom arrière':'Zoom −','Zoom avant':'Zoom +',
   "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Page récapitulative des postes':'Récap.','Plein soleil':'Soleil','Ouvrir un projet':'Ouvrir',
   'Importer un plan':'Importer','Découpe rectangulaire':'Découpe □','Découpe point par point':'Découpe pts',
@@ -6002,7 +6088,7 @@ function pageLockables(){ return [...model.plans, ...model.pastilles, ...model.t
 function updateLockAllButton(){
   const btn = document.getElementById('btnLockAll'); if (!btn) return;
   const anyOpen = pageLockables().some(o=>!o.locked);
-  const lbl = btn.querySelector('.tb-icon-label'), txt = anyOpen ? 'Tout verr.' : 'Tout déverr.';
+  const lbl = btn.querySelector('.tb-icon-label'), txt = anyOpen ? 'Verrou.' : 'Déverr.';
   if (lbl && lbl.textContent !== txt) lbl.textContent = txt;
   btn.title = anyOpen ? 'Tout verrouiller' : 'Tout déverrouiller';
 }

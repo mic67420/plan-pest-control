@@ -1154,4 +1154,15 @@ v2.1-128 — Page « Récapitulatif des postes »
    besoin) ; la cocher l'ajoute au PDF / PPTX / PNG / JPEG.
  - Test smoke : tableau calculé, unique, décochée par défaut (le test cherche la carte de dialogue par son z-index, un
    « Annuler » du tiroir Fichier le faisait attendre indéfiniment).
+
+v2.1-129 — Import de tous les formats d'image ; tiroirs sur une seule ligne
+ - fileToImageDataURL() : PNG / JPEG gardés tels quels ; SVG dessiné dans un canevas (~2000 px, x10 max) puis PNG ; HEIC /
+   HEIF décodé par le navigateur (Safari) ou par heic2any (chargé à la demande depuis jsDelivr, donc sans effet hors ligne
+   tant qu'il n'a pas été mis en cache) puis JPEG ; WebP, AVIF, GIF, BMP… -> PNG. Utilisé pour l'import de plan, les logos
+   entreprise / client et le collage. Message « Format d'image non pris en charge » en cas d'échec. sw.js inchangé (la
+   bibliothèque est mise en cache à l'exécution).
+ - Tiroirs : les icônes se partagent la largeur au lieu de 64 px fixes (.pop-wrap en display:contents) -> une seule ligne
+   en portrait (testé 360 / 390 / 430 px) pour Page, Vue, Fichier, Plan, Texte ; Pastille = 2 lignes (poste + taille, puis
+   outils). Libellés raccourcis (Préc., Suiv., Suppr., Verrou.), n° de page « 1/3 », indicateur de sauvegarde du tiroir
+   Page retiré (déjà dans le bandeau).
 ```
