@@ -1,6 +1,6 @@
 // Tests automatiques de non-régression (v2.1-102) — à lancer avant chaque grosse modification :
 //   LIBS=/chemin/vers/node_modules PLAYWRIGHT=/chemin/vers/playwright CHROME=/chemin/vers/chrome node tests/smoke.js
-// LIBS doit contenir konva, jspdf, pptxgenjs, jszip (mêmes versions que le CDN). Aucun réseau n'est utilisé.
+// LIBS doit contenir konva, jspdf, pptxgenjs, jszip, pdfjs-dist@3.11.174 (mêmes versions que le CDN). Aucun réseau n'est utilisé.
 const path = require('path');
 const { chromium } = require(process.env.PLAYWRIGHT || 'playwright');
 const L = (process.env.LIBS || path.join(__dirname, 'node_modules')) + '/';
@@ -19,6 +19,8 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       if (u.includes('jspdf')) return r.fulfill({ path:L+'jspdf/dist/jspdf.umd.min.js', contentType:'application/javascript' });
       if (u.includes('pptxgen')) return r.fulfill({ path:L+'pptxgenjs/dist/pptxgen.bundle.js', contentType:'application/javascript' });
       if (u.includes('jszip')) return r.fulfill({ path:L+'jszip/dist/jszip.min.js', contentType:'application/javascript' });
+      if (u.includes('pdf.worker.min.js')) return r.fulfill({ path:L+'pdfjs-dist/build/pdf.worker.min.js', contentType:'application/javascript', headers:{ 'access-control-allow-origin':'*' } });
+      if (u.includes('pdf.min.js')) return r.fulfill({ path:L+'pdfjs-dist/build/pdf.min.js', contentType:'application/javascript' });
       if (u.startsWith('file:')) return r.continue(); return r.abort();
     });
     await pg.goto(FILE); await pg.waitForTimeout(1500);
@@ -178,6 +180,26 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     });
     ok(fmt.svg && fmt.webp && fmt.heic && fmt.png, 'import : SVG (2000 px), WebP, HEIC (bibliothèque simulée) convertis ; PNG gardé tel quel ('+JSON.stringify(fmt)+')');
     ok(await pg.evaluate(()=>[...document.querySelectorAll('.tb-group')].every(g=>true) && (()=>{ closeAllTileDrawers(); const res = ['page','historique','plan','texte'].map(tile=>{ openTileDrawer(tile,true); const g = document.querySelector('.tb-group[data-tile="'+tile+'"]'); const tops = new Set([...g.querySelectorAll('.tb-icon')].filter(b=>b.getBoundingClientRect().width>0).map(b=>Math.round(b.getBoundingClientRect().top))); closeAllTileDrawers(); return tops.size; }); return res.every(n=>n===1); })()), 'tiroirs Page, Fichier, Plan, Texte : toutes les icônes sur une seule ligne (430 px)');
+    // 18. v2.1-130 : import PDF (choix de la page), détection ordinateur / smartphone, flèches du clavier
+    const pdf = await pg.evaluate(async()=>{
+      const { jsPDF } = window.jspdf;
+      const d = new jsPDF({ unit:'pt', format:'a4' }); d.text('Page un', 60, 80); d.addPage(); d.setFillColor(200,0,0); d.rect(100,100,200,100,'F');
+      const file = new File([d.output('arraybuffer')], 'plan.pdf', { type:'application/pdf' });
+      const prom = fileToImageDataURL(file, { pdfChoose:true });
+      await new Promise(r=>setTimeout(r,1500));
+      const card = [...document.body.children].filter(e=>e.style && e.style.zIndex==='950').pop();
+      const nb = card ? card.querySelectorAll('button[data-page]').length : -1;
+      card.querySelector('button[data-page="2"]').click();
+      const url = await prom; const im = await loadImage(url);
+      const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im,0,0);
+      const px = x.getImageData(Math.round(im.width*0.33), Math.round(im.height*0.15), 1, 1).data; // dans le rectangle rouge de la page 2
+      const one = new jsPDF({ unit:'pt', format:'a4' }); one.text('seule', 60, 80);
+      const url1 = await fileToImageDataURL(new File([one.output('arraybuffer')], 'un.pdf', { type:'application/pdf' }), { pdfChoose:true });
+      return { nb, red: px[0]>150 && px[1]<80, w: im.width, h: im.height, direct: url1.startsWith('data:image/png') };
+    });
+    ok(pdf.nb===2 && pdf.red && pdf.h>pdf.w && pdf.direct, 'import PDF : 2 pages proposées, la page 2 est importée ; PDF d\'une page = import direct ('+JSON.stringify(pdf)+')');
+    ok(await pg.evaluate(()=>!document.body.classList.contains('desk')), 'détection : tactile 430 px = mode smartphone (pas de classe desk)');
+    ok(await pg.evaluate(async()=>{ selectedTypeId = model.deviceTypes[0].id; const pa = addPastille(200,200); pa.locked = false; selectNode(pastilleNodes.get(pa.id), pa.id); window.__pa = pa; return true; }) && await (async()=>{ await pg.keyboard.press('ArrowRight'); await pg.keyboard.press('Shift+ArrowDown'); await pg.waitForTimeout(300); return pg.evaluate(()=>window.__pa.x===201 && window.__pa.y===210); })(), 'clavier : flèche = 1, Maj+flèche = 10 sur l\'élément sélectionné');
     ok(errs.length===0, 'aucune erreur JavaScript'+(errs.length?' : '+errs[0]:''));
   } finally { await b.close(); }
   console.log(fails ? '\n'+fails+' ÉCHEC(S)' : '\nTOUS LES TESTS PASSENT');

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-129 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-130 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -401,6 +401,13 @@
   #selSettingsBody #selSizeMinus, #selSettingsBody #selSizePlus{display:none !important;} /* remplacés par la barre − / + (buildRangeB) */
   #selSettingsBody input[type=color]{width:34px;height:32px;border:none;padding:0;border-radius:4px;background:none;}
   #selSettingsBody #selLabel{background:#fff !important;color:#1c2230 !important;border:1px solid #c9ced8 !important;}
+  /* v2.1-130 : adaptations AUTOMATIQUES à l'ordinateur (souris + écran large, classe body.desk posée par applyDeviceClass) :
+     barre de tuiles, tiroirs et fenêtres de réglages restent dans une colonne centrée au lieu de s'étaler sur tout l'écran. */
+  body.desk #mobileTileBar{ max-width:620px; margin:0 auto; }
+  body.desk .topbar-row1{ justify-content:center; }
+  body.desk.mobile-mode .tb-group.mobile-open{ left:max(6px, calc(50% - 310px)); right:max(6px, calc(50% - 310px)); }
+  body.desk.mobile-mode .popover{ left:max(8px, calc(50% - 310px)) !important; right:auto; width:min(460px, calc(100vw - 16px)); max-width:none; min-width:0; }
+  body.desk .tb-icon{ max-width:92px; }
   /* v2.1-127 : mode « plein soleil » — contraste maximal en extérieur */
   body.sun-mode{ --ink:#000; --bg:#9aa0aa; }
   body.sun-mode #topbar{ background:#fff; border-bottom:2px solid #000; }
@@ -513,7 +520,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-129</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-130</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -755,7 +762,7 @@
 <textarea id="textEditArea"></textarea>
 <button id="textEditConfirm">✓ Valider</button>
 
-<input type="file" id="fileInputPlan" accept="image/*,.heic,.heif,.svg,.avif,.webp">
+<input type="file" id="fileInputPlan" accept="image/*,.heic,.heif,.svg,.avif,.webp,application/pdf,.pdf">
 <input type="file" id="fileInputLogoA" accept="image/*,.heic,.heif,.svg,.avif,.webp">
 <input type="file" id="fileInputLogoB" accept="image/*,.heic,.heif,.svg,.avif,.webp">
 <input type="file" id="fileInputProject" accept="application/json">
@@ -776,7 +783,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-129 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-130 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -4482,10 +4489,10 @@ document.getElementById('fileInputPlan').addEventListener('change', async (e)=>{
   const file = e.target.files[0];
   if (!file) return;
   try{
-    const dataURL = await fileToImageDataURL(file);
+    const dataURL = await fileToImageDataURL(file, { pdfChoose:true });
     await importPlanImageFromDataURL(dataURL, file.name);
     toast(file.name+' importé.');
-  } catch(err){ toast('Format d\'image non pris en charge : '+file.name); }
+  } catch(err){ if (!(err instanceof ImportCancelled)) toast('Format non pris en charge ou fichier illisible : '+file.name); }
   e.target.value='';
 });
 // Réutilisée à la fois par l'import via bouton et par le collage (Ctrl/Cmd+V) d'une image
@@ -4525,6 +4532,78 @@ async function importPlanImageFromDataURL(dataURL, fileName){
 //  - HEIC / HEIF : décodé par le navigateur s'il sait (Safari) puis converti en JPEG ; sinon bibliothèque heic2any,
 //    chargée seulement à ce moment-là (Chrome / Android / PC ne lisent pas le HEIC).
 //  - WebP, AVIF, GIF, BMP… : décodés par le navigateur puis enregistrés en PNG.
+// PDF (v2.1-130) : lu par pdf.js, chargé à la demande (comme heic2any). Une page est dessinée sur un canevas blanc (~2400 px
+// sur le grand côté, x4 max) puis enregistrée en PNG. PDF de plusieurs pages : une petite fenêtre propose les vignettes.
+const PDFJS_BASE = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/';
+class ImportCancelled extends Error {}
+let pdfLibPromise = null;
+function loadPdfLib(){
+  if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions.workerSrc) return Promise.resolve(window.pdfjsLib);
+  if (!pdfLibPromise) pdfLibPromise = (async()=>{
+    if (!window.pdfjsLib) await new Promise((res, rej)=>{
+      const sc = document.createElement('script');
+      sc.src = PDFJS_BASE + 'pdf.min.js';
+      sc.onload = res; sc.onerror = ()=>rej(new Error('pdf.js indisponible (réseau ?)'));
+      document.head.appendChild(sc);
+    });
+    // Le « worker » d'un autre domaine est refusé par les navigateurs : on récupère son code et on le sert depuis un blob local.
+    const code = await (await fetch(PDFJS_BASE + 'pdf.worker.min.js')).text();
+    pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([code], { type:'text/javascript' }));
+    return pdfjsLib;
+  })().catch(e=>{ pdfLibPromise = null; throw e; });
+  return pdfLibPromise;
+}
+function askPdfPage(doc){
+  return new Promise(resolve=>{
+    const card = document.createElement('div');
+    card.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);max-width:calc(100vw - 32px);width:360px;'
+      + 'background:#F59E0B;color:#1c2230;padding:12px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);'
+      + 'z-index:950;font-size:13px;font-weight:500;display:flex;flex-direction:column;gap:8px;';
+    const bar = document.getElementById('mobileTileBar'); const r = bar ? bar.getBoundingClientRect() : null;
+    card.style.top = ((r && r.height ? r.bottom : 58) + 6)+'px';
+    card.innerHTML = '<div style="font-weight:700;">Quelle page du PDF importer ?</div>';
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#fff7e6;border-radius:8px;padding:8px;max-height:50vh;overflow:auto;';
+    const done = (v)=>{ card.remove(); resolve(v); };
+    for (let i=1; i<=doc.numPages; i++){
+      const b = document.createElement('button'); b.type = 'button'; b.dataset.page = i;
+      b.style.cssText = 'font:inherit;border:1px solid #d8dce3;background:#fff;border-radius:8px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;';
+      const cv = document.createElement('canvas'); cv.width = 90; cv.height = 120; cv.style.cssText = 'width:90px;height:120px;background:#eee;';
+      const lb = document.createElement('span'); lb.textContent = 'Page '+i;
+      b.append(cv, lb); b.addEventListener('click', ()=>done(i)); grid.appendChild(b);
+    }
+    card.appendChild(grid);
+    const row = document.createElement('div'); row.style.cssText = 'display:flex;justify-content:flex-end;';
+    const no = document.createElement('button'); no.type = 'button'; no.textContent = 'Annuler';
+    no.style.cssText = 'font:inherit;padding:8px 14px;border:none;border-radius:8px;background:#fff7e6;color:#1c2230;';
+    no.addEventListener('click', ()=>done(null)); row.appendChild(no); card.appendChild(row);
+    document.body.appendChild(card);
+    // vignettes dessinées l'une après l'autre (sans bloquer l'affichage de la fenêtre)
+    (async()=>{
+      for (let i=1; i<=doc.numPages && card.isConnected; i++){
+        try{
+          const pg = await doc.getPage(i), v1 = pg.getViewport({ scale:1 });
+          const k = Math.min(90/v1.width, 120/v1.height), cv = grid.children[i-1].querySelector('canvas');
+          cv.width = Math.round(v1.width*k); cv.height = Math.round(v1.height*k);
+          await pg.render({ canvasContext:cv.getContext('2d'), viewport:pg.getViewport({ scale:k }) }).promise;
+        } catch(e){ /* vignette manquante : sans conséquence */ }
+      }
+    })();
+  });
+}
+async function pdfToImageDataURL(file, choosePage){
+  const lib = await loadPdfLib();
+  const doc = await lib.getDocument({ data:new Uint8Array(await file.arrayBuffer()) }).promise;
+  let n = 1;
+  if (choosePage && doc.numPages > 1){ n = await askPdfPage(doc); if (!n) throw new ImportCancelled('annulé'); }
+  const page = await doc.getPage(n), v1 = page.getViewport({ scale:1 });
+  const k = Math.min(4, 2400/Math.max(v1.width, v1.height));
+  const vp = page.getViewport({ scale:k });
+  const cv = document.createElement('canvas'); cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
+  const ctx = cv.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,cv.width,cv.height);
+  await page.render({ canvasContext:ctx, viewport:vp }).promise;
+  return cv.toDataURL('image/png');
+}
 let heicLibPromise = null;
 function loadHeicLib(){
   if (window.heic2any) return Promise.resolve(window.heic2any);
@@ -4565,8 +4644,9 @@ async function svgToPngDataURL(file){
     return canvasToDataURL(img, Math.max(1,Math.round(w*k)), Math.max(1,Math.round(h*k)), 'image/png');
   } finally { URL.revokeObjectURL(url); }
 }
-async function fileToImageDataURL(file){
+async function fileToImageDataURL(file, opts){
   const name = (file.name||'').toLowerCase(), type = (file.type||'').toLowerCase();
+  if (type === 'application/pdf' || name.endsWith('.pdf')) return pdfToImageDataURL(file, !!(opts && opts.pdfChoose));
   if (type === 'image/svg+xml' || name.endsWith('.svg')) return svgToPngDataURL(file);
   const isHeic = /hei[cf]/.test(type) || /\.(heic|heif)$/.test(name);
   let dataURL = await fileToDataURL(file);
@@ -4814,7 +4894,7 @@ async function handleLogoFile(e, which){
   const file = e.target.files[0]; if (!file) return;
   let dataURL, img;
   try{ dataURL = await fileToImageDataURL(file); img = await loadImage(dataURL); }
-  catch(err){ toast('Format d\'image non pris en charge : '+file.name); e.target.value=''; return; }
+  catch(err){ if (!(err instanceof ImportCancelled)) toast('Format non pris en charge ou fichier illisible : '+file.name); e.target.value=''; return; }
   const maxW = which==='entreprise' ? 240 : 160, maxH = which==='entreprise' ? 150 : 100;
   const ratio = Math.min(maxW/img.width, maxH/img.height, 1);
   // Un remplacement manuel retire l'ancien logo de la même catégorie plutôt que de
@@ -5620,12 +5700,43 @@ document.getElementById('btnGrid').addEventListener('click', ()=>{
   updateGridButton();
   setGridVisible(gridVisible);
 });
+// v2.1-130 : détection automatique ordinateur / smartphone. Critère principal = le POINTEUR (souris précise + survol possible)
+// plutôt que la largeur : un iPad ou un téléphone en mode « ordinateur » restent tactiles. « desk » = souris ET écran >= 700 px.
+const deskMQ = window.matchMedia('(hover: hover) and (pointer: fine)');
+const IS_MAC = /Mac/i.test((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '') && !(navigator.maxTouchPoints > 0);
+function applyDeviceClass(){
+  document.body.classList.toggle('desk', deskMQ.matches && window.innerWidth >= 700);
+  document.body.classList.toggle('is-mac', IS_MAC);
+}
+applyDeviceClass();
+if (deskMQ.addEventListener) deskMQ.addEventListener('change', applyDeviceClass);
+window.addEventListener('resize', applyDeviceClass);
+// Sur Mac, les infobulles annoncent ⌘ au lieu de Ctrl.
+if (IS_MAC) document.querySelectorAll('[title*="Ctrl+"]').forEach(el=>{ el.title = el.title.replace(/Ctrl\+/g, '⌘'); });
+// Déplacement fin au clavier (flèches, Maj = 10) de l'élément sélectionné non verrouillé ; une seule entrée d'historique par série.
+let keyNudgeTimer = null;
+function keyNudge(dx, dy){
+  const o = findSelectedModelObject();
+  if (!o || o.locked || !isFinite(o.x) || !isFinite(o.y)) return false;
+  o.x += dx; o.y += dy;
+  scheduleRender();
+  clearTimeout(keyNudgeTimer); keyNudgeTimer = setTimeout(()=>pushHistory(), 500);
+  return true;
+}
 document.getElementById('btnUndo').addEventListener('click', undo);
 document.getElementById('btnRedo').addEventListener('click', redo);
 window.addEventListener('keydown', (e)=>{
   const typing = document.activeElement && (document.activeElement.tagName==='INPUT' || document.activeElement.tagName==='TEXTAREA');
   if (!typing && (e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='z' && !e.shiftKey){ e.preventDefault(); undo(); }
   if (!typing && (e.ctrlKey||e.metaKey) && (e.key.toLowerCase()==='y' || (e.shiftKey&&e.key.toLowerCase()==='z'))){ e.preventDefault(); redo(); }
+  // v2.1-130 : flèches = déplacement fin ; Ctrl/⌘+S = enregistrer le projet ; Échap = désélectionner
+  if (!typing && selectedId && !e.ctrlKey && !e.metaKey && !e.altKey && e.key.startsWith('Arrow')){
+    const st = e.shiftKey ? 10 : 1;
+    const d = { ArrowLeft:[-st,0], ArrowRight:[st,0], ArrowUp:[0,-st], ArrowDown:[0,st] }[e.key];
+    if (d && keyNudge(d[0], d[1])) e.preventDefault();
+  }
+  if (!typing && (e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); document.getElementById('btnSave').click(); }
+  if (e.key==='Escape' && !typing && !activeTool){ if (selectedId) selectNode(null, null); closeSelectionSettings(); closeAllPopovers(); closeAllTileDrawers(); }
   if (e.key==='Delete' || e.key==='Backspace'){
     if (selectedId && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='TEXTAREA'){
       document.getElementById('selDelete').click();

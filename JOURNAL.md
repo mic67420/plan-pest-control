@@ -1165,4 +1165,16 @@ v2.1-129 — Import de tous les formats d'image ; tiroirs sur une seule ligne
    en portrait (testé 360 / 390 / 430 px) pour Page, Vue, Fichier, Plan, Texte ; Pastille = 2 lignes (poste + taille, puis
    outils). Libellés raccourcis (Préc., Suiv., Suppr., Verrou.), n° de page « 1/3 », indicateur de sauvegarde du tiroir
    Page retiré (déjà dans le bandeau).
+
+v2.1-130 — Import PDF ; détection automatique ordinateur / smartphone ; raccourcis clavier
+ - PDF : pdf.js 3.11.174 chargé à la demande (jsDelivr ; le « worker » est récupéré puis servi par un blob). Une page est
+   dessinée en PNG (~2400 px). PDF de plusieurs pages : fenêtre de vignettes pour choisir la page ; une seule page :
+   import direct. Annuler ne montre aucun message (ImportCancelled). Test avec jsPDF + pdfjs-dist local.
+ - Détection : applyDeviceClass() pose body.desk quand le pointeur est une souris précise avec survol
+   (matchMedia hover/pointer fine) ET que l'écran fait >= 700 px (critère = le pointeur, pas la largeur : un iPad reste
+   tactile) et body.is-mac. Sur « desk » : barre de tuiles, tiroirs et fenêtres de réglages dans une colonne centrée
+   (620 px, fenêtres 460 px max). Aucun changement sur smartphone.
+ - Clavier : flèches = déplacement fin de l'élément sélectionné non verrouillé (Maj = 10 ; une entrée d'historique par
+   série), Ctrl/⌘+S = enregistrer, Échap = désélectionner et refermer ; Ctrl/⌘+Z et Y existaient (metaKey déjà géré) ;
+   sur Mac les infobulles affichent ⌘ au lieu de Ctrl.
 ```

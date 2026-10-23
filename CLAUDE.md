@@ -90,6 +90,8 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
   d'inactivité ou dès qu'on agit (pose d'une pastille, gomme…) ; la tuile reste bleue (v2.1-101, à l'essai).
   Survol souris = ouverture immédiate.
 - Barre de sélection et menus d'options en **pleine largeur**, étalés horizontalement.
+- Adaptation automatique ordinateur (v2.1-130) : `applyDeviceClass()` pose `body.desk` (souris précise + écran ≥ 700 px) ; barre de tuiles, tiroirs et fenêtres de réglages restent dans une colonne centrée. Pas de « mode PC » séparé.
+- Imports (v2.1-129/130) : `fileToImageDataURL()` convertit SVG, HEIC (heic2any), WebP/AVIF/GIF/BMP et PDF (pdf.js, page au choix) en PNG/JPEG ; bibliothèques chargées à la demande.
 - Police : **IBM Plex Sans uniquement** (constante `APP_FONT`, licence libre SIL OFL). Ne jamais
   réintroduire Inter, Arial ou une autre police propriétaire.
 
