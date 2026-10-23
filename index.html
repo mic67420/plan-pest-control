@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-134 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-135 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -521,7 +521,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-134</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-135</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -784,7 +784,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-134 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-135 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -4604,13 +4604,20 @@ async function pdfToImageDataURL(file, choosePage){
     const buf = new Uint8Array(await file.arrayBuffer());
     if (!buf.length) throw new Error('fichier vide : choisissez-le depuis « Téléchargements » ou téléchargez-le d\'abord sur le téléphone');
     const lib = await loadPdfLib();
-    doc = await lib.getDocument({ data:buf }).promise;
+    try{
+      doc = await lib.getDocument({ data:buf.slice() }).promise; // copie : pdf.js « transfère » (vide) le tampon qu'on lui donne
+    } catch(e1){
+      // 2e voie, sans transfert de tampon : le PDF est donné par adresse locale (blob:), lue par pdf.js lui-même (v2.1-135)
+      console.warn('Import PDF, 1re voie :', e1);
+      const u = URL.createObjectURL(new Blob([buf], { type:'application/pdf' }));
+      try{ doc = await lib.getDocument({ url:u }).promise; } finally { setTimeout(()=>URL.revokeObjectURL(u), 60000); }
+    }
   } catch(err){
     hideBubble();
     console.warn('Import PDF :', err);
     const msg = (err && err.name === 'PasswordException') ? 'PDF protégé par mot de passe.'
       : (/réseau|Failed to fetch|NetworkError|indisponible/i.test(String(err && err.message))) ? 'PDF : bibliothèque de lecture non téléchargée (vérifiez le réseau).'
-      : 'PDF illisible : '+String(err && err.message || err).slice(0,80);
+      : 'PDF illisible : '+String(err && err.message || err).slice(0,80)+' [v2.1-135, '+(file.size|0)+' o]';
     throw Object.assign(new Error(msg), { userMessage: msg });
   }
   hideBubble();

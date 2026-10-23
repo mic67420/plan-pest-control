@@ -1203,4 +1203,10 @@ v2.1-134 — Import PDF sur Android : « The PDF file is empty, size zero bytes 
    (URI de contenu du sélecteur) devient illisible entre-temps : lecture à zéro octet. Même risque pour le HEIC.
  - Correctif : lecture immédiate du fichier en mémoire (puis chargement de la bibliothèque) ; HEIC : copie en mémoire
    transmise à heic2any ; message clair si le fichier est réellement vide.
+
+v2.1-135 — Import PDF Android : même message avec v2.1-134
+ - Constat : le message restait « The PDF file is empty » (venant de pdf.js, donc fichier lu mais vu vide par la
+   bibliothèque ; notre test « 0 octet » aurait donné un autre texte). pdf.js transfère le tampon au worker.
+ - Correctif : on lui donne une COPIE ; en cas d'échec, 2e voie par adresse blob: (sans transfert). Le message d'erreur
+   indique la version et la taille du fichier lu pour aider au diagnostic.
 ```
