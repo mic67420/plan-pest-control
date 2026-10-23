@@ -1220,4 +1220,9 @@ v2.1-137 — Nouvelles icônes, lot 1 (les 6 tuiles)
    Texte). Lots suivants à valider un par un : tiroirs Page / Vue, Fichier / Plan, Pastille / Texte, pastilles rondes
    (cadenas, croix, ciseaux, réglages) et menu « Outils image ». Icônes à refaire : cadenas ouvert, dossier + horloge,
    export, import.
+
+v2.1-138 — Nouvelles icônes, lot 2 (tiroirs Page et Vue)
+ - Page : précédente, suivante, + étage, récap, page ← / →, supprimer, nouveau projet. Vue : portrait, paysage, zoom − / +,
+   ajuster, verrouiller, soleil. Outil : ico/apply.py (scratchpad) remplace l'<svg> d'un bouton par l'icône découpée.
+ - Bouton actif : pastille blanche derrière l'icône (contraste sur le fond bleu).
 ```
