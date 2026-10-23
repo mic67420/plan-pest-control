@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-133 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-134 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -521,7 +521,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-133</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-134</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -784,7 +784,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-133 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-134 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -4598,8 +4598,13 @@ async function pdfToImageDataURL(file, choosePage){
   showBubble('Lecture du PDF…');
   let doc;
   try{
+    // v2.1-133 : le fichier est lu TOUT DE SUITE, avant le téléchargement de pdf.js. Sur Android, le fichier choisi
+    // (document Drive, Téléchargements…) devient illisible au bout de quelques secondes : relu après le chargement de
+    // la bibliothèque, il arrivait « vide, taille zéro octet » (constaté par Mic).
+    const buf = new Uint8Array(await file.arrayBuffer());
+    if (!buf.length) throw new Error('fichier vide : choisissez-le depuis « Téléchargements » ou téléchargez-le d\'abord sur le téléphone');
     const lib = await loadPdfLib();
-    doc = await lib.getDocument({ data:new Uint8Array(await file.arrayBuffer()) }).promise;
+    doc = await lib.getDocument({ data:buf }).promise;
   } catch(err){
     hideBubble();
     console.warn('Import PDF :', err);
@@ -4678,8 +4683,9 @@ async function fileToImageDataURL(file, opts){
   } catch(err){
     if (!isHeic) throw err;
   }
+  const heicBlob = await (await fetch(dataURL)).blob(); // copie en mémoire : le fichier d'origine peut devenir illisible pendant le chargement de la bibliothèque (Android)
   const heic2any = await loadHeicLib();
-  const out = await heic2any({ blob:file, toType:'image/jpeg', quality:0.92 });
+  const out = await heic2any({ blob:heicBlob, toType:'image/jpeg', quality:0.92 });
   const blob = Array.isArray(out) ? out[0] : out;
   return fileToDataURL(blob);
 }

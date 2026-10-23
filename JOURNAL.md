@@ -1197,4 +1197,10 @@ v2.1-132 — Import PDF : messages clairs sur smartphone
 v2.1-133 — Mode soleil : le fond des tiroirs reste transparent
  - Cause : la règle body.sun-mode imposait background:#fff !important aux tiroirs et fenêtres, annulant le curseur « Fond ».
  - Correctif : même règle avec rgba(255,255,255,var(--drawer-alpha)) ; bordures noires conservées. Test smoke ajouté.
+
+v2.1-134 — Import PDF sur Android : « The PDF file is empty, size zero bytes »
+ - Cause : le fichier choisi n'était lu qu'APRÈS le téléchargement de pdf.js (plusieurs secondes). Sur Android, le fichier
+   (URI de contenu du sélecteur) devient illisible entre-temps : lecture à zéro octet. Même risque pour le HEIC.
+ - Correctif : lecture immédiate du fichier en mémoire (puis chargement de la bibliothèque) ; HEIC : copie en mémoire
+   transmise à heic2any ; message clair si le fichier est réellement vide.
 ```
