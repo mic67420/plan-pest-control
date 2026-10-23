@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-126 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-127 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -383,6 +383,18 @@
   #selSettingsBody #selSizeMinus, #selSettingsBody #selSizePlus{display:none !important;} /* remplacés par la barre − / + (buildRangeB) */
   #selSettingsBody input[type=color]{width:34px;height:32px;border:none;padding:0;border-radius:4px;background:none;}
   #selSettingsBody #selLabel{background:#fff !important;color:#1c2230 !important;border:1px solid #c9ced8 !important;}
+  /* v2.1-127 : mode « plein soleil » — contraste maximal en extérieur */
+  body.sun-mode{ --ink:#000; --bg:#9aa0aa; }
+  body.sun-mode #topbar{ background:#fff; border-bottom:2px solid #000; }
+  body.sun-mode #mobileTileBar .mtile, body.sun-mode #mobileTileBar .mtile-split button{ background:#fff; border:2px solid #000; color:#000; }
+  body.sun-mode #mobileTileBar .mtile.active{ background:#003d73; color:#fff; }
+  body.sun-mode #mobileTileBar .mtile .lbl, body.sun-mode .tb-icon-label{ color:#000; font-weight:800; }
+  body.sun-mode .tb-icon{ background:#fff !important; border:1.5px solid #000 !important; }
+  body.sun-mode .tb-icon.active{ background:#003d73 !important; }
+  body.sun-mode .tb-icon.active .tb-icon-label{ color:#fff; }
+  body.sun-mode.mobile-mode .tb-group.mobile-open, body.sun-mode .popover{ background:#fff !important; border:2px solid #000 !important; box-shadow:none; }
+  body.sun-mode #canvasWrap{ background:#9aa0aa; }
+  body.sun-mode .doc-row{ border:2px solid #000; }
   /* v2.1-126 : liste « Mes documents » */
   #docsList{display:flex;flex-direction:column;gap:8px;}
   .doc-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e3e6ec;border-radius:10px;background:#fff;}
@@ -483,14 +495,14 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-126</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-127</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
   <div id="mobileTileBar">
     <button class="mtile" data-tile="page" title="Pages"><svg class="icon" viewBox="0 0 24 24"><path d="M6 2.5h8.5L19 7v13.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z" fill="#FFFFFF" stroke="#2B3242" stroke-width="1.4" stroke-linejoin="round"/><path d="M14.5 2.5V7H19" fill="none" stroke="#2B3242" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 11.5h6M8 14.5h4" stroke="#BFC7D4" stroke-width="1.3" stroke-linecap="round"/></svg><span class="lbl">Page</span></button>
     <button class="mtile" data-tile="vue" title="Affichage"><svg class="icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="#E4EEF4" stroke="#0E6FA8" stroke-width="1.8"/><path d="M15.3 15.3 20 20" stroke="#2B3242" stroke-width="2" stroke-linecap="round"/></svg><span class="lbl">Vue</span></button>
-    <button class="mtile" data-tile="historique" title="Historique / export"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="#E4E8ED"/><path d="M7 8 4 11l3 3" stroke="#2B3242" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 11h8a4.5 4.5 0 1 1 0 9h-1.5" stroke="#0E6FA8" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span class="lbl">Historique</span></button>
+    <button class="mtile" data-tile="historique" title="Fichier : annuler, documents, enregistrer, exporter"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="#E4E8ED"/><path d="M7 8 4 11l3 3" stroke="#2B3242" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 11h8a4.5 4.5 0 1 1 0 9h-1.5" stroke="#0E6FA8" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span class="lbl">Fichier</span></button>
     <button class="mtile" data-tile="plan" title="Outils plan"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="14" rx="1.3" fill="#E4EEF4" stroke="#0E6FA8" stroke-width="1.4"/><circle cx="7.5" cy="9" r="1.6" fill="#F0C447" stroke="none"/><path d="M4.2 17 9.5 12l3.5 3.5 3-3.5L20 17" fill="#BFE0F0" stroke="#0E6FA8" stroke-width="1.4" stroke-linejoin="round"/></svg><span class="lbl">Plan</span></button>
     <button class="mtile" data-tile="pastille" title="Pastilles"><svg class="icon" viewBox="0 0 24 24"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12Z" fill="#D6493E" stroke="#8f2c24" stroke-width="1.2" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.6" fill="#FFFFFF" stroke="#8f2c24" stroke-width="1"/></svg><span class="lbl">Pastille</span></button>
     <button class="mtile" data-tile="texte" title="Textes, logos, légende"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="#E4E8ED"/><path d="M7.5 8h9M12 8v9" stroke="#2B3242" stroke-width="1.9" stroke-linecap="round"/></svg><span class="lbl">Texte</span></button>
@@ -522,6 +534,8 @@
     <span id="zoomLabel" class="mono" title="Niveau de zoom">100%</span>
     <button class="tb-icon" id="btnZoomIn" title="Zoom avant"><svg class="icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="#E4EEF4" stroke="#0E6FA8" stroke-width="1.8"/><path d="M15.3 15.3 20 20" stroke="#2B3242" stroke-width="2" stroke-linecap="round"/><path d="M10.5 7.5v6M7.5 10.5h6" stroke="#0E6FA8" stroke-width="1.8" stroke-linecap="round"/></svg></button>
     <button class="tb-icon" id="btnZoomFit" title="Ajuster à l'écran"><svg class="icon" viewBox="0 0 24 24"><rect x="5.5" y="5.5" width="13" height="13" rx="1" fill="#FBE6BF" stroke="#E8A83C" stroke-width="1.4"/><path d="M4 8V5.5a1.5 1.5 0 0 1 1.5-1.5H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16" stroke="#2B3242" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="tb-icon" id="btnLockAll" title="Tout verrouiller"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="#D6493E"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="#2B3242" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.5" fill="#fff"/></svg></button>
+    <button class="tb-icon" id="btnSun" title="Plein soleil"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2" fill="#F6C453" stroke="#B8862B" stroke-width="1.5"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" stroke="#B8862B" stroke-width="1.6" stroke-linecap="round"/></svg></button>
     <div class="pop-row" id="drawerAlphaRow" style="flex:1 1 100%;"><label>Fond</label><input type="range" id="rngDrawerAlpha" min="0" max="100" value="100" title="Opacité du fond des tiroirs"></div>
   </div>
   <div class="sep"></div>
@@ -742,7 +756,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-126 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-127 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1044,7 +1058,7 @@ window.addEventListener('beforeunload', (e)=>{
 // Enregistre tout de suite les modifications en attente (avant de remplacer le document ouvert).
 function flushAutoSaveNow(){ clearTimeout(autoSaveTimer); return autoSaveDirty ? doAutoSave() : Promise.resolve(); }
 function newProject(){
-  if (!confirm("Créer un nouveau projet ? Le projet actuel reste disponible dans Historique > Documents (les 5 derniers).")) return;
+  if (!confirm("Créer un nouveau projet ? Le projet actuel reste disponible dans Fichier > Documents (les 5 derniers).")) return;
   flushAutoSaveNow(); // le projet quitté est rangé dans « Mes documents » avant d'être remplacé
   idbClear();
   docId = newDocId();
@@ -1580,6 +1594,7 @@ function render(){
   document.getElementById('toolToggleLegend').classList.toggle('active', model.legend.visible);
   document.getElementById('chkOnlyUsed').checked = model.legend.onlyUsed;
   updateSizePreview(); // pastille témoin : couleur/étiquette du poste choisi (v2.1-68)
+  updateLockAllButton();
 }
 
 // render() appelle cette fonction très souvent (chaque valeur de curseur, chaque fin de
@@ -2091,7 +2106,18 @@ function renderContent(){
     if (!lg.scale || !isFinite(lg.scale) || lg.scale < 0.3 || lg.scale > 8) lg.scale = 1;
     const sheetWChk = model.orientation==='portrait' ? SHEET_W : SHEET_H;
     const sheetHChk = model.orientation==='portrait' ? SHEET_H : SHEET_W;
-    const legendWChk = 300*lg.scale, legendHChk = (34+14*2+Math.max(types.length,0)*30)*lg.scale;
+    // v2.1-127 : colonnes automatiques — si la légende, sur UNE colonne, dépasserait le bas de la page depuis sa position
+    // actuelle, les postes passent sur 2 ou 3 colonnes (jamais plus). Si la largeur sort alors à droite de la feuille,
+    // elle est ramenée juste assez à gauche (même principe que le recentrage « hors feuille » ci-dessous).
+    const LG_COL_W = 300, LG_ROW_H = 30, LG_PAD = 14, LG_TITLE_H = 34;
+    let legendCols = 1;
+    if (isFinite(lg.y)){
+      const availH = (sheetHChk - lg.y)/lg.scale - 10;
+      while (legendCols < 3 && (LG_TITLE_H + LG_PAD*2 + Math.ceil(types.length/legendCols)*LG_ROW_H) > availH && types.length > legendCols) legendCols++;
+    }
+    const legendRows = Math.max(1, Math.ceil(types.length/legendCols));
+    const legendWChk = LG_COL_W*legendCols*lg.scale, legendHChk = (LG_TITLE_H+LG_PAD*2+Math.max(types.length ? legendRows : 0,0)*LG_ROW_H)*lg.scale;
+    if (legendCols > 1 && isFinite(lg.x) && lg.x + legendWChk > sheetWChk) lg.x = Math.max(0, sheetWChk - legendWChk - 10);
     // Recentre aussi si la légende est passée ENTIÈREMENT hors de la feuille — pas
     // seulement pour des valeurs aberrantes (NaN, des milliers de pixels) : un simple
     // déplacement accidentel (ou hérité d'un changement d'orientation, une page dupliquée
@@ -2103,7 +2129,7 @@ function renderContent(){
     if (offPage){ lg.x = sheetWChk-legendWChk-40; lg.y = sheetHChk-legendHChk-40; }
     // Les couleurs de police et de fond font partie de la signature : les modifier doit
     // reconstruire la légende (sinon le changement ne s'afficherait pas).
-    const legendSig = JSON.stringify(types.map(t=>[t.id,t.color,t.shape,t.code,t.name,t.noNumber,t.defaultRadius])) + '|' + (lg.textColor||'') + '|' + (lg.bgColor||'');
+    const legendSig = JSON.stringify(types.map(t=>[t.id,t.color,t.shape,t.code,t.name,t.noNumber,t.defaultRadius])) + '|' + (lg.textColor||'') + '|' + (lg.bgColor||'') + '|c' + legendCols;
     const legendFg = lg.textColor || null;
     const legendBg = (!lg.bgColor) ? '#ffffff' : (lg.bgColor==='transparent' ? 'rgba(0,0,0,0)' : lg.bgColor);
     const legendNoBg = lg.bgColor==='transparent';
@@ -2114,8 +2140,8 @@ function renderContent(){
         draggable:true, id:'legend-frame', name:'legend'
       });
       group._sig = legendSig;
-      const DESIGN_W = 300, ROW_H = 30, PAD = 14, TITLE_H = 34;
-      const height = TITLE_H + PAD*2 + types.length*ROW_H;
+      const DESIGN_W = LG_COL_W*legendCols, ROW_H = LG_ROW_H, PAD = LG_PAD, TITLE_H = LG_TITLE_H;
+      const height = TITLE_H + PAD*2 + (types.length ? legendRows : 0)*ROW_H;
       group.add(new Konva.Rect({
         x:0,y:0,width:DESIGN_W,height, fill:legendBg, stroke:legendNoBg ? 'rgba(0,0,0,0)' : '#d8dce3', strokeWidth:1, cornerRadius:8,
         shadowColor:'rgba(20,26,40,0.28)', shadowBlur:14, shadowOffset:{x:0,y:4}, shadowOpacity:legendNoBg ? 0 : 0.5
@@ -2125,7 +2151,8 @@ function renderContent(){
         fontFamily:APP_FONT, fill:legendFg || '#1c2230'
       }));
       types.forEach((t,i)=>{
-        const rowY = TITLE_H + PAD + i*ROW_H + ROW_H/2;
+        const col = Math.floor(i/legendRows), colX = col*LG_COL_W;
+        const rowY = TITLE_H + PAD + (i%legendRows)*ROW_H + ROW_H/2;
         // Les postes "sans numéro" (ex. souris/rat) n'affichent aucune étiquette sur la
         // pastille du plan : la légende reste cohérente avec ça, sans code dessus non plus.
         // Taille UNIFORME (10) pour toutes les pastilles de la légende, quelle que soit
@@ -2134,10 +2161,10 @@ function renderContent(){
         // jugé moins lisible qu'une taille identique partout.
         const iconR = 10;
         const mini = buildPastilleGroup(t, iconR, t.noNumber ? '' : t.code);
-        mini.position({x:PAD+12, y:rowY});
+        mini.position({x:colX+PAD+12, y:rowY});
         group.add(mini);
         group.add(new Konva.Text({
-          x:PAD+34, y:rowY-9, width:DESIGN_W-PAD*2-34, text:t.name, fontSize:13,
+          x:colX+PAD+34, y:rowY-9, width:LG_COL_W-PAD*2-34, text:t.name, fontSize:13,
           fontFamily:APP_FONT, fill:legendFg || '#2a3142'
         }));
       });
@@ -5624,7 +5651,41 @@ function exportStageDataURL(mimeType, quality, pixelRatio){
 // orientation propre), puis restaure la page affichée avant l'export. Utilisé pour les
 // exports multi-pages (PDF). Les exports PNG/JPEG/PPTX ci-dessous restent, eux, limités
 // à la page actuellement affichée à l'écran.
+// v2.1-127 : choix des pages à exporter (la page « Récapitulatif », si elle existe, est décochée par défaut : le client n'en
+// a pas besoin). Un seul étage = aucune question. Résultat : liste d'indices, ou null si Mic annule.
+function askPagesToExport(){
+  if (pages.length <= 1) return Promise.resolve([0]);
+  return new Promise(resolve=>{
+    const card = document.createElement('div');
+    card.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);max-width:calc(100vw - 32px);width:340px;'
+      + 'background:#F59E0B;color:#1c2230;padding:12px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);'
+      + 'z-index:950;font-size:13px;font-weight:500;display:flex;flex-direction:column;gap:8px;';
+    const bar = document.getElementById('mobileTileBar'); const r = bar ? bar.getBoundingClientRect() : null;
+    card.style.top = ((r && r.height ? r.bottom : 58) + 6)+'px';
+    card.innerHTML = '<div style="font-weight:700;">Pages à exporter</div>';
+    const list = document.createElement('div'); list.style.cssText = 'display:flex;flex-direction:column;gap:2px;background:#fff7e6;border-radius:8px;padding:6px 8px;max-height:40vh;overflow:auto;';
+    const boxes = pages.map((pg, i)=>{
+      const lab = document.createElement('label'); lab.style.cssText = 'display:flex;align-items:center;gap:8px;padding:5px 0;';
+      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !pg.recap; cb.style.cssText = 'width:20px;height:20px;';
+      const nm = document.createElement('span'); nm.textContent = pg.recap ? 'Récapitulatif des postes' : 'Page '+(i+1);
+      lab.append(cb, nm); list.appendChild(lab); return cb;
+    });
+    card.appendChild(list);
+    const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;';
+    const mk = (txt, bg, fg, fn)=>{ const b = document.createElement('button'); b.type='button'; b.textContent = txt; b.style.cssText = 'font:inherit;padding:8px 14px;border:none;border-radius:8px;background:'+bg+';color:'+fg+';'; b.addEventListener('click', fn); return b; };
+    const done = (v)=>{ card.remove(); resolve(v); };
+    row.append(mk('Annuler','#fff7e6','#1c2230',()=>done(null)), mk('Exporter','#1c2230','#fff',()=>{
+      const idx = boxes.map((cb,i)=>cb.checked ? i : -1).filter(i=>i>=0);
+      if (!idx.length){ toast('Cochez au moins une page.'); return; }
+      done(idx);
+    }));
+    card.appendChild(row);
+    document.body.appendChild(card);
+  });
+}
 async function captureAllPagesAsImages(mimeType, quality){
+  const wanted = await askPagesToExport();
+  if (!wanted) return null; // export annulé
   const originalIndex = currentPageIndex;
   const images = [];
   // Pendant la capture, les pastilles et la légende sont redessinées en VECTORIEL (pas depuis
@@ -5632,6 +5693,7 @@ async function captureAllPagesAsImages(mimeType, quality){
   bitmapCacheEnabled = false;
   try{
   for (let i=0; i<pages.length; i++){
+    if (!wanted.includes(i)) continue; // page non cochée
     currentPageIndex = i;
     model = pages[i];
     selectedId = null; transformer.nodes([]);
@@ -5674,7 +5736,7 @@ async function downloadImagesAsFileOrZip(images, ext, baseName){
 // Impression (v2.1-80) : toutes les pages en A4, orientation de chaque page respectée.
 document.getElementById('btnPrint').addEventListener('click', async ()=>{
   closeAllPopovers();
-  const images = await captureAllPagesAsImages('image/jpeg', 0.95);
+  const images = await captureAllPagesAsImages('image/jpeg', 0.95); if (!images) return;
   const title = (docName || 'plan-pest-control').replace(/[<>&"]/g,'');
   const html = '<!doctype html><html><head><meta charset="utf-8"><title>'+title+'</title><style>'
     + '@page portrait{size:A4 portrait;margin:0}@page landscape{size:A4 landscape;margin:0}'
@@ -5699,21 +5761,21 @@ document.getElementById('btnPrint').addEventListener('click', async ()=>{
 document.getElementById('btnExportPNG').addEventListener('click', async ()=>{
   closeAllPopovers();
   const base = await ensureDocName(); if (!base) return;
-  const images = await captureAllPagesAsImages('image/png');
+  const images = await captureAllPagesAsImages('image/png'); if (!images) return;
   await downloadImagesAsFileOrZip(images, 'png', base);
   toast((images.length>1 ? images.length+' pages exportées (.zip).' : 'PNG exporté.'));
 });
 document.getElementById('btnExportJPEG').addEventListener('click', async ()=>{
   closeAllPopovers();
   const base = await ensureDocName(); if (!base) return;
-  const images = await captureAllPagesAsImages('image/jpeg', 0.92);
+  const images = await captureAllPagesAsImages('image/jpeg', 0.92); if (!images) return;
   await downloadImagesAsFileOrZip(images, 'jpg', base);
   toast((images.length>1 ? images.length+' pages exportées (.zip).' : 'JPEG exporté.'));
 });
 document.getElementById('btnExportPDF').addEventListener('click', async ()=>{
   closeAllPopovers();
   const base = await ensureDocName(); if (!base) return;
-  const images = await captureAllPagesAsImages('image/jpeg', 0.95);
+  const images = await captureAllPagesAsImages('image/jpeg', 0.95); if (!images) return;
   const { jsPDF } = window.jspdf;
   let pdf = null;
   images.forEach(img=>{
@@ -5729,7 +5791,7 @@ document.getElementById('btnExportPDF').addEventListener('click', async ()=>{
 document.getElementById('btnExportPPTX').addEventListener('click', async ()=>{
   closeAllPopovers();
   const base = await ensureDocName(); if (!base) return;
-  const images = await captureAllPagesAsImages('image/png');
+  const images = await captureAllPagesAsImages('image/png'); if (!images) return;
   const pptx = new window.PptxGenJS();
   // Le format du diaporama (calque) est fixé sur l'orientation de la page 1 ; les pages
   // suivantes, si elles ont une orientation différente, sont insérées à leur échelle
@@ -5831,7 +5893,7 @@ const SHORT_ICON_LABELS = {
   'Déplacer cette page vers la gauche':'Page ←','Déplacer cette page vers la droite':'Page →',
   'Supprimer la page courante':'Suppr. page','Nouveau projet':'Nouveau',
   'Orientation portrait':'Portrait','Orientation paysage':'Paysage','Zoom arrière':'Zoom −','Zoom avant':'Zoom +',
-  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Ouvrir un projet':'Ouvrir',
+  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Plein soleil':'Soleil','Ouvrir un projet':'Ouvrir',
   'Importer un plan':'Importer','Découpe rectangulaire':'Découpe □','Découpe point par point':'Découpe pts',
   'Outils image : pipette, pot de peinture, gomme, réglages':'Outils image','Pot de peinture intelligent':'Pot peinture',
   'Gomme carrée':'Gomme','Placement classique':'Classique','Placement déporté':'Déporté',
@@ -5868,6 +5930,32 @@ function applyDrawerAlpha(){
   rng.addEventListener('input', ()=>{ drawerAlpha = parseInt(rng.value,10); applyDrawerAlpha(); schedulePastilleDrawerClose(); }); // le tiroir reste ouvert pendant le réglage
 }
 applyDrawerAlpha();
+// v2.1-127 : « Tout verrouiller » (page affichée) — bascule : s'il reste un élément déverrouillé on verrouille tout,
+// sinon on déverrouille tout. Annulable (un seul pushHistory).
+function pageLockables(){ return [...model.plans, ...model.pastilles, ...model.textes, ...model.logos, model.legend].filter(Boolean); }
+function updateLockAllButton(){
+  const btn = document.getElementById('btnLockAll'); if (!btn) return;
+  const anyOpen = pageLockables().some(o=>!o.locked);
+  const lbl = btn.querySelector('.tb-icon-label'), txt = anyOpen ? 'Tout verr.' : 'Tout déverr.';
+  if (lbl && lbl.textContent !== txt) lbl.textContent = txt;
+  btn.title = anyOpen ? 'Tout verrouiller' : 'Tout déverrouiller';
+}
+document.getElementById('btnLockAll').addEventListener('click', ()=>{
+  const all = pageLockables(), anyOpen = all.some(o=>!o.locked);
+  all.forEach(o=>{ o.locked = anyOpen; });
+  pushHistory(); render();
+  toast(anyOpen ? 'Tout est verrouillé sur cette page.' : 'Tout est déverrouillé sur cette page.');
+});
+// v2.1-127 : mode « plein soleil » (contraste renforcé, bordures noires, fond du plan plus sombre), mémorisé sur l'appareil.
+let sunMode = false;
+try{ sunMode = localStorage.getItem('ppc_sun') === '1'; }catch(e){}
+function applySunMode(){
+  document.body.classList.toggle('sun-mode', sunMode);
+  const btn = document.getElementById('btnSun'); if (btn) btn.classList.toggle('active', sunMode);
+  try{ localStorage.setItem('ppc_sun', sunMode ? '1' : '0'); }catch(e){}
+}
+document.getElementById('btnSun').addEventListener('click', ()=>{ sunMode = !sunMode; applySunMode(); });
+applySunMode();
 function updateGridButton(){
   const btn = document.getElementById('btnGrid');
   const txt = gridVisible ? "Grille d'accroche activée" : "Grille d'accroche désactivée";

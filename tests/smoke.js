@@ -130,6 +130,12 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       return { opened: docId===idA && docName==='Doc A', plans: model.plans.length, img: !!(model.plans[0] && model.plans[0].dataURL.length>500), name: A && A.name };
     });
     ok(docs2.opened && docs2.plans===1 && docs2.img && docs2.name==='Doc A', 'Mes documents : un document rangé se rouvre avec son plan et son nom');
+    // 15. v2.1-127 : tout verrouiller, plein soleil, légende en colonnes, choix des pages
+    ok(await pg.evaluate(()=>{ model.pastilles.forEach(q=>q.locked=false); document.getElementById('btnLockAll').click(); const a = pageLockables().every(o=>o.locked); document.getElementById('btnLockAll').click(); const b = pageLockables().every(o=>!o.locked); return a && b; }), 'tout verrouiller : bascule verrouillé puis déverrouillé');
+    ok(await pg.evaluate(()=>{ document.getElementById('btnSun').click(); const on = document.body.classList.contains('sun-mode'); document.getElementById('btnSun').click(); return on && !document.body.classList.contains('sun-mode'); }), 'plein soleil : activé puis désactivé');
+    const cols = await pg.evaluate(()=>{ model.legend.visible = true; model.legend.onlyUsed = false; model.legend.locked = false; const h = sheetH(); model.legend.x = 100; model.legend.y = h - 300; model.legend.scale = 1; legendGroupNode && legendGroupNode.destroy(); legendGroupNode = null; render(); const w = legendGroupNode.getClientRect({relativeTo:stage}).width; model.legend.y = 40; legendGroupNode.destroy(); legendGroupNode = null; render(); const w1 = legendGroupNode.getClientRect({relativeTo:stage}).width; return { bas:Math.round(w), haut:Math.round(w1) }; });
+    ok(cols.bas > cols.haut*1.5, 'légende : colonnes automatiques quand elle déborderait en bas ('+cols.haut+' px en haut, '+cols.bas+' px en bas)');
+    ok(await pg.evaluate(async()=>(await askPagesToExport()).join()==='0' || pages.length>1), 'export : une seule page = aucune question');
     ok(errs.length===0, 'aucune erreur JavaScript'+(errs.length?' : '+errs[0]:''));
   } finally { await b.close(); }
   console.log(fails ? '\n'+fails+' ÉCHEC(S)' : '\nTOUS LES TESTS PASSENT');

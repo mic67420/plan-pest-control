@@ -1135,4 +1135,13 @@ v2.1-126 — Mes documents (5), « ✓ hh:mm » visible, tuile Annuler | Rétabl
    À 360 px de large, le libellé « Historique » est tronqué.
  - Flèches ← ↑ ↓ → dans la fenêtre de réglages d'une pastille : 1 unité par appui, répétition en maintenant, un seul
    pushHistory à la fin de la série.
+
+v2.1-127 — Tuile « Fichier », tout verrouiller, plein soleil, choix des pages à exporter, légende en colonnes
+ - La tuile « Historique » devient « Fichier » (libellé tronqué à 360 px ; contient annuler, documents, enregistrer, exporter).
+ - Tiroir Vue : « Tout verr. / Tout déverr. » (plans, pastilles, textes, logos, légende de la page affichée ; annulable) et
+   « Soleil » (classe body.sun-mode : bordures noires, textes gras, fond plus sombre ; mémorisé en localStorage).
+ - Export : askPagesToExport() dans captureAllPagesAsImages() (PDF, PPTX, PNG, JPEG, impression) ; un seul étage = aucune
+   question ; annuler = aucun export. La page « Récapitulatif » (v2.1-128) est décochée par défaut.
+ - Légende : si elle dépasserait le bas de la page depuis sa position, 2 puis 3 colonnes (jamais plus) ; si la largeur
+   sort à droite, x est ramené juste assez à gauche (même principe que le recentrage « hors feuille »).
 ```
