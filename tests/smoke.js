@@ -200,6 +200,9 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     ok(pdf.nb===2 && pdf.red && pdf.h>pdf.w && pdf.direct, 'import PDF : 2 pages proposées, la page 2 est importée ; PDF d\'une page = import direct ('+JSON.stringify(pdf)+')');
     ok(await pg.evaluate(()=>!document.body.classList.contains('desk')), 'détection : tactile 430 px = mode smartphone (pas de classe desk)');
     ok(await pg.evaluate(async()=>{ selectedTypeId = model.deviceTypes[0].id; const pa = addPastille(200,200); pa.locked = false; selectNode(pastilleNodes.get(pa.id), pa.id); window.__pa = pa; return true; }) && await (async()=>{ await pg.keyboard.press('ArrowRight'); await pg.keyboard.press('Shift+ArrowDown'); await pg.waitForTimeout(300); return pg.evaluate(()=>window.__pa.x===201 && window.__pa.y===210); })(), 'clavier : flèche = 1, Maj+flèche = 10 sur l\'élément sélectionné');
+    // 19. v2.1-131 : finesse du dessin = densité de l'écran x zoom (écran 1x, téléphone : plafond mémoire 2 ; ordinateur : jusqu'à ~2,6)
+    const rr = await pg.evaluate(()=>{ const z0 = zoom, r0 = Konva.pixelRatio; setZoom(2.5); const r1 = Konva.pixelRatio, w1 = planLayer.getCanvas().width, fw = stage.width(); setZoom(z0); return { r0, r1, ok: Math.abs(w1 - fw*r1) <= 1 }; });
+    ok(rr.r1 >= 2 && rr.ok && rr.r1 > rr.r0, 'dessin net au zoom : ratio '+rr.r0+' -> '+rr.r1+' à 250 %, canevas de la bonne taille');
     ok(errs.length===0, 'aucune erreur JavaScript'+(errs.length?' : '+errs[0]:''));
   } finally { await b.close(); }
   console.log(fails ? '\n'+fails+' ÉCHEC(S)' : '\nTOUS LES TESTS PASSENT');

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-130 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-131 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -520,7 +520,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-130</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-131</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -783,7 +783,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-130 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-131 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -5675,7 +5675,30 @@ function setZoom(z, lite){
   applySheetSize();
   if (!lite) settleZoom();
 }
+// v2.1-131 : finesse du dessin à l'écran. Le canevas est dessiné à 'Konva.pixelRatio' fois la taille de la feuille puis agrandi
+// ou réduit en CSS par le zoom : sur un PC (écran à 1 pixel par pixel) le plafond de 2 et le ratio fixe donnaient une image
+// floue dès qu'on zoomait (le PDF exporté, lui, est dessiné à ratio 2 sans zoom, donc net). Le ratio suit maintenant
+// « densité de l'écran × zoom », avec un plancher (celui d'avant sur téléphone ; 2 sur ordinateur) et un plafond de MÉMOIRE
+// (nombre de pixels par couche) pour ne jamais alourdir un téléphone au-delà de l'ancien comportement.
+function computeRenderRatio(){
+  const dpr = window.devicePixelRatio || 1;
+  const desk = document.body.classList.contains('desk');
+  const floor = desk ? 2 : Math.min(dpr, 2);
+  const budget = Math.sqrt((desk ? 10e6 : 6e6) / (stage.width()*stage.height()));
+  const r = Math.min(Math.max(floor, dpr*zoom), budget, 4);
+  return Math.max(1, Math.round(r*4)/4); // par pas de 0,25 : pas de reconstruction à chaque micro-zoom
+}
+function applyRenderRatio(){
+  const r = computeRenderRatio();
+  if (Math.abs(r - Konva.pixelRatio) < 0.01) return;
+  Konva.pixelRatio = r;
+  [planLayer, contentLayer, gridLayer, uiLayer].forEach(l=>l.getCanvas().setPixelRatio(r));
+  planImageNodes.forEach(n=>{ n._forceRefresh = true; }); // plans filtrés : image mise en cache refaite à la nouvelle finesse
+  resetContentNodeCaches(); // pastilles et légende mises en cache bitmap à l'ancienne finesse
+  render();
+}
 function settleZoom(){
+  applyRenderRatio();
   updateSizePreview(); // la pastille témoin suit le zoom (taille réelle à l'écran)
   if (!planRotate.active) updateLockIndicator(); // met à jour aussi les icônes de rotation : taille constante à l'écran
   if (selectedId){ // zone de saisie de la pastille sélectionnée : taille constante à l'écran
@@ -5706,6 +5729,7 @@ const deskMQ = window.matchMedia('(hover: hover) and (pointer: fine)');
 const IS_MAC = /Mac/i.test((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '') && !(navigator.maxTouchPoints > 0);
 function applyDeviceClass(){
   document.body.classList.toggle('desk', deskMQ.matches && window.innerWidth >= 700);
+  if (typeof applyRenderRatio === 'function' && typeof planLayer !== 'undefined') applyRenderRatio(); // le plancher dépend de « desk »
   document.body.classList.toggle('is-mac', IS_MAC);
 }
 applyDeviceClass();

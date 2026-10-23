@@ -1177,4 +1177,13 @@ v2.1-130 — Import PDF ; détection automatique ordinateur / smartphone ; racco
  - Clavier : flèches = déplacement fin de l'élément sélectionné non verrouillé (Maj = 10 ; une entrée d'historique par
    série), Ctrl/⌘+S = enregistrer, Échap = désélectionner et refermer ; Ctrl/⌘+Z et Y existaient (metaKey déjà géré) ;
    sur Mac les infobulles affichent ⌘ au lieu de Ctrl.
+
+v2.1-131 — Résolution à l'écran sur PC / Mac
+ - Cause : le canevas était dessiné à un ratio fixe (écran, plafonné à 2) puis agrandi en CSS par le zoom. Sur un écran
+   d'ordinateur (1 ou 1,25 pixel par pixel) on zoome presque toujours au-delà du ratio : l'image était donc étirée et floue.
+   L'export PDF, dessiné à ratio 2 sans zoom, restait net. Sur téléphone, la feuille est affichée réduite : rien à voir.
+ - Correctif : computeRenderRatio() / applyRenderRatio() (appelé à la fin de chaque zoom, pas pendant le pincement, et au
+   changement « desk ») : ratio = max(plancher, densité d'écran × zoom), plancher = ancien ratio sur téléphone / 2 sur
+   ordinateur, plafonné par un budget mémoire (6 M pixels par couche sur téléphone = jamais plus lourd qu'avant, 10 M sur
+   ordinateur, soit ~2,6) et 4, par pas de 0,25. Les caches bitmap (pastilles, légende, plans filtrés) sont refaits.
 ```
