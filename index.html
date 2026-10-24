@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-153 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-154 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -193,7 +193,10 @@
   .dd-list.open{display:block;}
   .dd-item{display:flex;align-items:center;gap:9px;padding:8px 9px;font-size:12.5px;color:#2a3142;border-radius:7px;cursor:pointer;}
   .dd-item:hover{background:#eef2fb;}
-  .dd-item.selected{background:var(--accent-soft);}
+  /* v2.1-154 : poste choisi = confirmation visuelle nette : pastille ✓ verte à gauche + barre bleue + nom en gras */
+  .dd-item.selected{background:var(--accent-soft);box-shadow:inset 4px 0 0 var(--accent);font-weight:600;}
+  .dd-item{position:relative;padding-left:22px;}
+  .dd-item.selected::before{content:'✓';position:absolute;left:3px;top:50%;margin-top:-8px;width:16px;height:16px;border-radius:50%;background:#2E9E6B;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;}
   .dd-item .code{font-weight:700;min-width:30px;flex:none;text-align:center;}
   /* Nom complet : sur une seule ligne si la place le permet, sinon renvoyé à la ligne
      (petit écran) — jamais tronqué. */
@@ -459,6 +462,7 @@
   body:not(.night-mode) #mobileTileBar .mtile[data-tile="plan"]{ border-bottom-color:#7A5AD8; }
   body:not(.night-mode) #mobileTileBar .mtile[data-tile="pastille"]{ border-bottom-color:#D6493E; }
   body:not(.night-mode) #mobileTileBar .mtile[data-tile="texte"]{ border-bottom-color:#E8A83C; }
+  body:not(.night-mode) #mobileTileBar #mtileUndo, body:not(.night-mode) #mobileTileBar #mtileRedo{ border-bottom-color:#2E9E6B; } /* v2.1-154 : liseré de couleur aussi pour Annuler / Rétablir */
   body:not(.night-mode) #mobileTileBar .mtile.active{ background:var(--accent); }
   /* v2.1-142 : bouton d'affichage à 3 états (Jour / Soleil / Nuit) : seul le dessin du mode actif est visible */
   #btnSun .th-night{ display:none; }
@@ -543,7 +547,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-153</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-154</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -782,7 +786,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-153 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-154 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -6232,7 +6236,7 @@ const SHORT_ICON_LABELS = {
   'Déplacer cette page vers la gauche':'Page ←','Déplacer cette page vers la droite':'Page →',
   'Supprimer la page courante':'Suppr.','Nouveau projet':'Nouveau',
   'Orientation portrait':'Portrait','Orientation paysage':'Paysage','Zoom arrière':'Zoom −','Zoom avant':'Zoom +',
-  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Déplacement fin de la pastille':'Flèches','Taille de tous les éléments d\'un poste':'Tailles','Page récapitulative des postes':'Récap.','Mode d\'affichage : jour / nuit':'Jour','Ouvrir un projet':'Ouvrir',
+  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Déplacement fin de la pastille':'Ajust. fin','Taille de tous les éléments d\'un poste':'Tailles','Page récapitulative des postes':'Récap.','Mode d\'affichage : jour / nuit':'Jour','Ouvrir un projet':'Ouvrir',
   'Importer un plan':'Importer','Découpe rectangulaire':'Découpe □','Découpe point par point':'Découpe pts',
   'Outils image : pipette, pot de peinture, gomme, réglages':'Outils image','Pot de peinture intelligent':'Pot peinture',
   'Gomme carrée':'Gomme','Placement classique':'Classique','Placement déporté':'Déporté',

@@ -1341,4 +1341,9 @@ v2.1-153 — Taille par poste = prochaines pastilles seulement ; légende « Pos
   Cause : − / + dans la liste des postes modifiaient aussi les pastilles déjà posées (setTypeSize).
   Correctif : seule la taille par défaut du poste change (la fenêtre « Tailles » reste le moyen de tout modifier) ; ajout de l'annotation
   « Postes » sous la liste déroulante du tiroir Pastille.
+
+v2.1-154 — Poste choisi confirmé visuellement, « Ajust. fin », liseré Annuler / Rétablir
+  Cause : le poste actif n'était qu'un fond bleu pâle peu visible ; l'icône de déplacement fin s'appelait « Flèches » ; les tuiles
+  Annuler / Rétablir avaient un liseré gris.
+  Correctif : ✓ vert + barre bleue + gras sur le poste choisi ; étiquette « Ajust. fin » ; liseré vert sur Annuler et Rétablir.
 ```
