@@ -1258,4 +1258,14 @@ v2.1-142 — Grille /2, pastille : 4 icônes en ligne + réglages sur une ligne,
 v2.1-143 — Tuiles plus visibles en mode jour (proposition D)
  - Fond blanc, bordure grise, ombre légère et liseré de couleur par tuile (Page foncé, Vue turquoise, Fichier bleu, Plan violet,
    Pastille rouge, Texte orange) ; uniquement hors modes Soleil / Nuit.
+
+v2.1-144 — Pastille : UNE seule fenêtre, UNE seule ligne (essai)
+ - Constat de Mic : le tiroir Pastille (2 lignes) et la fenêtre de réglages d'une pastille étaient deux fenêtres différentes.
+ - Le tiroir Pastille est maintenant aussi la fenêtre de réglages : ligne unique = poste (code seul + liste déroulante) | taille
+   − curseur + | placement classique, déporté, grille (icônes seules, infobulles) | flèches ← ↑ ↓ → . Le bouton « Postes » est
+   masqué : « + Nouveau poste… » est au bas de la liste déroulante. Pastille sélectionnée : le curseur règle SA taille, la
+   liste change SON poste (numéro suivant libre), les flèches s'activent (grisées sinon) ; l'icône bleue de la pastille ouvre ce
+   tiroir (2e appui = ferme). La fenêtre #popSelSettings ne sert plus qu'à la légende.
+ - Perdus dans l'essai : la couleur de la pastille (se règle dans « modifier le poste » ✎ de la liste), la pastille témoin et la
+   valeur chiffrée de la taille.
 ```
