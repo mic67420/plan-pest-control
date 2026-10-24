@@ -1278,4 +1278,14 @@ v2.1-145 — 4 icônes centrées, découpe (pointillés + fenêtre orange), flè
    place en bas ; la bulle d'instruction est masquée quand la fenêtre apparaît.
  - Flèches de déplacement fin : sorties du tiroir Pastille, pastille orange flottante en bas (même style que le réglage de
    rotation du plan), visible seulement pour une pastille déverrouillée.
+
+v2.1-146 — Découpe : pointillés conservés au 2e coin ; flèches en haut, ouvertes par une icône
+ - Cause réelle (reproduite avec des touchers simulés) : le 2e coin se règle en déplaçant le cercle, puis se VALIDE en
+   touchant le cercle. Au relâchement du doigt (avant la validation), le gestionnaire « touchend » vidait ghostGroup alors que
+   le curseur était encore en phase « end » : le rectangle pointillé disparaissait. Correctif : cutPreviewActive() (zone en
+   attente, ou 2e coin relâché non validé, ou points posés) protège ghostGroup dans ce gestionnaire et dans updateGhost, et
+   le dernier tracé est redessiné au relâchement.
+ - Flèches de déplacement fin : fenêtre orange flottante SOUS LES TUILES (en haut), avec une croix pour la fermer ; elle
+   s'ouvre avec la nouvelle icône bleue « Flèches » (rond bleu, croix de 4 flèches) du tiroir Pastille, pour une pastille
+   sélectionnée et déverrouillée.
 ```
