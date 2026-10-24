@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-162 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-163 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -335,6 +335,9 @@
   .pop-btn .pop-ico{display:inline-block;vertical-align:middle;margin-right:10px;}
   .pop-tool-btn .icon{flex:none;}
   .tb-icon .lock-open{display:none;}
+  /* v2.1-163 : point orange discret = le fichier .json n'est pas à jour */
+  #btnSave.file-stale, #mobileTileBar .mtile.file-stale{ position:relative; }
+  #btnSave.file-stale::after, #mobileTileBar .mtile.file-stale::after{ content:''; position:absolute; top:4px; right:5px; width:10px; height:10px; border-radius:50%; background:#F59E0B; border:2px solid #fff; box-sizing:content-box; }
   .tb-icon.is-open .lock-open{display:inline;}
   .tb-icon.is-open .lock-closed{display:none;}
   /* v2.1-138 : pastille blanche derrière l'icône d'un bouton ACTIF (le contour sombre des nouvelles icônes se voyait mal sur le fond bleu) */
@@ -412,7 +415,8 @@
   .tb-group #btnUndo, .tb-group #btnRedo{ display:none; } /* v2.1-148 : doublon avec la tuile Annuler | Rétablir (les boutons restent dans la page : raccourcis, icônes de la tuile) */
   body.mobile-mode .tb-group[data-tile="pastille"].mobile-open{ flex-wrap:wrap; align-items:center; gap:2px; padding:8px 6px; }
   /* v2.1-152 : UNE seule ligne : 6 icônes + liste des postes (la taille se règle dans la liste) */
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-wrap{ flex:0 0 62px; min-width:0; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-wrap{ flex:0 0 50px; min-width:0; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .tb-icon .tb-icon-label{ font-size:8.5px; letter-spacing:-.25px; } /* 7 icônes + liste sur une ligne */
   body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-cap{ display:block; font-size:9px; font-weight:600; line-height:1.15; color:inherit; }
   body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-btn{ min-width:0; width:100%; padding:0 6px; gap:4px; height:34px; justify-content:center; }
   body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-label{ flex:none; max-width:30px; }
@@ -565,7 +569,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-162</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-163</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -689,6 +693,7 @@
     <button class="tb-icon" id="btnNudgeToggle" title="Déplacement fin de la pastille (flèches)"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#3962F5" stroke="#25212D" stroke-width="5"/><path d="M50 18v64M18 50h64" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M50 14l-12 14h24zM50 86L38 72h24zM14 50l14-12v24zM86 50L72 38v24z" fill="#fff"/></svg></button>
     <button class="tb-icon" id="btnLockAll" title="Tout verrouiller"><svg class="icon lock-closed" xmlns="http://www.w3.org/2000/svg" viewBox="856.2 687.6 100.9 100.9"><path fill="#222331" d="M884.7 731.1C884.6 725.9 884.3 720.7 884.8 715.4C886.3 700.4 903.2 691.3 916.7 698.1C924.4 702 928.7 709.4 928.8 717.9C928.9 722.3 928.8 726.7 928.8 731.1C935.2 731.2 939.2 730.4 939.2 737.7C939.2 737.7 939.2 739.7 939.2 739.7C939.1 752.5 939.5 765.2 939.4 778.0C939.4 783.2 936.8 784.5 932 784.6C915 784.8 898.1 784.7 881.2 784.7C876.3 784.7 873.9 783.6 873.9 778.5C873.9 778.4 873.8 777.2 873.8 777.2C873.9 764.4 873.7 751.5 873.8 738.7C873.9 730.7 876.8 731.3 884.7 731.1Z"/><path fill="#EF4F45" d="M877.7 734.9L935.3 734.8C935.5 736.6 935.6 738.4 935.6 740.2C935.8 752.1 935.6 764 935.7 776.0C935.8 781.4 934.9 781.3 929.5 781.3C913.6 781.4 897.8 781.3 881.9 781.0C877.2 780.9 877.5 780 877.5 775.5C877.5 772.5 877.6 769.6 877.6 766.7C877.6 756.1 877.2 745.5 877.7 734.9Z"/><path fill="#222331" d="M903.1 759.7C902.3 758.7 901.5 757.7 900.8 756.8C895.6 750.2 903.4 740.6 910.6 745.3C915.3 748.4 915 753.3 911.8 757.3C911.3 758 910.7 758.5 910.2 759.1L910.1 771.9L903.2 771.8L903.1 759.7Z"/><path fill="white" d="M888.3 731.1C888.2 726.9 888.2 722.7 888.2 718.4C888.2 718.4 888.2 717.2 888.2 717.2C888.6 705.5 900.9 696.6 912.1 700.1C920.2 702.7 925.1 709.7 925.2 717.9C925.2 722.3 925.2 726.6 925.2 730.9L888.3 731.1Z"/></svg><svg class="icon lock-open" xmlns="http://www.w3.org/2000/svg" viewBox="163.7 132.8 275.1 275.1"><path fill="#25284F" d="M229.9 239.9C229.9 233.1 229.8 226.3 229.9 219.5C230.1 201.2 237.1 184.7 249.7 171.6C272.1 148.4 308.2 142.9 336.5 158.6C358.9 171 372.2 193.6 372.7 219.2C372.9 231.3 372.8 243.3 372.9 255.4C373.8 255.4 374.8 255.4 375.7 255.5C392.5 256 403.8 269.2 403.7 285.7C403.7 297.2 403.8 308.7 403.8 320.2C403.7 336 404 351.9 403.8 367.7C403.7 371.4 403.3 374.8 401.9 378.2C396.9 390.2 386.7 397.3 373.7 397.4C348.5 397.6 323.2 397.3 298 397.4C275.4 397.4 252.8 397.6 230.2 397.4C230.2 397.4 228.7 397.3 228.7 397.3C210.9 396.9 198.9 384.8 198.6 367.0C198.6 366.9 198.5 365 198.5 365.0C198.5 338.8 198.3 312.6 198.5 286.5C198.6 268.3 210.9 255.9 229.5 255.6C229.5 255.6 231.7 255.5 231.7 255.5C275.7 255.3 319.6 255.3 363.6 255.5C363.6 243.8 363.6 232.1 363.5 220.5C363.3 209.5 360.6 198.3 354.7 189.0C345 173.5 329.4 163 311.4 160.0C274.5 154 239.4 182.2 239.2 220C239.1 226.6 239.2 233.3 239.2 239.9L229.9 239.9Z"/><path fill="#FC3836" d="M304.7 264.3C304.7 264.3 311.2 264.3 311.2 264.3C332.2 264.3 353.2 264.1 374.2 264.3C377.1 264.4 379.5 264.8 382.2 265.9C392.6 270.4 394.5 278 394.6 288.5C394.7 293.4 394.7 298.3 394.7 303.2C394.8 323.6 395.1 344.1 394.8 364.5C394.8 364.5 394.8 365.9 394.8 366.0C394.4 378.4 386.9 387.9 374 388.1C373.9 388.1 372.5 388.1 372.5 388.1C342.2 388.3 311.9 388.1 281.7 388.2C264.3 388.2 246.9 388.2 229.4 388.0C225.7 388 222.1 387.6 218.8 385.8C210.6 381.4 207.7 374.6 207.6 365.7C207.6 365.7 207.6 362.7 207.6 362.7C207.5 337.6 207.3 312.5 207.5 287.5C207.6 273.1 215.9 264.7 230.2 264.4C254.8 264 280.3 264.3 304.7 264.3Z"/></svg></button>
     <button class="tb-icon" id="btnSizeAll" title="Taille de tous les éléments d'un poste"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#3962F5" stroke="#25212D" stroke-width="5"/><circle cx="40" cy="58" r="12" fill="#fff"/><circle cx="64" cy="38" r="19" fill="none" stroke="#fff" stroke-width="6"/><path d="M52 50l-6 6" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg></button>
+    <button class="tb-icon" id="btnCtrl" title="Contrôle des numéros (trous, doublons)"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="14" y="10" width="72" height="82" rx="10" fill="#fff" stroke="#25212D" stroke-width="6"/><rect x="34" y="4" width="32" height="14" rx="6" fill="#F59E0B" stroke="#25212D" stroke-width="5"/><path d="M28 40l8 8 14-16" fill="none" stroke="#2E9E6B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="36" cy="70" r="6" fill="#D6493E"/><path d="M58 70h18M58 44h18" stroke="#25212D" stroke-width="6" stroke-linecap="round"/></svg></button>
     <div class="dd-wrap" id="deviceTypeDropdown">
       <button type="button" class="dd-btn" id="deviceTypeDropdownBtn" title="Choisir le poste actif">
         <span class="dd-swatch" id="deviceTypeDropdownSwatch"></span>
@@ -810,7 +815,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-162 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-163 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1144,7 +1149,7 @@ function newProject(){
   if (!confirm("Créer un nouveau projet ? Le projet actuel reste disponible dans Fichier > Documents (les 5 derniers).")) return;
   flushAutoSaveNow(); // le projet quitté est rangé dans « Mes documents » avant d'être remplacé
   idbClear();
-  docId = newDocId();
+  docId = newDocId(); changesSinceFile = 0;
   docName = null; // nouveau projet : le nom sera demandé au premier export (v2.1-79)
   pages = [createEmptyModel()];
   currentPageIndex = 0;
@@ -1321,12 +1326,17 @@ function agoText(t){
   const h = Math.round(m/60); if (h < 24) return 'il y a '+h+' h';
   const d = Math.round(h/24); return 'il y a '+d+' jour'+(d>1?'s':'');
 }
-function remindFileSave(why){
-  if (fileReminded) return; fileReminded = true;
-  showTimedBubble('Pensez à enregistrer le fichier (Fichier > Enregistrer) : '+why, 6000);
+// v2.1-163 : plus de bulle (jugée envahissante) : un petit point orange discret sur l'icône Enregistrer et sur la tuile Fichier tant que
+// le fichier n'est pas à jour ; il disparaît à l'enregistrement.
+function updateFileDot(){
+  const lf = lastFileSaveOf(docId), nbP = pages.reduce((n,pg)=>n+pg.pastilles.length,0);
+  const stale = docHasContent(pages) && (changesSinceFile >= FILE_REMIND_CHANGES || (lf && Date.now()-lf > FILE_REMIND_DAYS*86400000) || (!lf && nbP >= 10));
+  document.getElementById('btnSave').classList.toggle('file-stale', !!stale);
+  document.querySelector('#mobileTileBar .mtile[data-tile="historique"]').classList.toggle('file-stale', !!stale);
+  fileReminded = !!stale;
 }
 function pushHistory(){
-  if (++changesSinceFile >= FILE_REMIND_CHANGES && docHasContent(pages)) remindFileSave(changesSinceFile+' modifications depuis le dernier fichier');
+  if (++changesSinceFile === FILE_REMIND_CHANGES) updateFileDot();
   history = history.slice(0, historyIndex + 1);
   history.push(cloneDoc());
   if (history.length > HISTORY_LIMIT) history.shift();
@@ -5166,11 +5176,6 @@ function refreshTypeList(){
     positionFloating(document.getElementById('deviceTypeDropdownBtn'), pop);
   });
   list.appendChild(addRow);
-  const ctrlRow = document.createElement('div');
-  ctrlRow.className = 'dd-item dd-add';
-  ctrlRow.innerHTML = '<span style="font-size:17px;line-height:1;color:#D98400;font-weight:700;width:20px;text-align:center;">?</span><span class="nm" style="font-weight:600;">Contrôle des numéros (trous, doublons)</span>';
-  ctrlRow.addEventListener('click', (e)=>{ e.stopPropagation(); openCtrlWin(); });
-  list.appendChild(ctrlRow);
   updateDropdownButton();
   syncColorPickerToSelectedType();
 }
@@ -5490,6 +5495,7 @@ function openCtrlWin(){
   if (rotFineEl) rotFineEl.style.display = 'none';
 }
 document.getElementById('ctrlClose').addEventListener('click', closeCtrlWin);
+document.getElementById('btnCtrl').addEventListener('click', ()=>{ if (document.getElementById('ctrlWin').classList.contains('show')) closeCtrlWin(); else openCtrlWin(); });
 function bindPopover(triggerId, popId){
   const trigger = document.getElementById(triggerId);
   const pop = document.getElementById(popId);
@@ -6080,6 +6086,7 @@ document.getElementById('btnSave').addEventListener('click', async ()=>{
   URL.revokeObjectURL(url);
   changesSinceFile = 0; fileReminded = false;
   try{ localStorage.setItem('ppc_filesave_'+docId, String(Date.now())); }catch(e){}
+  updateFileDot();
   toast('Projet enregistré ('+pages.length+' page'+(pages.length>1?'s':'')+').');
 });
 // Met en place les `pages` / `currentPageIndex` déjà posés (fichier ouvert ou document de la liste) : migration, modèle,
@@ -6095,6 +6102,7 @@ async function loadDocIntoApp(name, id){
   await rehydratePlanCanvas();
   history = [cloneDoc()]; historyIndex = 0; updateHistoryButtons();
   updateOrientButtons(); updatePageIndicator();
+  changesSinceFile = 0; updateFileDot();
   fitZoom(); // sans ça, le zoom restait celui actif AVANT l'ouverture — d'où un rendu très différent d'une fois à l'autre
   render();
   scheduleAutoSave();
@@ -6459,7 +6467,7 @@ const SHORT_ICON_LABELS = {
   'Déplacer cette page vers la gauche':'Page ←','Déplacer cette page vers la droite':'Page →',
   'Supprimer la page courante':'Suppr.','Nouveau projet':'Nouveau',
   'Orientation portrait':'Portrait','Orientation paysage':'Paysage','Zoom arrière':'Zoom −','Zoom avant':'Zoom +',
-  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Déplacement fin de la pastille':'Ajust. fin','Taille de tous les éléments d\'un poste':'Tailles','Page récapitulative des postes':'Récap.','Mode d\'affichage : jour / nuit':'Jour','Ouvrir un projet':'Ouvrir',
+  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Déplacement fin de la pastille':'Ajust. fin','Taille de tous les éléments d\'un poste':'Tailles','Contrôle des numéros':'Séries','Page récapitulative des postes':'Récap.','Mode d\'affichage : jour / nuit':'Jour','Ouvrir un projet':'Ouvrir',
   'Importer un plan':'Importer','Découpe rectangulaire':'Découpe □','Découpe point par point':'Découpe pts',
   'Outils image : pipette, pot de peinture, gomme, réglages':'Outils image','Pot de peinture intelligent':'Pot peinture',
   'Gomme carrée':'Gomme','Placement classique':'Classique','Placement déporté':'Déporté',
@@ -6620,8 +6628,7 @@ function ensureDefaultDeviceTypes(){
     setAutoSaveIndicator('Sauvegardé à '+(t? t.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '—'), false);
     toast('Session précédente restaurée automatiquement.');
     // v2.1-160 : rappel à l'ouverture si le fichier .json n'a pas été enregistré depuis plus de 3 jours (ou jamais, pour un document déjà fourni)
-    const lf = lastFileSaveOf(docId), nbP = pages.reduce((n,pg)=>n+pg.pastilles.length,0);
-    if (docHasContent(pages) && ((lf && Date.now()-lf > FILE_REMIND_DAYS*86400000) || (!lf && nbP >= 10))) setTimeout(()=>remindFileSave(lf ? 'dernier fichier '+agoText(lf) : 'aucun fichier enregistré'), 3500);
+    updateFileDot();
   } else {
     await autoInsertCompanyLogo(); // logo entreprise déjà présent dès l'ouverture de l'application (page 1)
     await autoInsertClientLogoPlaceholder(); // idem pour le placeholder "logo Cie", en haut à droite

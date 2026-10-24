@@ -1394,4 +1394,10 @@ v2.1-162 — Performance et compatibilité iPhone (contrôle)
   Vérifié par lecture : champs de saisie >= 16 px (pas de zoom automatique iOS), pas d'API absente de Safari, encoches (safe-area) en haut.
   Non testable ici : Safari réel (WebKit non disponible dans l'environnement) ; risque connu iOS : Safari peut vider le stockage d'un site
   non utilisé pendant ~7 jours hors écran d'accueil -> installer l'application sur l'écran d'accueil + fichier .json (rappel v2.1-160).
+
+v2.1-163 — Rappel de fichier discret ; « Séries » dans le tiroir Pastille
+  Retour de Mic : la bulle de rappel est envahissante ; le contrôle des numéros, caché au bas de la liste des postes, n'est pas pratique.
+  Correctif : plus de bulle : un petit point orange apparaît sur l'icône Enregistrer et sur la tuile Fichier tant que le fichier .json n'est
+  pas à jour (40 modifications, plus de 3 jours, ou jamais enregistré avec au moins 10 pastilles) et disparaît à l'enregistrement ;
+  le contrôle des numéros devient une icône « Séries » sur la ligne du tiroir Pastille (liste des postes réduite à 50 px, étiquettes 8,5 px).
 ```
