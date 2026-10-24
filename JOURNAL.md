@@ -1329,4 +1329,11 @@ v2.1-151 — Fenêtres unifiées, pavé de rotation en haut, barre de sélection
   Fenêtres : closeOtherWindows() = règle unique (tiroirs, menus, réglages, taille poste, flèches : en ouvrir une referme les autres ; Échap ferme tout).
   Pavé de rotation fine déplacé en haut (masqué pendant la découpe). Bandeaux sombres de découpe : CSS de base nettoyé.
   Barre de sélection : poignée, infos, alignement, ✓, glissement, réserve de bas d'écran supprimés (code mort).
+
+v2.1-152 — Tiroir Pastille sur une seule ligne, liste des postes sous les tuiles
+  Cause : le curseur de taille était redondant (taille réglable par poste dans la liste) et occupait une 2e ligne ; la liste déroulante,
+  trop haute pour l'écran, était replacée AU-DESSUS de son bouton et masquait les tuiles.
+  Correctif : curseur, − / + et valeur retirés du tiroir ; la liste des postes rejoint la ligne des 6 icônes ; positionFloating() ne place
+  plus jamais une fenêtre au-dessus du bas des tuiles (hauteur limitée + défilement) ; menus ouverts depuis un tiroir le laissent ouvert.
+  Étiquette « Taille poste » -> « Tailles » (tenait mal). Taille des pastilles : réglage uniquement par poste (liste).
 ```

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-151 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-152 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -344,13 +344,8 @@
   body.mobile-mode .tb-group.mobile-open #zoomLabel{ width:34px; font-size:11px; }
   body.mobile-mode .tb-group.mobile-open #pageIndicator{ min-width:0 !important; flex:1 1 0; padding:0 !important; font-size:11px !important; }
   body.mobile-mode #autoSaveIndicator{ display:none !important; } /* l'heure de sauvegarde est affichée dans le bandeau (✓ hh:mm) */
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .row-break{ flex:0 0 100%; height:0; }
   body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-wrap{ flex:1 1 120px; min-width:0; }
   body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-btn{ min-width:0; width:100%; }
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-ctl{ flex:1 1 110px; min-width:0; }
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-ctl .rngB{ min-width:30px; width:auto; flex:1 1 0; }
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-ctl-row{ min-width:0; gap:3px; }
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-ctl-row .val{ display:none; } /* la valeur est lisible sur la pastille témoin */
   body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-preview{ flex:none; }
   body.mobile-mode .dd-btn{height:52px;min-width:170px;font-size:14px;}
   body.mobile-mode .dd-swatch{width:24px;height:24px;}
@@ -410,12 +405,10 @@
   #btnAddTypeMenu{ display:none; }
   .tb-group #btnUndo, .tb-group #btnRedo{ display:none; } /* v2.1-148 : doublon avec la tuile Annuler | Rétablir (les boutons restent dans la page : raccourcis, icônes de la tuile) */
   body.mobile-mode .tb-group[data-tile="pastille"].mobile-open{ flex-wrap:wrap; align-items:center; gap:2px; padding:8px 6px; }
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .row-break{ flex:0 0 100%; height:1px; background:#e3e6ec; margin:4px 0; }
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-wrap{ flex:0 0 auto; }
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-btn{ min-width:0; width:auto; padding:0 6px; gap:4px; height:46px; }
+  /* v2.1-152 : UNE seule ligne : 6 icônes + liste des postes (la taille se règle dans la liste) */
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-wrap{ flex:0 0 62px; min-width:0; }
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-btn{ min-width:0; width:100%; padding:0 6px; gap:4px; height:46px; justify-content:center; }
   body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-label{ flex:none; max-width:30px; }
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-ctl{ flex:1 1 0; min-width:120px; padding:0 0 0 6px; }
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-ctl-row .val, body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-preview{ display:none; }
   /* v2.1-148 : « taille d'un poste » (fenêtre orange sous les tuiles) */
   #sizeAllWin{ position:fixed; left:50%; top:calc(var(--topbar-h, 96px) + 8px); transform:translateX(-50%); z-index:790; display:none; flex-direction:column; gap:8px;
     width:min(340px, calc(100vw - 16px)); box-sizing:border-box; background:#F59E0B; color:#1c2230; border-radius:14px; padding:12px; font-size:13px; font-weight:500; box-shadow:0 4px 14px rgba(0,0,0,.3); }
@@ -548,7 +541,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-151</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-152</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -671,7 +664,6 @@
     <button class="tb-icon" id="btnNudgeToggle" title="Déplacement fin de la pastille (flèches)"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#3962F5" stroke="#25212D" stroke-width="5"/><path d="M50 18v64M18 50h64" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M50 14l-12 14h24zM50 86L38 72h24zM14 50l14-12v24zM86 50L72 38v24z" fill="#fff"/></svg></button>
     <button class="tb-icon" id="btnLockAll" title="Tout verrouiller"><svg class="icon lock-closed" xmlns="http://www.w3.org/2000/svg" viewBox="856.2 687.6 100.9 100.9"><path fill="#222331" d="M884.7 731.1C884.6 725.9 884.3 720.7 884.8 715.4C886.3 700.4 903.2 691.3 916.7 698.1C924.4 702 928.7 709.4 928.8 717.9C928.9 722.3 928.8 726.7 928.8 731.1C935.2 731.2 939.2 730.4 939.2 737.7C939.2 737.7 939.2 739.7 939.2 739.7C939.1 752.5 939.5 765.2 939.4 778.0C939.4 783.2 936.8 784.5 932 784.6C915 784.8 898.1 784.7 881.2 784.7C876.3 784.7 873.9 783.6 873.9 778.5C873.9 778.4 873.8 777.2 873.8 777.2C873.9 764.4 873.7 751.5 873.8 738.7C873.9 730.7 876.8 731.3 884.7 731.1Z"/><path fill="#EF4F45" d="M877.7 734.9L935.3 734.8C935.5 736.6 935.6 738.4 935.6 740.2C935.8 752.1 935.6 764 935.7 776.0C935.8 781.4 934.9 781.3 929.5 781.3C913.6 781.4 897.8 781.3 881.9 781.0C877.2 780.9 877.5 780 877.5 775.5C877.5 772.5 877.6 769.6 877.6 766.7C877.6 756.1 877.2 745.5 877.7 734.9Z"/><path fill="#222331" d="M903.1 759.7C902.3 758.7 901.5 757.7 900.8 756.8C895.6 750.2 903.4 740.6 910.6 745.3C915.3 748.4 915 753.3 911.8 757.3C911.3 758 910.7 758.5 910.2 759.1L910.1 771.9L903.2 771.8L903.1 759.7Z"/><path fill="white" d="M888.3 731.1C888.2 726.9 888.2 722.7 888.2 718.4C888.2 718.4 888.2 717.2 888.2 717.2C888.6 705.5 900.9 696.6 912.1 700.1C920.2 702.7 925.1 709.7 925.2 717.9C925.2 722.3 925.2 726.6 925.2 730.9L888.3 731.1Z"/></svg><svg class="icon lock-open" xmlns="http://www.w3.org/2000/svg" viewBox="163.7 132.8 275.1 275.1"><path fill="#25284F" d="M229.9 239.9C229.9 233.1 229.8 226.3 229.9 219.5C230.1 201.2 237.1 184.7 249.7 171.6C272.1 148.4 308.2 142.9 336.5 158.6C358.9 171 372.2 193.6 372.7 219.2C372.9 231.3 372.8 243.3 372.9 255.4C373.8 255.4 374.8 255.4 375.7 255.5C392.5 256 403.8 269.2 403.7 285.7C403.7 297.2 403.8 308.7 403.8 320.2C403.7 336 404 351.9 403.8 367.7C403.7 371.4 403.3 374.8 401.9 378.2C396.9 390.2 386.7 397.3 373.7 397.4C348.5 397.6 323.2 397.3 298 397.4C275.4 397.4 252.8 397.6 230.2 397.4C230.2 397.4 228.7 397.3 228.7 397.3C210.9 396.9 198.9 384.8 198.6 367.0C198.6 366.9 198.5 365 198.5 365.0C198.5 338.8 198.3 312.6 198.5 286.5C198.6 268.3 210.9 255.9 229.5 255.6C229.5 255.6 231.7 255.5 231.7 255.5C275.7 255.3 319.6 255.3 363.6 255.5C363.6 243.8 363.6 232.1 363.5 220.5C363.3 209.5 360.6 198.3 354.7 189.0C345 173.5 329.4 163 311.4 160.0C274.5 154 239.4 182.2 239.2 220C239.1 226.6 239.2 233.3 239.2 239.9L229.9 239.9Z"/><path fill="#FC3836" d="M304.7 264.3C304.7 264.3 311.2 264.3 311.2 264.3C332.2 264.3 353.2 264.1 374.2 264.3C377.1 264.4 379.5 264.8 382.2 265.9C392.6 270.4 394.5 278 394.6 288.5C394.7 293.4 394.7 298.3 394.7 303.2C394.8 323.6 395.1 344.1 394.8 364.5C394.8 364.5 394.8 365.9 394.8 366.0C394.4 378.4 386.9 387.9 374 388.1C373.9 388.1 372.5 388.1 372.5 388.1C342.2 388.3 311.9 388.1 281.7 388.2C264.3 388.2 246.9 388.2 229.4 388.0C225.7 388 222.1 387.6 218.8 385.8C210.6 381.4 207.7 374.6 207.6 365.7C207.6 365.7 207.6 362.7 207.6 362.7C207.5 337.6 207.3 312.5 207.5 287.5C207.6 273.1 215.9 264.7 230.2 264.4C254.8 264 280.3 264.3 304.7 264.3Z"/></svg></button>
     <button class="tb-icon" id="btnSizeAll" title="Taille de tous les éléments d'un poste"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#3962F5" stroke="#25212D" stroke-width="5"/><circle cx="40" cy="58" r="12" fill="#fff"/><circle cx="64" cy="38" r="19" fill="none" stroke="#fff" stroke-width="6"/><path d="M52 50l-6 6" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg></button>
-    <div class="row-break"></div>
     <div class="dd-wrap" id="deviceTypeDropdown">
       <button type="button" class="dd-btn" id="deviceTypeDropdownBtn" title="Choisir le poste actif">
         <span class="dd-swatch" id="deviceTypeDropdownSwatch"></span>
@@ -679,16 +671,6 @@
         <span class="dd-caret">▾</span>
       </button>
       <div class="dd-list" id="deviceTypeDropdownList"></div>
-    </div>
-    <!-- Taille de la prochaine pastille : bouton − à gauche, bouton + à droite du curseur (v2.1-68),
-         et une pastille TÉMOIN à taille réelle sur la feuille, au zoom actuel. -->
-    <div class="size-ctl" title="Taille de la prochaine pastille">
-      <div class="size-ctl-row">
-        <button type="button" class="step-btn" id="btnPastilleSizeMinus" aria-label="Réduire la taille">−</button>
-        <input type="range" id="rngPastilleSize" min="8" max="42" value="16">
-        <button type="button" class="step-btn" id="btnPastilleSizePlus" aria-label="Agrandir la taille">+</button>
-        <span class="val" id="pastilleSizeLabel">16</span>
-      </div>
     </div>
     <div class="pop-wrap">
       <button class="tb-icon" id="btnAddTypeMenu" title="Ajouter / retirer un poste"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="718.5 271.6 98.8 98.8"><path fill="#25212D" d="M768.2 275.4C793.2 275.6 813.4 295.9 813.4 320.9C813.4 346 793.2 366.3 768.2 366.5C742.9 366.7 722.3 346.2 722.3 320.9C722.3 295.6 742.9 275.2 768.2 275.4Z"/><path fill="#67AC3D" d="M767.2 278.9C790.4 278.6 809.5 297.2 809.8 320.4C810.1 343.6 791.4 362.7 768.2 362.9C745.1 363.1 726.2 344.5 725.9 321.4C725.6 298.3 744.1 279.3 767.2 278.9Z"/><path fill="white" d="M765.5 318.4C765.5 313.7 765.4 309.1 765.5 304.4C765.6 299 770.3 299.4 770.3 305.2C770.3 309.6 770.3 314 770.3 318.4C775.1 318.3 779.9 318.2 784.7 318.4C789.2 318.6 788 323.3 784.7 323.3C779.9 323.4 775 323.3 770.2 323.3C770.2 328.3 770.2 333.4 770.3 338.5C770.3 339.7 770 341.3 768.5 341.3C765.8 341.4 765.5 339.2 765.5 337.2C765.5 332.5 765.5 327.9 765.6 323.2C762.4 323.2 759.1 323.2 755.9 323.3C755.1 323.3 749.6 324.1 749.1 322.0C748.4 318.7 750 318.4 752.7 318.4C757 318.3 761.3 318.4 765.5 318.4Z"/></svg></button>
@@ -797,7 +779,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-151 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-152 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2962,10 +2944,6 @@ document.getElementById('popSelSettings').addEventListener('click', (e)=>e.stopP
 let nudgeOpen = false; // v2.1-146 : la fenêtre de flèches est ouverte (par l'icône du tiroir Pastille)
 function syncPastilleDrawer(){
   const p = model.pastilles.find(q=>q.id===selectedId);
-  const rng = document.getElementById('rngPastilleSize');
-  const target = p ? p.radius : currentPastilleRadius;
-  if (parseInt(rng.value,10) !== Math.round(target)) rng.value = Math.round(target);
-  document.getElementById('pastilleSizeLabel').textContent = Math.round(target);
   document.getElementById('selNudge').classList.toggle('show', nudgeOpen && !!p && !p.locked); // fenêtre flottante, seulement si demandée, pour une pastille déverrouillée
   if (!p) nudgeOpen = false;
   if (p && selectedTypeId !== p.typeId){ selectedTypeId = p.typeId; lastTypeListSig = null; }
@@ -5084,7 +5062,7 @@ function refreshTypeList(){
     document.getElementById('newTypeRadiusLabel').textContent = '16';
     document.getElementById('btnAddType').textContent = '+ Ajouter ce poste';
     const pop = document.getElementById('popAddType');
-    closeAllPopovers();
+    closeOtherWindows('popover'); closeAllPopovers();
     pop.classList.add('open');
     positionFloating(document.getElementById('deviceTypeDropdownBtn'), pop);
   });
@@ -5131,7 +5109,7 @@ document.getElementById('deviceTypeDropdownBtn').addEventListener('click', (e)=>
   const btn = e.currentTarget;
   const list = document.getElementById('deviceTypeDropdownList');
   const isOpen = list.classList.contains('open');
-  closeAllPopovers();
+  closeOtherWindows('popover'); closeAllPopovers();
   if (!isOpen){ list.classList.add('open'); positionFloating(btn, list); }
 });
 document.getElementById('btnDelType').addEventListener('click', ()=>{
@@ -5197,18 +5175,6 @@ document.getElementById('bucketColorPicker').addEventListener('input', (e)=>{
   bucketColor = e.target.value;
   document.getElementById('bucketColorSwatch').style.background = bucketColor;
 });
-document.getElementById('rngPastilleSize').addEventListener('change', ()=>{ if (model.pastilles.some(q=>q.id===selectedId)) pushHistory(); });
-document.getElementById('rngPastilleSize').addEventListener('input', (e)=>{
-  const selP = model.pastilles.find(q=>q.id===selectedId);
-  if (selP){ // v2.1-144 : une pastille est sélectionnée : le curseur règle SA taille (la taille de la prochaine pastille reste inchangée)
-    if (selP.locked){ e.target.value = selP.radius; return; }
-    selP.radius = parseInt(e.target.value,10); document.getElementById('pastilleSizeLabel').textContent = selP.radius;
-    scheduleRender(); return;
-  }
-  currentPastilleRadius = parseInt(e.target.value,10);
-  document.getElementById('pastilleSizeLabel').textContent = currentPastilleRadius;
-});
-
 /* ---------------------------- Boutons − / + et pastille témoin (v2.1-68) ----------------- */
 // Taille réellement utilisée pour la PROCHAINE pastille : un poste peut imposer sa propre taille
 // par défaut (souris, rat…), sinon c'est le réglage du curseur.
@@ -5288,7 +5254,6 @@ function buildRangeB(input, opts){
   return wrap;
 }
 (function(){
-  buildRangeB(document.getElementById('rngPastilleSize'));      // −/+ déjà présents dans le tiroir
   buildRangeB(document.getElementById('rngEraserSize'));        // idem
   buildRangeB(document.getElementById('rngTolerance'), { buttons:true });
   ['rngBrightness','rngContrast','rngSaturation','rngHue'].forEach(id=>buildRangeB(document.getElementById(id), { buttons:true, noValue:true })); // le « 0 » n'apprend rien (v2.1-112)
@@ -5296,7 +5261,6 @@ function buildRangeB(input, opts){
   buildRangeB(document.getElementById('selSize'), { buttons:true }); // v2.1-124 : taille de la pastille sélectionnée, même barre que les autres réglages
 })();
 (function(){
-  const rng = document.getElementById('rngPastilleSize');
   const setRange = (inputEl)=>(v)=>{
     const min = parseFloat(inputEl.min), max = parseFloat(inputEl.max);
     const nv = Math.max(min, Math.min(max, Math.round(v)));
@@ -5314,8 +5278,6 @@ function buildRangeB(input, opts){
   document.getElementById('btnEraserSquare').addEventListener('click', ()=>{ eraserShape='square'; updateEraserUI(); });
   document.getElementById('btnEraserRound').addEventListener('click', ()=>{ eraserShape='round'; updateEraserUI(); });
   updateEraserUI();
-  bindStepper(document.getElementById('btnPastilleSizeMinus'), -1, ()=>parseFloat(rng.value), setRange(rng));
-  bindStepper(document.getElementById('btnPastilleSizePlus'), +1, ()=>parseFloat(rng.value), setRange(rng));
   // Barre de sélection : taille de la pastille sélectionnée (historique enregistré à la fin du geste).
   const sel = document.getElementById('selSize');
   const endSel = ()=>sel.dispatchEvent(new Event('change', { bubbles:true }));
@@ -5340,7 +5302,11 @@ function positionFloating(trigger, el){
     const elRect = el.getBoundingClientRect();
     let newLeft = left, newTop = top;
     if (elRect.right > window.innerWidth - 8) newLeft = Math.max(8, window.innerWidth - elRect.width - 8);
-    if (elRect.bottom > window.innerHeight - 8) newTop = Math.max(8, rect.top - elRect.height - 6);
+    // v2.1-152 : jamais par-dessus les tuiles (la bande des tuiles reste toujours visible) : si ça ne tient pas en dessous, on
+    // remonte au plus haut juste sous les tuiles et fitFloatingHeight() limite la hauteur (défilement).
+    const tilesBottom = document.getElementById('mobileTileBar').getBoundingClientRect().bottom + 6;
+    if (elRect.bottom > window.innerHeight - 8) newTop = Math.max(tilesBottom, Math.min(newTop, window.innerHeight - 8 - elRect.height));
+    newTop = Math.max(newTop, tilesBottom);
     el.style.left = newLeft + 'px';
     el.style.top = newTop + 'px';
     fitFloatingHeight(el);
@@ -5355,7 +5321,7 @@ function closeAllPopovers(){
 // autres, sauf celle de la famille « keep » ('popover' | 'drawer' | 'sizeAll' | 'nudge' | 'settings').
 function closeOtherWindows(keep){
   if (keep !== 'popover') closeAllPopovers();
-  if (keep !== 'drawer') closeAllTileDrawers();
+  if (keep !== 'drawer' && keep !== 'popover') closeAllTileDrawers(); // un menu s'ouvre DEPUIS un tiroir : celui-ci reste ouvert (sinon son bouton disparaît et le menu ne sait plus où se placer)
   if (keep !== 'sizeAll') document.getElementById('sizeAllWin').classList.remove('show');
   if (keep !== 'settings') closeSelectionSettings();
   if (keep !== 'nudge' && nudgeOpen){ nudgeOpen = false; syncPastilleDrawer(); }
@@ -6264,7 +6230,7 @@ const SHORT_ICON_LABELS = {
   'Déplacer cette page vers la gauche':'Page ←','Déplacer cette page vers la droite':'Page →',
   'Supprimer la page courante':'Suppr.','Nouveau projet':'Nouveau',
   'Orientation portrait':'Portrait','Orientation paysage':'Paysage','Zoom arrière':'Zoom −','Zoom avant':'Zoom +',
-  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Déplacement fin de la pastille':'Flèches','Taille de tous les éléments d\'un poste':'Taille poste','Page récapitulative des postes':'Récap.','Mode d\'affichage : jour / nuit':'Jour','Ouvrir un projet':'Ouvrir',
+  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Déplacement fin de la pastille':'Flèches','Taille de tous les éléments d\'un poste':'Tailles','Page récapitulative des postes':'Récap.','Mode d\'affichage : jour / nuit':'Jour','Ouvrir un projet':'Ouvrir',
   'Importer un plan':'Importer','Découpe rectangulaire':'Découpe □','Découpe point par point':'Découpe pts',
   'Outils image : pipette, pot de peinture, gomme, réglages':'Outils image','Pot de peinture intelligent':'Pot peinture',
   'Gomme carrée':'Gomme','Placement classique':'Classique','Placement déporté':'Déporté',
