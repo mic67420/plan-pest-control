@@ -1361,4 +1361,8 @@ v2.1-156 — Audit complet
   Nettoyé : 3 attributs id inutilisés (tileUndoRedo, pageNavGroup, bucketColorRow). Plus aucune fenêtre sombre en bas de l'écran.
   Limite connue : le pavé de rotation fine et la fenêtre « Tailles » partagent la même place sous les tuiles (cas rare : plan sélectionné
   pendant que « Tailles » est ouverte).
+
+v2.1-157 — Pavé de rotation et fenêtre « Tailles » : l'un ferme l'autre
+  Cause : les deux s'affichent au même endroit (sous les tuiles) et pouvaient se superposer.
+  Correctif : sélectionner un plan ferme « Tailles » ; ouvrir « Tailles » masque le pavé ; le pavé revient quand « Tailles » se ferme.
 ```

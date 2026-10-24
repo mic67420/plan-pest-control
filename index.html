@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-156 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-157 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -552,7 +552,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-156</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-157</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -791,7 +791,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-156 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-157 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2528,6 +2528,7 @@ function updateRotateIcons(livePl){
 }
 /* ---------------------------- Rotation fine − / + (v2.1-82) ------------------------------ */
 const ROT_FINE_STEP = 0.1; // degrés par appui
+let rotFinePlanId = null;
 let rotFineEl = null, rotFineLabel = null, rotFineTimer = null, rotFineChanged = false;
 function ensureRotFine(){
   if (rotFineEl) return;
@@ -2560,7 +2561,12 @@ function ensureRotFine(){
 }
 function refreshRotFine(pl){
   ensureRotFine();
-  if (!pl || (activeTool && activeTool.startsWith('cut'))){ rotFineEl.style.display = 'none'; return; } // v2.1-151 : en haut comme les autres fenêtres, donc masqué pendant la découpe (fenêtres de découpe au même endroit)
+  const sizeWin = document.getElementById('sizeAllWin');
+  if (!pl){ rotFineEl.style.display = 'none'; rotFinePlanId = null; return; }
+  // v2.1-157 : pavé de rotation et fenêtre « Tailles » partagent la même place : l'un ferme l'autre. Plan nouvellement sélectionné ->
+  // « Tailles » se ferme ; « Tailles » ouverte ensuite (plan déjà sélectionné) -> le pavé se masque.
+  if (pl.id !== rotFinePlanId){ rotFinePlanId = pl.id; sizeWin.classList.remove('show'); }
+  if (sizeWin.classList.contains('show') || (activeTool && activeTool.startsWith('cut'))){ rotFineEl.style.display = 'none'; return; } // v2.1-151 : en haut comme les autres fenêtres, donc masqué pendant la découpe (fenêtres de découpe au même endroit)
   const a = (((pl.rotation||0)%360)+360)%360;
   rotFineLabel.textContent = (Math.round(a*10)/10).toFixed(1).replace('.',',')+'°';
   rotFineEl.style.display = 'flex';
@@ -5339,7 +5345,7 @@ function closeAllPopovers(){
 function closeOtherWindows(keep){
   if (keep !== 'popover') closeAllPopovers();
   if (keep !== 'drawer' && keep !== 'popover') closeAllTileDrawers(); // un menu s'ouvre DEPUIS un tiroir : celui-ci reste ouvert (sinon son bouton disparaît et le menu ne sait plus où se placer)
-  if (keep !== 'sizeAll') document.getElementById('sizeAllWin').classList.remove('show');
+  if (keep !== 'sizeAll'){ const w = document.getElementById('sizeAllWin'); if (w.classList.contains('show')){ w.classList.remove('show'); refreshRotFine(rotatablePlan()); } }
   if (keep !== 'settings') closeSelectionSettings();
   if (keep !== 'nudge' && nudgeOpen){ nudgeOpen = false; syncPastilleDrawer(); }
 }
@@ -5784,11 +5790,13 @@ document.getElementById('selNudgeClose').addEventListener('click', ()=>{ nudgeOp
   document.getElementById('sizeAllPlus').addEventListener('click', ()=>step(1));
   curBtn.addEventListener('click', ()=>listEl.classList.toggle('open'));
   allPages.addEventListener('change', fill);
-  document.getElementById('sizeAllClose').addEventListener('click', ()=>win.classList.remove('show'));
+  const backRot = ()=>{ if (typeof rotatablePlan === 'function') refreshRotFine(rotatablePlan()); }; // le pavé de rotation réapparaît quand « Tailles » se ferme
+  document.getElementById('sizeAllClose').addEventListener('click', ()=>{ win.classList.remove('show'); backRot(); });
   document.getElementById('btnSizeAll').addEventListener('click', ()=>{
-    if (win.classList.contains('show')){ win.classList.remove('show'); return; }
+    if (win.classList.contains('show')){ win.classList.remove('show'); backRot(); return; }
     if (!model.pastilles.length){ showTimedBubble('Aucune pastille sur ce plan'); return; }
     closeOtherWindows('sizeAll'); listEl.classList.remove('open'); fill(); win.classList.add('show');
+    if (rotFineEl) rotFineEl.style.display = 'none'; // v2.1-157 : même place que le pavé de rotation
   });
 })();
 document.getElementById('btnUndo').addEventListener('click', undo);
