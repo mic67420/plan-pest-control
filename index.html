@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-152 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-153 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -178,6 +178,7 @@
   .dd-btn:hover{border-color:var(--accent);}
   .dd-label{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .dd-caret{color:#8890a0;font-size:10px;}
+  .dd-cap{display:none;}
   .dd-swatch{width:20px;height:20px;flex:none;}
   .dd-list{
     /* Largeur adaptée au nom le plus long (plus de noms coupés par « … ») et hauteur libre :
@@ -406,8 +407,9 @@
   .tb-group #btnUndo, .tb-group #btnRedo{ display:none; } /* v2.1-148 : doublon avec la tuile Annuler | Rétablir (les boutons restent dans la page : raccourcis, icônes de la tuile) */
   body.mobile-mode .tb-group[data-tile="pastille"].mobile-open{ flex-wrap:wrap; align-items:center; gap:2px; padding:8px 6px; }
   /* v2.1-152 : UNE seule ligne : 6 icônes + liste des postes (la taille se règle dans la liste) */
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-wrap{ flex:0 0 62px; min-width:0; }
-  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-btn{ min-width:0; width:100%; padding:0 6px; gap:4px; height:46px; justify-content:center; }
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-wrap{ flex:0 0 62px; min-width:0; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-cap{ display:block; font-size:9px; font-weight:600; line-height:1.15; color:inherit; }
+  body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-btn{ min-width:0; width:100%; padding:0 6px; gap:4px; height:34px; justify-content:center; }
   body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .dd-label{ flex:none; max-width:30px; }
   /* v2.1-148 : « taille d'un poste » (fenêtre orange sous les tuiles) */
   #sizeAllWin{ position:fixed; left:50%; top:calc(var(--topbar-h, 96px) + 8px); transform:translateX(-50%); z-index:790; display:none; flex-direction:column; gap:8px;
@@ -541,7 +543,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-152</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-153</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -670,6 +672,7 @@
         <span class="dd-label" id="deviceTypeDropdownLabel">—</span>
         <span class="dd-caret">▾</span>
       </button>
+      <span class="dd-cap">Postes</span>
       <div class="dd-list" id="deviceTypeDropdownList"></div>
     </div>
     <div class="pop-wrap">
@@ -779,7 +782,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-152 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-153 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -4981,8 +4984,7 @@ function typeSizeOf(t){ return Math.round((t && t.defaultRadius) || currentPasti
 function setTypeSize(typeId, r){
   r = Math.max(6, Math.min(60, Math.round(r)));
   pages.forEach(pg=>{ const t = pg.deviceTypes.find(x=>x.id===typeId); if (t) t.defaultRadius = r; });
-  model.pastilles.forEach(q=>{ if (q.typeId===typeId) q.radius = r; });
-  scheduleRender();
+  // v2.1-153 : la taille du poste ne concerne QUE les prochaines pastilles posées (les existantes : fenêtre « Tailles »)
   return r;
 }
 function refreshTypeList(){

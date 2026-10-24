@@ -1336,4 +1336,9 @@ v2.1-152 — Tiroir Pastille sur une seule ligne, liste des postes sous les tuil
   Correctif : curseur, − / + et valeur retirés du tiroir ; la liste des postes rejoint la ligne des 6 icônes ; positionFloating() ne place
   plus jamais une fenêtre au-dessus du bas des tuiles (hauteur limitée + défilement) ; menus ouverts depuis un tiroir le laissent ouvert.
   Étiquette « Taille poste » -> « Tailles » (tenait mal). Taille des pastilles : réglage uniquement par poste (liste).
+
+v2.1-153 — Taille par poste = prochaines pastilles seulement ; légende « Postes »
+  Cause : − / + dans la liste des postes modifiaient aussi les pastilles déjà posées (setTypeSize).
+  Correctif : seule la taille par défaut du poste change (la fenêtre « Tailles » reste le moyen de tout modifier) ; ajout de l'annotation
+  « Postes » sous la liste déroulante du tiroir Pastille.
 ```
