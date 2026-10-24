@@ -1291,4 +1291,15 @@ v2.1-146 — Découpe : pointillés conservés au 2e coin ; flèches en haut, ou
 
 v2.1-147 — Flèches de déplacement fin : démarrage immédiat, vitesse x1,5
  - Répétition dès l'appui (avant : 400 ms d'attente) toutes les 40 ms (avant : 60 ms).
+
+v2.1-148 — Mode jour / nuit seulement, tiroir Pastille en 2 lignes, taille d'un poste, déplacement fin fluide
+ - Plein soleil supprimé (code, styles, réglage mémorisé) : le bouton ne bascule plus qu'entre Jour et Nuit.
+ - « Tout verrouiller » déplacé de la tuile Vue à la tuile Pastille ; tuile Fichier : annuler / rétablir masqués dans le tiroir (doublon
+   avec la tuile Annuler | Rétablir ; boutons conservés pour les raccourcis) ; icône d'import : flèche rouge retournée (vers le bas).
+ - Tiroir Pastille « comme Texte » : ligne 1 = icônes AVEC libellés (classique, déporté, grille, flèches, verrou, taille poste) ;
+   ligne 2 = poste actif + curseur de taille pleine largeur. Nouveau « Taille poste » : fenêtre orange (poste présent sur le plan +
+   curseur − / + ; case « Toutes les pages ») qui règle d'un coup la taille de toutes les pastilles du poste et sa taille par défaut.
+ - Déplacement fin : mouvement continu à vitesse constante (25 unités/s) au lieu de pas de 1 unité toutes les 40 ms (petit saut au
+   démarrage) ; appui bref = 1 unité exacte ; position arrondie au relâchement ; un seul pushHistory.
+ - Tiroir Vue : une ligne d'icônes (portrait, paysage, zoom − / +, ajuster, jour / nuit) + curseur « Fond » sur sa propre ligne.
 ```
