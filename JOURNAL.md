@@ -1413,4 +1413,15 @@ v2.1-165 — Fenêtre « poste » (crayon / ajout) refaite
   ne suivait pas le sélecteur, et « Retirer » visait le poste SÉLECTIONNÉ et non celui ouvert dans le crayon.
   Correctif : carte blanche sous les tuiles, 2 colonnes, champs de 42 px (Code | Nom, Couleur + aperçu en direct | Police + Auto,
   Taille | Sans numéro), boutons Enregistrer / Retirer ce poste (seulement en modification, et le poste ouvert) / Annuler.
+
+v2.1-166 — Placement déporté : bugs intermittents corrigés
+  Méthode : 4 scénarios de doigt réels (événements tactiles CDP) + 7 parcours aléatoires de 150 actions (appuis, glissements, pincements, appui
+  long, annulations, changements d'outil / tuile / page / zoom, annuler-rétablir) avec contrôle de cohérence ; comparés avec la version précédente.
+  Reproduits et corrigés :
+  1. Pincement à 2 doigts avec l'outil déporté : le relâchement du 1er doigt créait un curseur fantôme (geste « en attente » jamais abandonné).
+     -> le 2e doigt abandonne le geste en attente. 2. touchcancel (le navigateur reprend le geste) créait aussi un curseur -> ignoré.
+  3. Double tap involontaire sur le cercle : point réel PUIS pastille validés au même endroit (trait de longueur nul) -> 450 ms de garde.
+  4. Changer de page / annuler / rétablir / ouvrir / nouveau projet au milieu d'un placement gardait le point réel et le curseur d'une
+     autre page -> resetRemoteGesture() abandonne le placement. 5. Changement d'outil : le geste en attente est aussi abandonné.
+  Non reproduit (scénarios sans anomalie) : appui long + glisser, bord de feuille, zoom pendant le curseur, grille, 60 parcours aléatoires.
 ```

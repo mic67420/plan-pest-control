@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-165 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-166 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -592,7 +592,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-165</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-166</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -840,7 +840,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-165 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-166 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1174,6 +1174,7 @@ function newProject(){
   if (!confirm("Créer un nouveau projet ? Le projet actuel reste disponible dans Fichier > Documents (les 5 derniers).")) return;
   flushAutoSaveNow(); // le projet quitté est rangé dans « Mes documents » avant d'être remplacé
   idbClear();
+  resetRemoteGesture(); // v2.1-166
   docId = newDocId(); changesSinceFile = 0;
   docName = null; // nouveau projet : le nom sera demandé au premier export (v2.1-79)
   pages = [createEmptyModel()];
@@ -1384,6 +1385,7 @@ function resetContentNodeCaches(){
   recapGroup.destroyChildren(); lastRecapSig = null;
 }
 function restoreDoc(snap){
+  resetRemoteGesture(); // v2.1-166
   pages = snap.pages.map(cloneModel);
   currentPageIndex = Math.min(snap.currentPageIndex, pages.length - 1);
   model = pages[currentPageIndex];
@@ -1438,6 +1440,7 @@ function updatePageIndicator(){
   if (addBtn) addBtn.disabled = pages.length >= MAX_PAGES;
 }
 function switchToPage(index){
+  resetRemoteGesture(); // v2.1-166 : le point réel d'une page ne doit pas servir sur une autre
   if (index < 0 || index >= pages.length || index === currentPageIndex){ updatePageIndicator(); return; }
   closeAllPopovers();
   currentPageIndex = index;
@@ -1513,6 +1516,7 @@ function addRecapPage(){
   toast('Page récapitulative ajoutée (non exportée par défaut).');
 }
 function deleteCurrentPage(){
+  resetRemoteGesture(); // v2.1-166
   if (pages.length <= 1){ toast('Impossible de supprimer la seule page restante.'); return; }
   const removedIndex = currentPageIndex;
   pages.splice(removedIndex, 1);
@@ -3573,6 +3577,18 @@ canvasWrapEl.addEventListener('scroll', ()=>{
    déplacement natif des éléments existants restent inchangés (voir les gardes ci-dessous). */
 let remoteCursorRAF = null;
 let pendingRemoteCursorPos = null;
+// v2.1-166 : annule un placement déporté EN COURS (point réel déjà validé, curseur affiché, geste de doigt en attente). Appelé quand le
+// contexte change sous le doigt : autre page, annuler / rétablir, nouveau document, changement d'outil. Sans cela, le point réel d'une
+// page pouvait servir de départ à une pastille posée sur une autre page, ou un geste « en attente » rejouait un curseur fantôme.
+function resetRemoteGesture(){
+  if (remoteToolPendingGate){ clearTimeout(remoteToolPendingGate.timer); remoteToolPendingGate = null; }
+  remoteCursorDragActive = false; remoteCursorDragOnHandle = false;
+  if (remoteCursorRAF){ cancelAnimationFrame(remoteCursorRAF); remoteCursorRAF = null; }
+  pendingRemoteCursorPos = null;
+  remoteAnchor = null;
+  if (remoteCursor && remoteCursor.tool === 'pastille'){ remoteCursor = null; drawRemoteCursor(); }
+}
+let lastRemoteConfirmAt = 0;
 function scheduleRemoteCursorMove(pos){
   pendingRemoteCursorPos = pos;
   if (remoteCursorRAF) return; // déjà une mise à jour programmée pour la prochaine frame
@@ -3608,6 +3624,13 @@ let remoteToolPendingGate = null; // {startX,startY,resolved,panning,lastX,lastY
 stage.on('touchstart', (e)=>{
   if (!['place-remote','cut-rect','cut-point'].includes(activeTool)) return;
   const touches = e.evt.touches;
+  if (touches && touches.length > 1){
+    // v2.1-166 : 2e doigt = pincement : le geste d'un doigt en attente est abandonné (avant, le relâchement du 1er doigt créait un curseur
+    // fantôme à l'endroit où il se levait, et un glissement du plan pouvait démarrer pendant le zoom).
+    if (remoteToolPendingGate){ clearTimeout(remoteToolPendingGate.timer); remoteToolPendingGate = null; }
+    remoteCursorDragActive = false; remoteCursorDragOnHandle = false;
+    return;
+  }
   if (!touches || touches.length !== 1) return; // laisser le pincement à deux doigts tranquille
   if (activeTool==='place-remote' && !selectedTypeId){ toast('Sélectionnez d\'abord un type de dispositif.'); return; }
   if ((activeTool==='cut-rect' || activeTool==='cut-point') && pendingCutPolygon) return; // découpe déjà en attente de validation
@@ -3692,7 +3715,7 @@ stage.on('touchend touchcancel', (e)=>{
     const wasPanning = remoteToolPendingGate.panning;
     clearTimeout(remoteToolPendingGate.timer);
     remoteToolPendingGate = null;
-    if (!wasPanning){
+    if (!wasPanning && e.type === 'touchend'){ // v2.1-166 : un touchcancel (le navigateur reprend le geste) ne doit rien créer
       // Relâché rapidement, sans avoir assez bougé ni assez attendu : comportement
       // d'origine, on crée le curseur pile là où le doigt vient de se lever.
       const ct = e.evt.changedTouches && e.evt.changedTouches[0];
@@ -3968,6 +3991,8 @@ function drawRemoteCursor(){
 }// Valide l'étape en cours (point réel puis pastille numérotée), et enchaîne sur la suivante.
 function confirmRemoteCursor(){
   if (!remoteCursor) return;
+  // v2.1-166 : un double tap involontaire (rebond du doigt) validait le point réel PUIS la pastille au même endroit (trait de longueur nulle)
+  if (remoteCursor.tool==='pastille'){ const now = Date.now(); if (now - lastRemoteConfirmAt < 450) return; lastRemoteConfirmAt = now; }
   const {x,y} = remoteCursor.tip;
   if (remoteCursor.tool==='pastille'){
     if (remoteCursor.phase==='anchor'){
@@ -4965,6 +4990,7 @@ function setTool(name){
   if (activeTool === null && name !== '__none__' && activeTileId === 'pastille') activeTool = DEFAULT_TOOL;
   remoteAnchor = null; cutPoints=[]; cutRectStart=null; isErasing=false;
   remoteCursorDragActive = false; remoteCursorDragOnHandle = false;
+  if (remoteToolPendingGate){ clearTimeout(remoteToolPendingGate.timer); remoteToolPendingGate = null; } // v2.1-166
   if (remoteCursorRAF){ cancelAnimationFrame(remoteCursorRAF); remoteCursorRAF = null; }
   pendingRemoteCursorPos = null;
   // Les outils de découpe (ciseaux) affichent leur curseur déporté dès leur sélection,
@@ -6162,6 +6188,7 @@ document.getElementById('btnSave').addEventListener('click', async ()=>{
 // Met en place les `pages` / `currentPageIndex` déjà posés (fichier ouvert ou document de la liste) : migration, modèle,
 // canevas des plans, historique neuf, zoom ajusté (fitZoom : voir le commentaire historique du .json).
 async function loadDocIntoApp(name, id){
+  resetRemoteGesture(); // v2.1-166
   pages.forEach(migratePlanFormat);
   docName = name; docId = id;
   model = pages[currentPageIndex];
