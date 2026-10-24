@@ -1302,4 +1302,14 @@ v2.1-148 — Mode jour / nuit seulement, tiroir Pastille en 2 lignes, taille d'u
  - Déplacement fin : mouvement continu à vitesse constante (25 unités/s) au lieu de pas de 1 unité toutes les 40 ms (petit saut au
    démarrage) ; appui bref = 1 unité exacte ; position arrondie au relâchement ; un seul pushHistory.
  - Tiroir Vue : une ligne d'icônes (portrait, paysage, zoom − / +, ajuster, jour / nuit) + curseur « Fond » sur sa propre ligne.
+
+v2.1-149 — Appui long = tuile Plan seule active ; tiroir Vue sur une ligne ; taille par poste dans la liste ; icône déporté
+ - Appui long (2 s) sur un plan : sélection + tuile Plan seule active (outils des autres tuiles désactivés, tiroirs refermés),
+   que des outils soient actifs ou non (avant : seulement si un outil était actif).
+ - Tiroir Vue : icônes ET curseur « Fond » compact sur UNE ligne (libellé « Fond » au-dessus, % de zoom masqué dans le tiroir).
+ - Liste des postes : chaque poste a ses boutons − n + (taille du poste = taille par défaut + pastilles déjà posées sur la page
+   affichée ; maintien = répétition), nom sur 2 lignes maximum, taille sous le nom. « Taille poste » : le poste choisi s'affiche comme
+   dans la liste (point de couleur, code, nom) avec sa propre liste de choix.
+ - « Nouveau poste » : la fenêtre reçoit une hauteur maximale + défilement quand l'écran est trop petit (fitFloatingHeight).
+ - Icône du placement déporté : petits points partant de la pointe inférieure vers la droite et finissant par une croix rouge.
 ```
