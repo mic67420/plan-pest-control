@@ -1352,4 +1352,13 @@ v2.1-155 — Flash du poste touché, tuiles de nuit identiques
   Mode nuit : Annuler / Rétablir inactifs très grisés et aucun liseré de couleur sur les tuiles.
   Correctif : flash vert sur la ligne touchée puis application et fermeture après 280 ms ; la nuit, Annuler / Rétablir moins atténués
   et liserés de couleur sur toutes les tuiles (comme le jour).
+
+v2.1-156 — Audit complet
+  Contrôles : syntaxe, ids en double / manquants, balises, ESLint (aucune erreur, seulement des « err » inutilisés dans des catch),
+  fonctions / classes CSS / ids inutilisés, clic sur tous les boutons des 6 tiroirs (téléphone et PC : 0 erreur JavaScript),
+  géométrie des tiroirs à 360 / 430 / 1280 px jour et nuit (une ligne, jamais sur les tuiles, pas de débordement), tests/smoke.js.
+  Trouvé : la bulle d'information s'affichait à 64 px du haut, PAR-DESSUS les tuiles -> placée sous les tuiles comme toutes les fenêtres.
+  Nettoyé : 3 attributs id inutilisés (tileUndoRedo, pageNavGroup, bucketColorRow). Plus aucune fenêtre sombre en bas de l'écran.
+  Limite connue : le pavé de rotation fine et la fenêtre « Tailles » partagent la même place sous les tuiles (cas rare : plan sélectionné
+  pendant que « Tailles » est ouverte).
 ```

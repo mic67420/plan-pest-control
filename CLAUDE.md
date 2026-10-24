@@ -32,7 +32,7 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
    en mode Plan.
 2. **Ne jamais déplacer de soi-même** un élément que l'utilisateur place à la main (logos, textes,
    légende, date). Aucun repositionnement automatique non demandé.
-3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-69**), à mettre à
+3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-156**), à mettre à
    jour aux 3 endroits : la balise `<title>`, la puce `.brand .ver` du bandeau, le commentaire
    d'en-tête du `<script>`.
    Attention : un remplacement global (`v2.1-69` → `v2.1-70` partout) modifie aussi les références
@@ -54,7 +54,7 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
 - `tests/smoke.js` (Playwright, sans réseau) : démarrage, éléments de coin, tuile unique active, hauteur des
   tiroirs, plan verrouillé / déplaçable, gomme, placement déporté, noms des exports. À lancer avant et après
   chaque gros changement (voir l'en-tête du fichier pour les variables LIBS / PLAYWRIGHT / CHROME).
-- Référence fonctionnelle actuelle : **v2.1-117**, commit `e3e997d` (curseur de fond des tiroirs). Précédentes : v2.1-114 `2dc9e79`, v2.1-115 `96f2e37`.
+- Référence fonctionnelle actuelle : **v2.1-156** (audit complet ; commit : voir `git log`). Précédentes : v2.1-114 `2dc9e79`, v2.1-115 `96f2e37`.
 - Dernière version validée avant le grand nettoyage (v2.1-102+) : v2.1-101, commit `cbad9f7` (les étiquettes git ne
   sont pas acceptées par le dépôt distant : retrouver la version par ce numéro de commit).
 

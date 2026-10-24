@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-155 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-156 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -538,7 +538,7 @@
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   /* Bulle flottante (v2.1-71) : notification qui reste affichée jusqu'à hideBubble() */
   #bubble{
-    position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-10px);
+    position:fixed;top:calc(var(--topbar-h, 96px) + 8px);left:50%;transform:translateX(-50%) translateY(-10px); /* v2.1-156 : sous les tuiles (64 px les recouvrait) */
     max-width:calc(100vw - 32px);background:#F59E0B;color:#1c2230;padding:8px 16px;
     border-radius:18px;font-size:13px;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.25);
     opacity:0;transition:all .25s ease;z-index:800;pointer-events:none;text-align:center;
@@ -552,7 +552,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-155</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-156</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -563,11 +563,11 @@
     <button class="mtile" data-tile="plan" title="Outils plan"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="534.7 64.8 110.7 110.7"><path fill="#222331" d="M538.7 81.7L641.2 81.7L641.2 158.4L538.9 158.4L538.7 81.7Z"/><path fill="white" d="M542.4 85.3L637.7 85.4L637.6 151.5L609.4 118.0C604.7 122 601 126.9 596.5 131.0C590.5 124.6 585.3 117.3 579.7 110.6C577.2 107.6 576.3 108.3 573.8 111.3C573.8 111.3 572.8 112.6 572.8 112.6C562.7 125.5 552.8 138.5 542.3 151.1L542.4 85.3Z"/><path fill="#222331" d="M612.2 92.3C617.9 92.1 622.6 96.6 622.8 102.3C622.9 108 618.4 112.8 612.7 112.9C607 113 602.3 108.5 602.2 102.8C602 97.1 606.5 92.4 612.2 92.3Z"/><path fill="#FC9D36" d="M612.2 95.6C616 95.5 619.2 98.4 619.3 102.2C619.5 106 616.5 109.1 612.7 109.3C609 109.4 605.8 106.4 605.7 102.7C605.5 98.9 608.5 95.8 612.2 95.6Z"/><path fill="white" d="M577 113.4C579.3 115.6 581.3 118.1 583.3 120.6C587 125.3 592.5 132 595.8 136.9C600.7 132.8 604.5 127.6 609.1 123.2L635.6 154.7L544.3 154.7L577 113.4Z"/></svg><span class="lbl">Plan</span></button>
     <button class="mtile" data-tile="pastille" title="Pastilles"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="699.6 70.7 98.7 98.7"><path fill="#222331" d="M749.2 74.4C765.9 74.4 779.1 87.3 779.7 104C780.1 116.3 769.4 136.5 763.2 146.6C759.7 152.2 756.1 157.7 752.5 163.2C751.8 164.3 751 165.7 749.7 165.6C748.9 165.5 748.1 164.4 747.6 163.8C739.2 152.2 722.5 124.1 720.2 108.7C717.6 91.3 731.4 74.4 749.2 74.4Z"/><path fill="#EF4F45" d="M749.7 78.0C765.1 78.1 776.3 90.8 775.8 106C775.4 120.7 758.3 149.6 749.7 160.2C741.1 147.4 723.5 120.1 723.7 103.5C723.9 89.7 735.9 77.9 749.7 78.0Z"/><path fill="#222331" d="M750.2 88.3C758 88.5 764.2 94.9 764.2 102.7C764.2 110.5 758 116.9 750.2 117.1C744.9 117.3 740 114.6 737.3 110.0C734.7 105.5 734.7 99.9 737.3 95.4C740 90.8 744.9 88.1 750.2 88.3Z"/><path fill="#FEEBB6" d="M750.2 92.0C756.1 92.1 760.8 96.9 760.8 102.8C760.8 108.7 756.1 113.5 750.2 113.6C746.3 113.7 742.6 111.7 740.6 108.3C738.6 104.9 738.6 100.7 740.6 97.3C742.6 93.9 746.3 91.9 750.2 92.0Z"/></svg><span class="lbl">Pastille</span></button>
     <button class="mtile" data-tile="texte" title="Textes, logos, légende"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="859.4 73.9 92.2 92.2"><path fill="#222331" d="M930.2 77.6C931.6 77.6 933 77.6 934.5 77.6C942.2 77.8 948.2 84.9 948.2 92.4C948.2 100.5 948 108.6 948 116.7C947.9 127 948.1 137.4 947.9 147.7C947.8 156.9 942.1 162.1 933 162.2C932.9 162.2 932.2 162.2 932.2 162.2C914.4 162.2 896.5 162.3 878.7 162.3C875.9 162.3 873.2 162.1 870.7 160.8C865.3 157.8 863.1 152.9 863 147.0C863 146.9 863 145.7 863 145.7C862.9 127.7 862.8 109.7 862.8 91.7C862.8 90.8 862.9 90 863 89.2C864.5 81.3 870.9 77.6 878.4 77.7C895.5 77.9 913.5 77.6 930.2 77.6Z"/><path fill="#44C7CB" d="M873.1 158.4C868.8 155.1 866.6 152.9 866.5 146.7C866.3 128.6 866.2 110.5 866.4 92.4C866.4 90.9 866.4 89.4 867 88.0C869.2 82.7 873.4 81.2 878.7 81.1C896.2 80.8 913.7 81.2 931.2 81.2C934.7 81.1 937.9 81.4 940.7 83.8C944.1 86.6 944.6 89.8 944.6 93.9C944.8 110.7 944.7 129.8 944.6 146.2C944.5 148.5 944.5 150.6 943.6 152.7C941.5 157.5 937.8 158.6 933 158.7C932.9 158.7 931.5 158.7 931.5 158.7C913.6 158.7 895.8 159 878 158.8C876.3 158.8 874.7 158.6 873.1 158.4Z"/><path fill="#222331" d="M884 92.5C885.6 92.3 887.3 92.2 888.9 92.2C900.2 92 911.5 91.9 922.7 92.1C922.7 92.1 924 92.1 924 92.1C928.8 92.3 933.1 95.8 933 100.9C932.9 107.3 927.8 109.8 922.2 109.8C919.7 109.8 917.1 109.8 914.6 109.8C914.3 119.6 914.6 129.4 914.5 139.2C914.5 139.2 914.5 140.2 914.5 140.2C914.2 145.1 910 149.4 905 149.2C899 148.9 896.5 144.9 896.5 139.5C896.4 129.6 896.5 119.7 896.5 109.8C890.9 109.9 882.9 111.1 879.6 105.2C876.6 99.8 879.9 95.8 884 92.5Z"/></svg><span class="lbl">Texte</span></button>
-    <div class="mtile-split" id="tileUndoRedo"><button type="button" id="mtileUndo" aria-label="Annuler" title="Annuler"></button><button type="button" id="mtileRedo" aria-label="Rétablir" title="Rétablir"></button></div>
+    <div class="mtile-split"><button type="button" id="mtileUndo" aria-label="Annuler" title="Annuler"></button><button type="button" id="mtileRedo" aria-label="Rétablir" title="Rétablir"></button></div>
   </div>
   <div class="sep"></div>
 
-  <div class="tb-group" id="pageNavGroup" data-tile="page">
+  <div class="tb-group" data-tile="page">
     <button class="tb-icon" id="btnPagePrev" title="Page précédente"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="387 220.3 98 98"><path fill="#222331" d="M435.7 224.0C460.8 223.9 481.2 244.2 481.2 269.2C481.2 294.3 460.8 314.6 435.7 314.5C410.8 314.3 390.8 294.1 390.8 269.2C390.8 244.4 410.8 224.2 435.7 224.0Z"/><path fill="white" d="M435.7 227.9C458.7 227.8 477.3 246.3 477.3 269.3C477.3 292.2 458.6 310.8 435.7 310.6C413 310.5 394.7 292 394.7 269.3C394.7 246.6 413 228.1 435.7 227.9Z"/><path fill="#222331" d="M421.2 269.3C422.2 268.1 423.3 267 424.4 265.9C430.4 260.4 435.9 254.5 441.6 248.8C442.8 247.6 444.3 246.3 446 247.2C449.3 249 446.1 252.6 444.6 254.1C439.4 259.4 434 264.5 428.7 269.7C433.7 274.7 438.8 279.6 443.8 284.6C445.4 286.1 447.4 287.7 446.7 290.1C445.8 293.4 442.2 290.9 440.8 289.6C434.5 283.4 426.2 276.4 421.2 269.3Z"/></svg></button>
     <span id="pageIndicator" class="mono" style="font-size:12px;color:var(--ink-dim);white-space:nowrap;padding:0 4px;min-width:64px;text-align:center;">Page 1/1</span>
     <button class="tb-icon" id="btnPageNext" title="Page suivante"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="543.1 220.1 98.1 98.1"><path fill="#222331" d="M591.7 223.9C616.7 223.7 637.2 243.9 637.3 268.9C637.5 293.9 617.2 314.3 592.2 314.4C567.2 314.5 546.9 294.4 546.8 269.4C546.7 244.4 566.7 224.1 591.7 223.9Z"/><path fill="white" d="M592.2 227.8C615 227.9 633.5 246.4 633.5 269.2C633.5 292.1 615 310.6 592.2 310.6C569.3 310.7 550.7 292.1 550.7 269.2C550.7 246.3 569.3 227.8 592.2 227.8Z"/><path fill="#222331" d="M599.4 269.5C594 264 588.4 258.6 582.8 253.2C581.6 252.1 579.5 250 580.8 248.2C582.5 246 584.6 247.1 586.1 248.6C586.1 248.6 586.6 249.1 586.6 249.1C592.3 255.3 598.6 260.8 604.6 266.7C606.6 268.6 607.2 270.1 605 272.2C605 272.2 604.5 272.7 604.5 272.7C598.2 278.5 592.3 284.5 586.2 290.5C585.1 291.6 583.5 292.9 582.2 292.0C581.2 291.3 581 289.6 581 288.4C581.2 286.6 585.5 283.4 586.7 282.2C591 278 595.2 273.8 599.4 269.5Z"/></svg></button>
@@ -645,7 +645,7 @@
             <span>Gomme</span>
           </button>
         </div>
-        <div class="pop-row" id="bucketColorRow"><label>Couleur du pot</label><span class="dd-swatch" id="bucketColorSwatch" style="background:#FFFFFF;border-radius:50%;border:1.5px solid #000;"></span><input type="color" id="bucketColorPicker" value="#FFFFFF" style="width:26px;height:26px;border:none;padding:0;"></div>
+        <div class="pop-row"><label>Couleur du pot</label><span class="dd-swatch" id="bucketColorSwatch" style="background:#FFFFFF;border-radius:50%;border:1.5px solid #000;"></span><input type="color" id="bucketColorPicker" value="#FFFFFF" style="width:26px;height:26px;border:none;padding:0;"></div>
         <div class="pop-row" id="bucketToleranceRow"><label>Tolérance pot</label><input type="range" id="rngTolerance" min="4" max="120" value="32"></div>
         <div class="pop-row" id="eraserSizeRow" style="flex-wrap:nowrap;gap:6px;align-items:center;">
           <button type="button" class="pop-btn" id="btnEraserSquare" title="Gomme carrée" style="width:auto;height:36px;margin:0;padding:0 8px;flex:none;font-size:12.5px;font-weight:600;line-height:1;">■ Carré</button>
@@ -791,7 +791,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-155 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-156 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
