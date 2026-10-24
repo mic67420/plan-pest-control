@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-164 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-165 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -132,6 +132,27 @@
     z-index:1000;padding:10px;display:none;
   }
   .popover.open{display:block;}
+  /* v2.1-165 : fenêtre « poste » (ajout / crayon) : carte blanche sous les tuiles, 2 colonnes, champs grands, aperçu en direct */
+  body.mobile-mode #popAddType{ left:50% !important; right:auto !important; transform:translateX(-50%); width:min(420px, calc(100vw - 16px)); max-width:none; padding:12px; z-index:1001; }
+  body.mobile-mode #popAddType.open{ display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; align-items:end; }
+  #popAddType .tf{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+  #popAddType .tf > label:first-child{ font-size:11.5px; font-weight:600; color:#5c6478; }
+  #popAddType .tf input[type=text]{ width:100%; box-sizing:border-box; height:42px; font-size:16px; padding:6px 10px; border:1px solid #c9ced8; border-radius:8px; background:#fff; color:#1c2230; }
+  #popAddType .tf-ctl{ display:flex; align-items:center; gap:10px; height:42px; }
+  #popAddType .tf-ctl input[type=color]{ width:52px; height:42px; padding:2px; border:1px solid #c9ced8; border-radius:8px; background:#fff; flex:none; }
+  #popAddType .tf-ctl input[type=range]{ flex:1 1 auto; min-width:0; height:30px; accent-color:var(--accent); }
+  #popAddType .tf-ctl .mono{ width:24px; text-align:right; font-size:13px; font-weight:600; color:#1c2230; }
+  #popAddType .type-preview{ width:42px; height:42px; border-radius:50%; border:3px solid #000; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex:none; overflow:hidden; }
+  #popAddType .chip{ display:flex; align-items:center; gap:8px; height:42px; padding:0 12px; border:1px solid #c9ced8; border-radius:8px; background:#fff; color:#1c2230; font-size:13.5px; cursor:pointer; box-sizing:border-box; }
+  #popAddType .chip input{ width:20px; height:20px; margin:0; flex:none; }
+  #popAddType .tf-wide{ grid-column:1 / -1; }
+  #popAddType:not(.editing) #btnDelType{ display:none; }
+  #popAddType #btnDelType{ color:#D6493E; font-weight:600; }
+  #popAddType:not(.editing) #btnCancelType{ grid-column:1 / -1; }
+  #popAddType .pop-btn{ min-height:44px; }
+  #popAddType #btnAddType{ background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700; }
+  body.night-mode #popAddType .tf > label:first-child{ color:#9aa4b6; }
+  body.night-mode #popAddType .tf-ctl .mono{ color:#e9edf4; }
   /* Menus d'options en pleine largeur (v2.1-55) : étalés horizontalement sur tout l'écran,
      leurs réglages répartis en colonnes côte à côte (autant que la largeur le permet),
      au lieu d'une liste verticale étroite qui descendait loin sur le plan. Les titres de
@@ -571,7 +592,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-164</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-165</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -708,14 +729,15 @@
     <div class="pop-wrap">
       <button class="tb-icon" id="btnAddTypeMenu" title="Ajouter / retirer un poste"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="718.5 271.6 98.8 98.8"><path fill="#25212D" d="M768.2 275.4C793.2 275.6 813.4 295.9 813.4 320.9C813.4 346 793.2 366.3 768.2 366.5C742.9 366.7 722.3 346.2 722.3 320.9C722.3 295.6 742.9 275.2 768.2 275.4Z"/><path fill="#67AC3D" d="M767.2 278.9C790.4 278.6 809.5 297.2 809.8 320.4C810.1 343.6 791.4 362.7 768.2 362.9C745.1 363.1 726.2 344.5 725.9 321.4C725.6 298.3 744.1 279.3 767.2 278.9Z"/><path fill="white" d="M765.5 318.4C765.5 313.7 765.4 309.1 765.5 304.4C765.6 299 770.3 299.4 770.3 305.2C770.3 309.6 770.3 314 770.3 318.4C775.1 318.3 779.9 318.2 784.7 318.4C789.2 318.6 788 323.3 784.7 323.3C779.9 323.4 775 323.3 770.2 323.3C770.2 328.3 770.2 333.4 770.3 338.5C770.3 339.7 770 341.3 768.5 341.3C765.8 341.4 765.5 339.2 765.5 337.2C765.5 332.5 765.5 327.9 765.6 323.2C762.4 323.2 759.1 323.2 755.9 323.3C755.1 323.3 749.6 324.1 749.1 322.0C748.4 318.7 750 318.4 752.7 318.4C757 318.3 761.3 318.4 765.5 318.4Z"/></svg></button>
       <div class="popover" id="popAddType">
-        <div class="pop-row"><label>Code</label><input type="text" id="newTypeCode" placeholder="ex : R" style="width:70px;"></div>
-        <div class="pop-row"><label>Nom</label><input type="text" id="newTypeName" placeholder="Nom du dispositif" style="width:170px;"></div>
-        <div class="pop-row"><input type="color" id="currentColorPicker" value="#0E6FA8"><span id="currentColorDot" class="dd-swatch"></span><span style="font-size:11px;color:#5c6478;">couleur</span></div>
-        <div class="pop-row"><label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;"><input type="checkbox" id="newTypeNoNumber" style="width:auto;">Pastille sans numéro</label></div>
-        <div class="pop-row"><label>Police</label><input type="color" id="newTypeTextColor" value="#ffffff" title="Couleur du numéro dans la pastille"><label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;"><input type="checkbox" id="newTypeTextAuto" checked style="width:auto;">Contraste auto</label></div>
-        <div class="pop-row"><label>Taille par défaut</label><input type="range" id="newTypeRadius" min="6" max="40" value="16" style="width:110px;"><span id="newTypeRadiusLabel" class="mono" style="font-size:11px;color:#5c6478;width:22px;">16</span></div>
-        <button class="pop-btn" id="btnAddType">+ Ajouter ce poste</button>
-        <button class="pop-btn danger" id="btnDelType">✕ Retirer le poste sélectionné</button>
+        <div class="tf"><label for="newTypeCode">Code</label><input type="text" id="newTypeCode" placeholder="ex : R"></div>
+        <div class="tf"><label for="newTypeName">Nom</label><input type="text" id="newTypeName" placeholder="Nom du dispositif"></div>
+        <div class="tf"><label for="currentColorPicker">Couleur</label><div class="tf-ctl"><input type="color" id="currentColorPicker" value="#0E6FA8"><span id="typePreview" class="type-preview" title="Aperçu de la pastille">E</span></div></div>
+        <div class="tf"><label for="newTypeTextColor">Police</label><div class="tf-ctl"><input type="color" id="newTypeTextColor" value="#ffffff" title="Couleur du numéro dans la pastille"><label class="chip"><input type="checkbox" id="newTypeTextAuto" checked><span>Auto</span></label></div></div>
+        <div class="tf"><label for="newTypeRadius">Taille</label><div class="tf-ctl"><input type="range" id="newTypeRadius" min="6" max="40" value="16"><span id="newTypeRadiusLabel" class="mono">16</span></div></div>
+        <div class="tf"><label>Numéro</label><label class="chip"><input type="checkbox" id="newTypeNoNumber"><span>Sans numéro</span></label></div>
+        <button class="pop-btn tf-wide" id="btnAddType">+ Ajouter ce poste</button>
+        <button class="pop-btn danger" id="btnDelType">✕ Retirer ce poste</button>
+        <button class="pop-btn" id="btnCancelType">Annuler</button>
       </div>
     </div>
   </div>
@@ -818,7 +840,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-164 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-165 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -5187,7 +5209,7 @@ function refreshTypeList(){
     const pop = document.getElementById('popAddType');
     closeOtherWindows('popover'); closeAllPopovers();
     pop.classList.add('open');
-    positionFloating(document.getElementById('deviceTypeDropdownBtn'), pop);
+    positionTypeCard();
   });
   list.appendChild(addRow);
   updateDropdownButton();
@@ -5195,11 +5217,29 @@ function refreshTypeList(){
 }
 let editingTypeId = null;
 // Champ « Police » du formulaire de poste : en mode automatique, la couleur affichée suit le contraste calculé et est grisée.
+function updateTypePreview(){
+  const pv = document.getElementById('typePreview'); if (!pv) return;
+  const col = document.getElementById('currentColorPicker').value;
+  const auto = document.getElementById('newTypeTextAuto').checked;
+  pv.style.background = col;
+  pv.style.color = auto ? autoTextColor(col) : document.getElementById('newTypeTextColor').value;
+  pv.textContent = document.getElementById('newTypeNoNumber').checked ? '' : ((document.getElementById('newTypeCode').value || 'E').slice(0,3));
+}
+// Carte « poste » : toujours centrée juste sous les tuiles (ne cache plus les icônes du tiroir).
+function positionTypeCard(){
+  const pop = document.getElementById('popAddType'), bar = document.getElementById('mobileTileBar');
+  pop.classList.toggle('editing', !!editingTypeId); // « Retirer ce poste » seulement quand on modifie un poste existant
+  pop.style.top = (bar.getBoundingClientRect().bottom + 6) + 'px';
+  pop.style.maxHeight = 'calc(100vh - ' + (bar.getBoundingClientRect().bottom + 14) + 'px)'; pop.style.overflowY = 'auto';
+}
 function syncTextColorUI(){
   const auto = document.getElementById('newTypeTextAuto').checked, inp = document.getElementById('newTypeTextColor');
   if (auto) inp.value = autoTextColor(document.getElementById('currentColorPicker').value);
   inp.disabled = auto; inp.style.opacity = auto ? '.45' : '1';
+  updateTypePreview();
 }
+['newTypeCode','newTypeTextColor','newTypeNoNumber'].forEach(id=>document.getElementById(id).addEventListener('input', updateTypePreview));
+document.getElementById('newTypeNoNumber').addEventListener('change', updateTypePreview);
 document.getElementById('newTypeTextAuto').addEventListener('change', syncTextColorUI);
 document.getElementById('currentColorPicker').addEventListener('input', syncTextColorUI);
 function startEditType(typeId){
@@ -5221,7 +5261,7 @@ function startEditType(typeId){
   const pop = document.getElementById('popAddType');
   closeAllPopovers();
   pop.classList.add('open');
-  positionFloating(trigger, pop);
+  positionTypeCard();
 }
 function updateDropdownButton(){
   const t = model.deviceTypes.find(t=>t.id===selectedTypeId);
@@ -5235,7 +5275,6 @@ function syncColorPickerToSelectedType(){
   if (pop && pop.classList.contains('open')) return; // ne pas écraser un choix de couleur en cours (ajout/édition d'un poste)
   const t = model.deviceTypes.find(t=>t.id===selectedTypeId);
   const color = t ? t.color : currentColor;
-  document.getElementById('currentColorDot').innerHTML = t ? shapeSwatchHTML(t,18) : '';
   document.getElementById('currentColorPicker').value = color;
 }
 document.getElementById('deviceTypeDropdownBtn').addEventListener('click', (e)=>{
@@ -5246,15 +5285,17 @@ document.getElementById('deviceTypeDropdownBtn').addEventListener('click', (e)=>
   closeOtherWindows('popover'); closeAllPopovers();
   if (!isOpen){ list.classList.add('open'); positionFloating(btn, list); }
 });
+document.getElementById('btnCancelType').addEventListener('click', ()=>{ editingTypeId = null; closeAllPopovers(); });
 document.getElementById('btnDelType').addEventListener('click', ()=>{
-  const t = model.deviceTypes.find(t=>t.id===selectedTypeId);
+  const t = model.deviceTypes.find(t=>t.id===(editingTypeId || selectedTypeId)); // le poste ouvert dans le crayon (avant : le poste sélectionné, parfois un autre)
   if (!t) return;
   if (model.pastilles.some(p=>p.typeId===t.id)){
     if (!confirm('Des pastilles utilisent ce poste. Les supprimer aussi ?')) return;
     model.pastilles = model.pastilles.filter(p=>p.typeId!==t.id);
   }
   model.deviceTypes = model.deviceTypes.filter(dt=>dt.id!==t.id);
-  selectedTypeId = null;
+  if (selectedTypeId === t.id) selectedTypeId = null;
+  editingTypeId = null;
   closeAllPopovers();
   pushHistory(); render();
 });
@@ -5306,7 +5347,7 @@ document.getElementById('currentColorPicker').addEventListener('input', (e)=>{
   // actuellement sélectionné pour le placement de pastilles, sous peine d'écraser sa
   // couleur par erreur pendant qu'on choisit simplement la couleur d'un autre poste.
   currentColor = e.target.value;
-  document.getElementById('currentColorDot').innerHTML = shapeSwatchHTML({color:currentColor, shape:'circle'}, 18);
+  updateTypePreview();
 });
 document.getElementById('bucketColorPicker').addEventListener('input', (e)=>{
   bucketColor = e.target.value;

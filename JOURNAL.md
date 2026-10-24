@@ -1407,4 +1407,10 @@ v2.1-164 — Contraste : liste des postes la nuit, police des pastilles
   Cause 2 : le numéro dans la pastille était toujours blanc (illisible sur les couleurs claires : jaune, vert clair, cyan).
   Correctif 2 : couleur automatique noir / blanc selon le meilleur contraste (autoTextColor, WCAG) ; réglable dans le crayon du poste
   (champ « Police » + case « Contraste auto »), propagée à toutes les pages, utilisée aussi par la légende, le récapitulatif et les exports.
+
+v2.1-165 — Fenêtre « poste » (crayon / ajout) refaite
+  Cause : formulaire en liste serrée posé sur le tiroir (cachait les icônes), libellés qui passaient à la ligne, pastille « couleur » qui
+  ne suivait pas le sélecteur, et « Retirer » visait le poste SÉLECTIONNÉ et non celui ouvert dans le crayon.
+  Correctif : carte blanche sous les tuiles, 2 colonnes, champs de 42 px (Code | Nom, Couleur + aperçu en direct | Police + Auto,
+  Taille | Sans numéro), boutons Enregistrer / Retirer ce poste (seulement en modification, et le poste ouvert) / Annuler.
 ```
