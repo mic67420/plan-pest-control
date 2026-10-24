@@ -1288,4 +1288,7 @@ v2.1-146 — Découpe : pointillés conservés au 2e coin ; flèches en haut, ou
  - Flèches de déplacement fin : fenêtre orange flottante SOUS LES TUILES (en haut), avec une croix pour la fermer ; elle
    s'ouvre avec la nouvelle icône bleue « Flèches » (rond bleu, croix de 4 flèches) du tiroir Pastille, pour une pastille
    sélectionnée et déverrouillée.
+
+v2.1-147 — Flèches de déplacement fin : démarrage immédiat, vitesse x1,5
+ - Répétition dès l'appui (avant : 400 ms d'attente) toutes les 40 ms (avant : 60 ms).
 ```
