@@ -1312,4 +1312,11 @@ v2.1-149 — Appui long = tuile Plan seule active ; tiroir Vue sur une ligne ; t
    dans la liste (point de couleur, code, nom) avec sa propre liste de choix.
  - « Nouveau poste » : la fenêtre reçoit une hauteur maximale + défilement quand l'écran est trop petit (fitFloatingHeight).
  - Icône du placement déporté : petits points partant de la pointe inférieure vers la droite et finissant par une croix rouge.
+
+v2.1-150 — Contrôle intégral : nettoyage et fenêtre sombre du bas
+  Cause : le message `toast` s'affichait en bandeau SOMBRE en bas de l'écran (seul vestige), et du code
+  mort restait (pastille témoin masquée recalculée à chaque rendu, countPastillesOfType, rowsN,
+  PLAN_LOCK_SHACKLE_*, lastTilePointerType, CSS tb-slider / tb-hint / size-ctl-lbl / .hint).
+  Correctif : toast = fenêtre flottante ORANGE sous les tuiles (comme la bulle et les autres fenêtres) ;
+  code et CSS morts supprimés ; vérifications et tests/smoke.js OK.
 ```

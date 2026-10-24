@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-149 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-150 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -90,19 +90,9 @@
   #fileInputPlan,#fileInputLogoA,#fileInputLogoB,#fileInputProject{
     position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;
   }
-  .tb-slider{display:flex;align-items:center;gap:5px;font-size:10.5px;color:#5c6478;flex:none;padding:0 4px;}
-  .tb-hint{
-    flex:none;width:100%;background:#EEF4FA;border:1px solid #C9DCEC;border-radius:8px;
-    padding:6px 10px;margin-top:2px;
-  }
-  .tb-hint summary{font-size:12px;font-weight:600;color:#0E6FA8;cursor:pointer;}
-  .tb-hint p{margin:6px 0 2px;font-size:12px;color:#3a4356;line-height:1.4;}
-  .tb-slider input[type=range]{width:64px;accent-color:var(--accent);}
-  .tb-slider .val{width:20px;color:#8890a0;}
   /* Réglage de taille des pastilles (v2.1-68) : − | curseur | + sur une ligne, grosses cibles
      tactiles ; pastille témoin dans un cadre pointillé de taille fixe. */
   .size-ctl{display:flex;flex-direction:column;gap:3px;flex:none;padding:0 4px;}
-  .size-ctl-lbl{font-size:10.5px;color:#5c6478;}
   .size-ctl-row{display:flex;align-items:center;gap:6px;}
   .size-ctl-row input[type=range]{width:120px;height:30px;accent-color:var(--accent);}
   .size-ctl-row .val{width:22px;text-align:center;font-size:12px;color:#5c6478;}
@@ -161,7 +151,6 @@
   }
   body.mobile-mode .popover .pop-section-title,
   body.mobile-mode .popover .pop-divider,
-  body.mobile-mode .popover .hint{ grid-column:1 / -1; }
   body.mobile-mode .popover .pop-row{ margin:3px 0; }
   body.mobile-mode .popover .pop-btn{ margin-top:3px; }
   .pop-row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:11.5px;color:#5c6478;flex-wrap:wrap;}
@@ -370,8 +359,6 @@
   body.mobile-mode .tb-group[data-tile="pastille"].mobile-open .size-preview{ flex:none; }
   body.mobile-mode .dd-btn{height:52px;min-width:170px;font-size:14px;}
   body.mobile-mode .dd-swatch{width:24px;height:24px;}
-  body.mobile-mode .tb-slider input[type=range]{width:76px;height:26px;}
-  body.mobile-mode .tb-slider{font-size:12px;}
   body.mobile-mode .tb-check{font-size:12.5px;}
   body.mobile-mode .brand{font-size:16px;}
   body.mobile-mode .popover{min-width:260px;padding:14px;}
@@ -594,9 +581,11 @@
   #textEditConfirm:hover{background:#2559c9;}
 
   /* Toast */
+  /* v2.1-150 : plus de bandeau sombre en bas — même fenêtre flottante orange que la bulle, sous les tuiles */
   #toast{
-    position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);
-    background:#1c2230;color:#fff;padding:9px 16px;border-radius:8px;font-size:12.5px;
+    position:fixed;top:calc(var(--topbar-h,96px) + 8px);left:50%;transform:translateX(-50%) translateY(-10px);
+    max-width:calc(100vw - 32px);background:#F59E0B;color:#1c2230;padding:8px 16px;border-radius:18px;
+    font-size:13px;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.25);text-align:center;
     opacity:0;transition:all .25s ease;z-index:900;pointer-events:none;
   }
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -616,7 +605,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-149</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-150</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -758,10 +747,6 @@
         <span class="val" id="pastilleSizeLabel">16</span>
       </div>
     </div>
-    <div class="size-preview" id="pastilleSizePreview" title="Pastille témoin : taille réelle sur la feuille, au zoom actuel">
-      <div class="size-preview-shape" id="pastilleSizePreviewShape"></div>
-      <span class="size-preview-note" id="pastilleSizePreviewNote"></span>
-    </div>
     <div class="pop-wrap">
       <button class="tb-icon" id="btnAddTypeMenu" title="Ajouter / retirer un poste"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="718.5 271.6 98.8 98.8"><path fill="#25212D" d="M768.2 275.4C793.2 275.6 813.4 295.9 813.4 320.9C813.4 346 793.2 366.3 768.2 366.5C742.9 366.7 722.3 346.2 722.3 320.9C722.3 295.6 742.9 275.2 768.2 275.4Z"/><path fill="#67AC3D" d="M767.2 278.9C790.4 278.6 809.5 297.2 809.8 320.4C810.1 343.6 791.4 362.7 768.2 362.9C745.1 363.1 726.2 344.5 725.9 321.4C725.6 298.3 744.1 279.3 767.2 278.9Z"/><path fill="white" d="M765.5 318.4C765.5 313.7 765.4 309.1 765.5 304.4C765.6 299 770.3 299.4 770.3 305.2C770.3 309.6 770.3 314 770.3 318.4C775.1 318.3 779.9 318.2 784.7 318.4C789.2 318.6 788 323.3 784.7 323.3C779.9 323.4 775 323.3 770.2 323.3C770.2 328.3 770.2 333.4 770.3 338.5C770.3 339.7 770 341.3 768.5 341.3C765.8 341.4 765.5 339.2 765.5 337.2C765.5 332.5 765.5 327.9 765.6 323.2C762.4 323.2 759.1 323.2 755.9 323.3C755.1 323.3 749.6 324.1 749.1 322.0C748.4 318.7 750 318.4 752.7 318.4C757 318.3 761.3 318.4 765.5 318.4Z"/></svg></button>
       <div class="popover" id="popAddType">
@@ -879,7 +864,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-149 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-150 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1538,9 +1523,6 @@ function nextPastilleLabel(typeId){
   const code = type ? type.code : '?';
   return code + nextFreeLabelNumber(code);
 }
-function countPastillesOfType(typeId){
-  return pages.reduce((sum, pg)=> sum + pg.pastilles.filter(p=>p.typeId===typeId).length, 0);
-}
 // Déplace la page courante d'une position dans le document (elle reste affichée : seul son
 // rang change), sans recharger le plan puisque le contenu affiché ne change pas.
 function movePageBy(delta){
@@ -1738,7 +1720,6 @@ function render(){
   // restée cochée visuellement alors que cette page-ci l'a décochée).
   document.getElementById('toolToggleLegend').classList.toggle('active', model.legend.visible);
   document.getElementById('chkOnlyUsed').checked = model.legend.onlyUsed;
-  updateSizePreview(); // pastille témoin : couleur/étiquette du poste choisi (v2.1-68)
   updateLockAllButton();
 }
 
@@ -2014,7 +1995,6 @@ function renderRecapPage(){
   const totW = 64, pgW = Math.max(30, Math.min(54, Math.floor((W-2*M)*0.45/Math.max(nP,1))));
   const nameW = W - 2*M - totW - (nP>1 ? pgW*nP : 0);
   recapGroup.add(new Konva.Text({ x:M, y:TOP-64, width:W-2*M, text:'Récapitulatif des postes', fontSize:28, fontStyle:'700', fontFamily:APP_FONT, fill:'#1c2230' }));
-  const rowsN = types.length + 2; // en-tête + postes + total
   recapGroup.add(new Konva.Rect({ x:M, y:TOP, width:W-2*M, height:ROW_H, fill:'#E4EEF4', cornerRadius:6 }));
   const cell = (txt, x, y, w, o)=>recapGroup.add(new Konva.Text(Object.assign({ x, y:y+ROW_H/2-8, width:w, text:String(txt), fontSize:15, fontFamily:APP_FONT, fill:'#1c2230', align:'center' }, o||{})));
   cell('Poste', M+36, TOP, nameW-36, { align:'left', fontStyle:'700' });
@@ -2888,8 +2868,6 @@ function ensureLockBadge(){
   };
 }
 // v2.1-83 : icône + texte du bouton cadenas de la tuile Plan selon l'état du plan (sélectionné, sinon le 1er).
-const PLAN_LOCK_SHACKLE_CLOSED = 'M7.5 10.5V7.8a4.5 4.5 0 0 1 9 0v2.7';
-const PLAN_LOCK_SHACKLE_OPEN = 'M7.5 10.5V7.8a4.5 4.5 0 0 1 9 0V6';
 function updatePlanLockButton(){
   const btn = document.getElementById('toolLockPlan');
   if (!btn) return;
@@ -5367,7 +5345,6 @@ document.getElementById('rngPastilleSize').addEventListener('input', (e)=>{
   }
   currentPastilleRadius = parseInt(e.target.value,10);
   document.getElementById('pastilleSizeLabel').textContent = currentPastilleRadius;
-  updateSizePreview();
 });
 
 /* ---------------------------- Boutons − / + et pastille témoin (v2.1-68) ----------------- */
@@ -5376,44 +5353,6 @@ document.getElementById('rngPastilleSize').addEventListener('input', (e)=>{
 function effectiveNextRadius(){
   const type = model.deviceTypes.find(t=>t.id===selectedTypeId);
   return (type && type.defaultRadius) ? type.defaultRadius : currentPastilleRadius;
-}
-// Pastille TÉMOIN : dessinée à la taille réelle qu'aura la prochaine pastille sur la feuille, au
-// zoom actuel (diamètre = 2 × rayon × zoom), même couleur, même forme, même étiquette que la vraie.
-// Si elle dépasse le cadre, elle est réduite et une mention le précise. Le contenu n'est refait
-// que si quelque chose a changé (signature), car cette fonction est appelée à chaque rendu.
-let lastSizePreviewSig = null;
-function updateSizePreview(){
-  const shapeEl = document.getElementById('pastilleSizePreviewShape');
-  if (!shapeEl) return;
-  const noteEl = document.getElementById('pastilleSizePreviewNote');
-  const type = model.deviceTypes.find(t=>t.id===selectedTypeId);
-  const r = effectiveNextRadius();
-  const label = nextPastilleLabel(selectedTypeId); // même numéro que la prochaine pastille posée
-  const MAX_D = 40;                       // diamètre maximal du témoin (px écran) — v2.1-94 : 84 -> 40 (rayon 20)
-  const realD = 2*r*zoom;
-  const k = realD > MAX_D ? MAX_D/realD : 1;
-  const R = Math.max(2, r*zoom*k);
-  const note = (type && type.defaultRadius) ? 'taille propre au poste' : (k < 1 ? 'aperçu réduit à '+Math.round(k*100)+' %' : '');
-  const color = type ? type.color : '#0E6FA8';
-  const shape = (type && type.shape) || 'circle';
-  const sig = [color, shape, label, R.toFixed(1), note].join('|');
-  if (sig === lastSizePreviewSig) return;
-  lastSizePreviewSig = sig;
-  const pad = 6, S = Math.ceil(2*R + 2*pad);
-  const ringW = Math.max(1.6, r*0.14)*zoom*k, whiteW = Math.max(1, r*0.05)*zoom*k;
-  const c = S/2;
-  const shapeSvg = shape === 'burst'
-    ? '<polygon points="'+starPolygonPoints(10, c, c, R, R*0.74)+'" fill="url(#pvGrad)" stroke="#ffffff" stroke-width="'+whiteW+'"/>'
-      + '<polygon points="'+starPolygonPoints(10, c, c, R, R*0.74)+'" fill="none" stroke="#000" stroke-width="'+ringW+'"/>'
-    : '<circle cx="'+c+'" cy="'+c+'" r="'+R+'" fill="url(#pvGrad)" stroke="#ffffff" stroke-width="'+whiteW+'"/>'
-      + '<circle cx="'+c+'" cy="'+c+'" r="'+R+'" fill="none" stroke="#000" stroke-width="'+ringW+'"/>';
-  const fs = label ? fontSizeForLabel(label, r)*zoom*k : 0;
-  const text = label ? '<text x="'+c+'" y="'+c+'" fill="#fff" font-weight="700" font-size="'+fs.toFixed(1)+'" text-anchor="middle" dominant-baseline="central" font-family="'+APP_FONT.replace(/'/g,'&quot;')+'">'+escapeAttr(label)+'</text>' : '';
-  shapeEl.innerHTML = '<svg width="'+S+'" height="'+S+'" viewBox="0 0 '+S+' '+S+'">'
-    + '<defs><radialGradient id="pvGrad" cx="35%" cy="35%" r="80%"><stop offset="0" stop-color="'+lighten(color,32)+'"/><stop offset="0.55" stop-color="'+color+'"/><stop offset="1" stop-color="'+darken(color,18)+'"/></radialGradient></defs>'
-    + shapeSvg + text + '</svg>';
-  noteEl.textContent = note;
-  shapeEl.parentElement.title = 'Pastille témoin : taille réelle sur la feuille, au zoom actuel' + (note ? ' ('+note+')' : '');
 }
 // Bouton maintenu = répétition de plus en plus rapide (appui bref = 1 cran). Utilisé pour − et +.
 // "step" : +1 ou −1 ; "read"/"write" : lecture et écriture de la valeur ; "onEnd" : appelé UNE fois à
@@ -5756,13 +5695,11 @@ function openTileDrawer(tileId, allowToggle=true){
 // Limité aux vrais pointeurs souris (pointerType 'mouse') : sur un écran tactile, le
 // navigateur simule aussi un "survol" juste avant le tap, ce qui aurait ouvert puis
 // aussitôt refermé le tiroir (le tap qui suit le refermant par bascule).
-let lastTilePointerType = 'mouse';
 document.querySelectorAll('#mobileTileBar .mtile').forEach(btn=>{
   btn.addEventListener('pointerenter', (e)=>{
     if (e.pointerType !== 'mouse') return;
     openTileDrawer(btn.dataset.tile, false);
   });
-  btn.addEventListener('pointerdown', (e)=>{ lastTilePointerType = e.pointerType || 'mouse'; });
   btn.addEventListener('click', (e)=>{
     e.stopPropagation();
     // v2.1-92 : état du tiroir relevé AVANT onTileChosen, car setTool() (appelé par celui-ci) referme
@@ -5942,7 +5879,6 @@ function applyRenderRatio(){
 }
 function settleZoom(){
   applyRenderRatio();
-  updateSizePreview(); // la pastille témoin suit le zoom (taille réelle à l'écran)
   if (!planRotate.active) updateLockIndicator(); // met à jour aussi les icônes de rotation : taille constante à l'écran
   if (selectedId){ // zone de saisie de la pastille sélectionnée : taille constante à l'écran
     const pp = model.pastilles.find(x=>x.id===selectedId), g = pp && pastilleNodes.get(pp.id);
