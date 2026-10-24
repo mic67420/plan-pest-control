@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-154 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-155 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -196,6 +196,8 @@
   /* v2.1-154 : poste choisi = confirmation visuelle nette : pastille ✓ verte à gauche + barre bleue + nom en gras */
   .dd-item.selected{background:var(--accent-soft);box-shadow:inset 4px 0 0 var(--accent);font-weight:600;}
   .dd-item{position:relative;padding-left:22px;}
+  .dd-item.flash{animation:ddFlash .28s ease-out;}
+  @keyframes ddFlash{0%{background:#2E9E6B;transform:scale(1.03);}100%{background:#bfe8d3;transform:scale(1);}}
   .dd-item.selected::before{content:'✓';position:absolute;left:3px;top:50%;margin-top:-8px;width:16px;height:16px;border-radius:50%;background:#2E9E6B;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;}
   .dd-item .code{font-weight:700;min-width:30px;flex:none;text-align:center;}
   /* Nom complet : sur une seule ligne si la place le permet, sinon renvoyé à la ligne
@@ -456,13 +458,15 @@
      de couleur par tuile. Les modes Soleil et Nuit gardent leurs propres règles (d'où le :not). */
   body.mobile-mode:not(.night-mode) #mobileTileBar .mtile,
   body.mobile-mode:not(.night-mode) #mobileTileBar .mtile-split button{ background:#fff; border:1px solid #BFC7D4; border-bottom-width:5px; box-shadow:0 1px 3px rgba(0,0,0,.18); }
-  body:not(.night-mode) #mobileTileBar .mtile[data-tile="page"]{ border-bottom-color:#2B3242; }
-  body:not(.night-mode) #mobileTileBar .mtile[data-tile="vue"]{ border-bottom-color:#2AA6B0; }
-  body:not(.night-mode) #mobileTileBar .mtile[data-tile="historique"]{ border-bottom-color:#0E6FA8; }
-  body:not(.night-mode) #mobileTileBar .mtile[data-tile="plan"]{ border-bottom-color:#7A5AD8; }
-  body:not(.night-mode) #mobileTileBar .mtile[data-tile="pastille"]{ border-bottom-color:#D6493E; }
-  body:not(.night-mode) #mobileTileBar .mtile[data-tile="texte"]{ border-bottom-color:#E8A83C; }
-  body:not(.night-mode) #mobileTileBar #mtileUndo, body:not(.night-mode) #mobileTileBar #mtileRedo{ border-bottom-color:#2E9E6B; } /* v2.1-154 : liseré de couleur aussi pour Annuler / Rétablir */
+  body.mobile-mode.night-mode #mobileTileBar .mtile, body.mobile-mode.night-mode #mobileTileBar .mtile-split button{ border-style:solid; border-width:1px 1px 5px; border-top-color:#394258; border-left-color:#394258; border-right-color:#394258; } /* v2.1-155 : liserés de couleur aussi la nuit */
+  body #mobileTileBar .mtile[data-tile="page"]{ border-bottom-color:#2B3242; }
+  body.night-mode #mobileTileBar .mtile[data-tile="page"]{ border-bottom-color:#8A94AA; } /* sombre sur sombre : éclairci la nuit */
+  body #mobileTileBar .mtile[data-tile="vue"]{ border-bottom-color:#2AA6B0; }
+  body #mobileTileBar .mtile[data-tile="historique"]{ border-bottom-color:#0E6FA8; }
+  body #mobileTileBar .mtile[data-tile="plan"]{ border-bottom-color:#7A5AD8; }
+  body #mobileTileBar .mtile[data-tile="pastille"]{ border-bottom-color:#D6493E; }
+  body #mobileTileBar .mtile[data-tile="texte"]{ border-bottom-color:#E8A83C; }
+  body #mobileTileBar #mtileUndo, body #mobileTileBar #mtileRedo{ border-bottom-color:#2E9E6B; } /* v2.1-154 : liseré de couleur aussi pour Annuler / Rétablir */
   body:not(.night-mode) #mobileTileBar .mtile.active{ background:var(--accent); }
   /* v2.1-142 : bouton d'affichage à 3 états (Jour / Soleil / Nuit) : seul le dessin du mode actif est visible */
   #btnSun .th-night{ display:none; }
@@ -474,6 +478,7 @@
   body.night-mode #topbar{ background:#161b26; border-bottom:1px solid #2a3243; }
   body.night-mode #topbar .brand{ color:#e9edf4; }
   body.night-mode #mobileTileBar .mtile, body.night-mode #mobileTileBar .mtile-split button{ background:#242c3c; color:#e9edf4; }
+  body.night-mode #mobileTileBar .mtile-split button:disabled{ opacity:.85; } /* v2.1-155 : Annuler / Rétablir inactifs restent proches des autres tuiles */
   body.night-mode #mobileTileBar .mtile.active{ background:#0E6FA8; color:#fff; }
   body.night-mode #mobileTileBar .mtile .icon, body.night-mode #mobileTileBar .mtile-split .icon, body.night-mode .tb-icon .icon{ background:#eef1f6; border-radius:7px; padding:2px; box-sizing:content-box; }
   body.night-mode .tb-icon{ color:#e9edf4; }
@@ -547,7 +552,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-154</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-155</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -786,7 +791,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-154 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-155 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -5038,15 +5043,21 @@ function refreshTypeList(){
         }
         return;
       }
-      selectedTypeId = t.id;
-      closeAllPopovers();
-      // v2.1-144 : une pastille est sélectionnée -> le choix s'applique à elle (poste + numéro suivant libre de ce poste)
-      const selP = model.pastilles.find(q=>q.id===selectedId);
-      if (selP && selP.typeId !== t.id && !selP.locked){
-        selP.typeId = t.id; selP.label = t.noNumber ? '' : nextPastilleLabel(t.id);
-        pushHistory(); render();
-      }
-      lastTypeListSig=null; refreshTypeList();
+      // v2.1-155 : flash vert + court délai (280 ms) avant d'appliquer et de refermer la liste : on VOIT quel poste le doigt a touché
+      // (au doigt le choix est plus hasardeux). La liste n'est pas reconstruite pendant le flash ; un 2e appui est ignoré.
+      if (row.classList.contains('flash')) return;
+      row.classList.add('flash');
+      setTimeout(()=>{
+        selectedTypeId = t.id;
+        closeAllPopovers();
+        // v2.1-144 : une pastille est sélectionnée -> le choix s'applique à elle (poste + numéro suivant libre de ce poste)
+        const selP = model.pastilles.find(q=>q.id===selectedId);
+        if (selP && selP.typeId !== t.id && !selP.locked){
+          selP.typeId = t.id; selP.label = t.noNumber ? '' : nextPastilleLabel(t.id);
+          pushHistory(); render();
+        }
+        lastTypeListSig=null; refreshTypeList();
+      }, 280);
     });
     const nEl = row.querySelector('.sz-n');
     row.querySelectorAll('.sz-ctl button').forEach(sb=>{

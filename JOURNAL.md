@@ -1346,4 +1346,10 @@ v2.1-154 — Poste choisi confirmé visuellement, « Ajust. fin », liseré Annu
   Cause : le poste actif n'était qu'un fond bleu pâle peu visible ; l'icône de déplacement fin s'appelait « Flèches » ; les tuiles
   Annuler / Rétablir avaient un liseré gris.
   Correctif : ✓ vert + barre bleue + gras sur le poste choisi ; étiquette « Ajust. fin » ; liseré vert sur Annuler et Rétablir.
+
+v2.1-155 — Flash du poste touché, tuiles de nuit identiques
+  Cause : le choix d'un poste dans la liste était immédiat (liste refermée aussitôt) : au doigt, impossible de vérifier ce qu'on a touché.
+  Mode nuit : Annuler / Rétablir inactifs très grisés et aucun liseré de couleur sur les tuiles.
+  Correctif : flash vert sur la ligne touchée puis application et fermeture après 280 ms ; la nuit, Annuler / Rétablir moins atténués
+  et liserés de couleur sur toutes les tuiles (comme le jour).
 ```
