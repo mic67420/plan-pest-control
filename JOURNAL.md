@@ -1370,4 +1370,9 @@ v2.1-158 — Contrôle des numéros (trous et doublons)
   Besoin : repérer les trous dans les séries (E1, E2, E4 -> E3 manque) et les doublons.
   Réalisation : ligne « Contrôle des numéros » au bas de la liste des postes -> fenêtre orange sous les tuiles : par lettre,
   toutes pages confondues, « Manque : E3 », « En double : E4 » ou « série complète » ; bouton « Renuméroter 1 -> n » (confirmation, annulable).
+
+v2.1-159 — Aperçu des pages avant export
+  Besoin : voir les pages exactes avant d'envoyer le rapport.
+  Réalisation : avant PDF / PPTX / PNG / JPEG / impression, fenêtre orange « Aperçu : pages à exporter » avec une miniature par page
+  (capture réduite ratio 0,3, page affichée restaurée ensuite), cases à cocher, Annuler / Exporter ; aussi pour un document d'une seule page.
 ```

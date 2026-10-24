@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-158 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-159 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -565,7 +565,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-158</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-159</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -809,7 +809,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-158 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-159 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -6098,24 +6098,56 @@ function exportStageDataURL(mimeType, quality, pixelRatio){
 // à la page actuellement affichée à l'écran.
 // v2.1-127 : choix des pages à exporter (la page « Récapitulatif », si elle existe, est décochée par défaut : le client n'en
 // a pas besoin). Un seul étage = aucune question. Résultat : liste d'indices, ou null si Mic annule.
+// v2.1-159 : miniatures de toutes les pages (aperçu avant export). Même parcours que la capture d'export, mais en très petit
+// (ratio 0,3) ; la page affichée est restaurée ensuite.
+async function buildPageThumbs(){
+  const originalIndex = currentPageIndex, was = selectedId;
+  const thumbs = [];
+  bitmapCacheEnabled = false;
+  try{
+    for (let i=0; i<pages.length; i++){
+      if (i !== currentPageIndex || !thumbs.length){
+        currentPageIndex = i; model = pages[i];
+        selectedId = null; transformer.nodes([]);
+        resetContentNodeCaches();
+        await rehydratePlanCanvas();
+        render();
+        await waitForLogoImages();
+      }
+      thumbs.push(withCleanStage(()=>exportStageDataURL('image/jpeg', 0.7, 0.3)));
+    }
+  } finally { bitmapCacheEnabled = true; }
+  currentPageIndex = originalIndex; model = pages[originalIndex];
+  resetContentNodeCaches();
+  await rehydratePlanCanvas();
+  selectedId = was;
+  render(); updateOrientButtons(); updatePageIndicator();
+  return thumbs;
+}
 function askPagesToExport(){
-  if (pages.length <= 1) return Promise.resolve([0]);
-  return new Promise(resolve=>{
+  return new Promise(async resolve=>{
+    toast('Préparation de l\'aperçu…');
+    let thumbs = [];
+    try{ thumbs = await buildPageThumbs(); } catch(err){ thumbs = []; }
     const card = document.createElement('div');
-    card.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);max-width:calc(100vw - 32px);width:340px;'
+    card.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);max-width:calc(100vw - 16px);width:360px;'
       + 'background:#F59E0B;color:#1c2230;padding:12px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);'
-      + 'z-index:950;font-size:13px;font-weight:500;display:flex;flex-direction:column;gap:8px;';
+      + 'z-index:950;font-size:13px;font-weight:500;display:flex;flex-direction:column;gap:8px;box-sizing:border-box;';
     const bar = document.getElementById('mobileTileBar'); const r = bar ? bar.getBoundingClientRect() : null;
     card.style.top = ((r && r.height ? r.bottom : 58) + 6)+'px';
-    card.innerHTML = '<div style="font-weight:700;">Pages à exporter</div>';
-    const list = document.createElement('div'); list.style.cssText = 'display:flex;flex-direction:column;gap:2px;background:#fff7e6;border-radius:8px;padding:6px 8px;max-height:40vh;overflow:auto;';
+    card.innerHTML = '<div style="font-weight:700;">Aperçu : pages à exporter</div>';
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(2,1fr);gap:8px;background:#fff7e6;border-radius:8px;padding:8px;max-height:min(55vh,420px);overflow:auto;';
     const boxes = pages.map((pg, i)=>{
-      const lab = document.createElement('label'); lab.style.cssText = 'display:flex;align-items:center;gap:8px;padding:5px 0;';
+      const cell = document.createElement('label'); cell.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;background:#fff;border-radius:8px;padding:6px;cursor:pointer;';
+      const img = document.createElement('img'); img.alt = ''; if (thumbs[i]) img.src = thumbs[i];
+      img.style.cssText = 'width:100%;max-height:150px;object-fit:contain;background:#eee;border-radius:4px;';
+      const line = document.createElement('span'); line.style.cssText = 'display:flex;align-items:center;gap:6px;';
       const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !pg.recap; cb.style.cssText = 'width:20px;height:20px;';
-      const nm = document.createElement('span'); nm.textContent = pg.recap ? 'Récapitulatif des postes' : 'Page '+(i+1);
-      lab.append(cb, nm); list.appendChild(lab); return cb;
+      const nm = document.createElement('span'); nm.textContent = pg.recap ? 'Récapitulatif' : 'Page '+(i+1);
+      line.append(cb, nm); cell.append(img, line); grid.appendChild(cell); return cb;
     });
-    card.appendChild(list);
+    card.appendChild(grid);
     const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;';
     const mk = (txt, bg, fg, fn)=>{ const b = document.createElement('button'); b.type='button'; b.textContent = txt; b.style.cssText = 'font:inherit;padding:8px 14px;border:none;border-radius:8px;background:'+bg+';color:'+fg+';'; b.addEventListener('click', fn); return b; };
     const done = (v)=>{ card.remove(); resolve(v); };

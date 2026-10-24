@@ -69,6 +69,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       const dl = pg.waitForEvent('download',{timeout:20000});
       await pg.evaluate(i=>document.getElementById(i).click(), id);
       if (id==='btnExportPDF'){ await pg.waitForSelector('input[placeholder="ex : Usine Martin"]',{timeout:3000}); ok(await pg.inputValue('input[placeholder="ex : Usine Martin"]')==='Plan test', 'export : nom pré-rempli avec le nom du plan'); await pg.keyboard.press('Enter'); }
+      if (id!=='btnSave'){ await pg.waitForFunction(()=>[...document.body.children].some(e=>e.style && e.style.zIndex==='950' && /Aperçu/.test(e.textContent)),null,{timeout:20000}); await pg.evaluate(()=>{ const c=[...document.body.children].filter(e=>e.style && e.style.zIndex==='950').pop(); [...c.querySelectorAll('button')].find(b=>b.textContent==='Exporter').click(); }); } // v2.1-159 : aperçu des pages avant export
       names.push((await dl).suggestedFilename());
     }
     ok(names.join('|')==='Plan test.pdf|Plan test.pptx|Plan test.png|Plan test.ppcx.json', 'exports : PDF, PPTX, PNG et .json au nom du document ('+names.join(', ')+')');
@@ -137,7 +138,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     ok(await pg.evaluate(()=>{ const b = document.getElementById('btnSun'); b.click(); const night = document.body.classList.contains('night-mode'); b.click(); return night && !document.body.classList.contains('night-mode') && !document.body.classList.contains('sun-mode'); }), 'affichage : jour -> nuit -> jour (plus de mode soleil)');
     const cols = await pg.evaluate(()=>{ model.legend.visible = true; model.legend.onlyUsed = false; model.legend.locked = false; const h = sheetH(); model.legend.x = 100; model.legend.y = h - 300; model.legend.scale = 1; legendGroupNode && legendGroupNode.destroy(); legendGroupNode = null; render(); const w = legendGroupNode.getClientRect({relativeTo:stage}).width; model.legend.y = 40; legendGroupNode.destroy(); legendGroupNode = null; render(); const w1 = legendGroupNode.getClientRect({relativeTo:stage}).width; return { bas:Math.round(w), haut:Math.round(w1) }; });
     ok(cols.bas > cols.haut*1.5, 'légende : colonnes automatiques quand elle déborderait en bas ('+cols.haut+' px en haut, '+cols.bas+' px en bas)');
-    ok(await pg.evaluate(async()=>(await askPagesToExport()).join()==='0' || pages.length>1), 'export : une seule page = aucune question');
+    ok(await pg.evaluate(async()=>{ if (pages.length>1) return true; const d = askPagesToExport(); for (let k=0;k<100 && ![...document.body.children].some(e=>e.style && e.style.zIndex==='950');k++) await new Promise(r=>setTimeout(r,100)); const c = [...document.body.children].filter(e=>e.style && e.style.zIndex==='950').pop(); const thumbs = c.querySelectorAll('img').length; [...c.querySelectorAll('button')].find(b=>b.textContent==='Exporter').click(); return (await d).join()==='0' && thumbs===1; }), 'export : une seule page = aperçu avec une miniature, Exporter renvoie la page 0');
     // 16. v2.1-128 : page « Récapitulatif » (comptes par page + total, décochée à l'export)
     const rec = await pg.evaluate(async()=>{
       const n0 = pages.length;
@@ -150,7 +151,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       document.getElementById('btnPageRecap').click(); await new Promise(r=>setTimeout(r,600));
       const texts = recapGroup.find('Text').map(x=>x.text());
       const ok1 = model.recap && texts.includes('Récapitulatif des postes') && texts.includes('Total général');
-      const dlg = askPagesToExport(); await new Promise(r=>setTimeout(r,100));
+      const dlg = askPagesToExport(); for (let k=0;k<100 && ![...document.body.children].some(e=>e.style && e.style.zIndex==='950');k++) await new Promise(r=>setTimeout(r,100));
       const card = [...document.body.children].filter(e=>e.style && e.style.zIndex==='950').pop();
       const defaults = [...card.querySelectorAll('input[type=checkbox]')].map(b=>b.checked);
       [...card.querySelectorAll('button')].find(b=>b.textContent==='Annuler').click();
