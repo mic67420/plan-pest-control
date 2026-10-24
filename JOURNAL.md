@@ -1385,4 +1385,13 @@ v2.1-161 — Restaurer une version automatique
   Réalisation : base IndexedDB en version 4 (magasin « snaps ») ; une version légère est rangée au plus toutes les 10 min (5 gardées, mêmes
   images à part, ménage commun dans idbMaintain). Fichier > Documents : section « Restaurer une version automatique » ; la version s'ouvre
   comme COPIE (nouveau document), l'original n'est jamais écrasé.
+
+v2.1-162 — Performance et compatibilité iPhone (contrôle)
+  Mesures (Chrome, processeur ralenti x4, écran 3x, plan 2400x1700, 300 pastilles) : construction complète d'une page ~4 s (≈1 s sur un
+  téléphone récent), déplacement d'une pastille ~18 ms, sauvegarde auto suivante 16-57 ms, zoom 20 ms : fluide. Seule la 1re sauvegarde
+  (écriture de l'image du plan) est longue (~1,6 s ralenti), une seule fois.
+  Corrigé : mesure de police des étiquettes mémorisée (fontSizeMemo) ; hauteurs max des listes / fenêtres en dvh (barre Safari iPhone).
+  Vérifié par lecture : champs de saisie >= 16 px (pas de zoom automatique iOS), pas d'API absente de Safari, encoches (safe-area) en haut.
+  Non testable ici : Safari réel (WebKit non disponible dans l'environnement) ; risque connu iOS : Safari peut vider le stockage d'un site
+  non utilisé pendant ~7 jours hors écran d'accueil -> installer l'application sur l'écran d'accueil + fichier .json (rappel v2.1-160).
 ```

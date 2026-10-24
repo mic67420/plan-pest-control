@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-161 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-162 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -186,7 +186,7 @@
        pour ne jamais dépasser l'écran (le défilement ne réapparaît que si l'écran est trop
        petit pour tout afficher). */
     position:fixed;min-width:270px;width:max-content;max-width:calc(100vw - 16px);
-    max-height:calc(100vh - 16px);overflow-y:auto;
+    max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);overflow-y:auto; /* v2.1-162 : dvh = hauteur réelle visible sur iPhone (barre Safari) */
     background:#fff;border:1px solid #d8dce3;border-radius:10px;box-shadow:0 12px 30px rgba(20,26,40,.22);
     z-index:1000;display:none;padding:5px;box-sizing:border-box;
   }
@@ -436,7 +436,7 @@
   #sizeAllWin .sz-btns button{ font:inherit; padding:8px 14px; border:none; border-radius:8px; background:#1c2230; color:#fff; }
   /* v2.1-158 : « Contrôle des numéros » (trous et doublons dans les séries E1, E2…) — même fenêtre orange sous les tuiles */
   #ctrlWin{ position:fixed; left:50%; top:calc(var(--topbar-h, 96px) + 8px); transform:translateX(-50%); z-index:790; display:none; flex-direction:column; gap:8px;
-    width:min(340px, calc(100vw - 16px)); max-height:calc(100vh - var(--topbar-h, 96px) - 24px); box-sizing:border-box; background:#F59E0B; color:#1c2230; border-radius:14px; padding:12px; font-size:13px; font-weight:500; box-shadow:0 4px 14px rgba(0,0,0,.3); }
+    width:min(340px, calc(100vw - 16px)); max-height:calc(100vh - var(--topbar-h, 96px) - 24px); max-height:calc(100dvh - var(--topbar-h, 96px) - 24px); box-sizing:border-box; background:#F59E0B; color:#1c2230; border-radius:14px; padding:12px; font-size:13px; font-weight:500; box-shadow:0 4px 14px rgba(0,0,0,.3); }
   #ctrlWin.show{ display:flex; }
   #ctrlWin .cw-list{ display:flex; flex-direction:column; gap:6px; overflow-y:auto; min-height:0; }
   #ctrlWin .cw-row{ background:#fff; border-radius:8px; padding:8px 10px; display:flex; flex-direction:column; gap:4px; }
@@ -565,7 +565,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-161</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-162</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -810,7 +810,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-161 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-162 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1963,6 +1963,7 @@ function cacheLegendGroup(group, scale){
 // étiquette dessinée avec la police de secours resterait sinon figée avec la mauvaise police).
 function rebuildAllBitmapCaches(){
   if (!bitmapCacheEnabled) return;
+  fontSizeMemo.clear();
   pastilleNodes.forEach(g=>cachePastilleBody(g));
   if (legendGroupNode && legendGroupNode.visible()) cacheLegendGroup(legendGroupNode, model.legend.scale);
   contentLayer.batchDraw();
@@ -2397,7 +2398,16 @@ function renderContent(){
 // de longueur différente, etc.). Ici, on réduit la police progressivement jusqu'à ce que
 // le texte tienne réellement dans la pastille, quel que soit son contenu.
 let __measureCtx = null;
+// v2.1-162 : résultat mémorisé par (texte, rayon) — des centaines de pastilles « E12 » de même rayon refaisaient la même mesure
+// (≈ 20 % du temps de construction d'une page de 300 pastilles). Vidé quand la police finit de charger (la mesure change alors).
+const fontSizeMemo = new Map();
 function fontSizeForLabel(text, r){
+  const key = text+'|'+r;
+  let v = fontSizeMemo.get(key);
+  if (v === undefined){ v = measureFontSizeForLabel(text, r); if (fontSizeMemo.size > 800) fontSizeMemo.clear(); fontSizeMemo.set(key, v); }
+  return v;
+}
+function measureFontSizeForLabel(text, r){
   if (!__measureCtx) __measureCtx = document.createElement('canvas').getContext('2d');
   const maxWidth = r*1.6; // marge de sécurité à l'intérieur du cercle/étoile
   const maxFontSize = r*1.5, minFontSize = r*0.5;
