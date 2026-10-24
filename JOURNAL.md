@@ -1375,4 +1375,14 @@ v2.1-159 — Aperçu des pages avant export
   Besoin : voir les pages exactes avant d'envoyer le rapport.
   Réalisation : avant PDF / PPTX / PNG / JPEG / impression, fenêtre orange « Aperçu : pages à exporter » avec une miniature par page
   (capture réduite ratio 0,3, page affichée restaurée ensuite), cases à cocher, Annuler / Exporter ; aussi pour un document d'une seule page.
+
+v2.1-160 — Rappel de sauvegarde du fichier .json
+  Besoin : le fichier .json est la vraie protection (surtout iPhone) mais on l'oublie.
+  Réalisation : date du dernier fichier enregistré par document (localStorage) affichée dans Fichier > Documents ; bulle de rappel après
+  40 modifications sans fichier, ou à l'ouverture si le dernier fichier a plus de 3 jours (ou aucun et au moins 10 pastilles). Une fois par session.
+
+v2.1-161 — Restaurer une version automatique
+  Réalisation : base IndexedDB en version 4 (magasin « snaps ») ; une version légère est rangée au plus toutes les 10 min (5 gardées, mêmes
+  images à part, ménage commun dans idbMaintain). Fichier > Documents : section « Restaurer une version automatique » ; la version s'ouvre
+  comme COPIE (nouveau document), l'original n'est jamais écrasé.
 ```
