@@ -1268,4 +1268,14 @@ v2.1-144 — Pastille : UNE seule fenêtre, UNE seule ligne (essai)
    tiroir (2e appui = ferme). La fenêtre #popSelSettings ne sert plus qu'à la légende.
  - Perdus dans l'essai : la couleur de la pastille (se règle dans « modifier le poste » ✎ de la liste), la pastille témoin et la
    valeur chiffrée de la taille.
+
+v2.1-145 — 4 icônes centrées, découpe (pointillés + fenêtre orange), flèches orange
+ - Pastille : les 4 icônes sont centrées sur la pastille (décalage de 64 px et non 58) ; ordre = les 2 rouges à gauche (cadenas,
+   supprimer), les 2 bleues à droite (renommer, réglages).
+ - Découpe : cause des pointillés qui disparaissaient = le « touchend » du relâchement vidait ghostGroup juste après
+   showCutConfirm ; garde pendingCutPolygon dans ce gestionnaire et dans updateGhost. Les barres sombres du bas (validation,
+   découpe point par point) deviennent des fenêtres flottantes orange sous les tuiles (comme les autres) ; plus de réserve de
+   place en bas ; la bulle d'instruction est masquée quand la fenêtre apparaît.
+ - Flèches de déplacement fin : sorties du tiroir Pastille, pastille orange flottante en bas (même style que le réglage de
+   rotation du plan), visible seulement pour une pastille déverrouillée.
 ```
