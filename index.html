@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-163 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-164 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -212,6 +212,8 @@
   .dd-item .sz-ctl button{ width:26px; height:26px; border-radius:50%; border:1px solid #d8dce3; background:#fff; color:#D98400; font-size:16px; font-weight:700; line-height:1; padding:0; cursor:pointer; touch-action:none; }
   .dd-item .sz-ctl .sz-n{ min-width:22px; text-align:center; font-size:12px; font-weight:700; color:#1c2230; }
   body.night-mode .dd-list{ background:#1b2230; border-color:#394258; }
+  body.night-mode .dd-item.selected{ background:#1f4468; color:#fff; } /* v2.1-164 : fond clair + texte clair = illisible la nuit */
+  body.night-mode .dd-item:hover{ background:#26324a; }
   body.night-mode .dd-item{ color:#e9edf4; } body.night-mode .dd-item:hover{ background:#242c3c; } body.night-mode .dd-item .sz-ctl .sz-n{ color:#e9edf4; }
   .dd-item-actions{display:flex;align-items:center;gap:1px;flex:none;}
   .dd-item-btn{flex:none;width:22px;height:22px;border:none;background:transparent;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#7a8496;cursor:pointer;padding:0;}
@@ -569,7 +571,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-163</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-164</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -710,6 +712,7 @@
         <div class="pop-row"><label>Nom</label><input type="text" id="newTypeName" placeholder="Nom du dispositif" style="width:170px;"></div>
         <div class="pop-row"><input type="color" id="currentColorPicker" value="#0E6FA8"><span id="currentColorDot" class="dd-swatch"></span><span style="font-size:11px;color:#5c6478;">couleur</span></div>
         <div class="pop-row"><label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;"><input type="checkbox" id="newTypeNoNumber" style="width:auto;">Pastille sans numéro</label></div>
+        <div class="pop-row"><label>Police</label><input type="color" id="newTypeTextColor" value="#ffffff" title="Couleur du numéro dans la pastille"><label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;"><input type="checkbox" id="newTypeTextAuto" checked style="width:auto;">Contraste auto</label></div>
         <div class="pop-row"><label>Taille par défaut</label><input type="range" id="newTypeRadius" min="6" max="40" value="16" style="width:110px;"><span id="newTypeRadiusLabel" class="mono" style="font-size:11px;color:#5c6478;width:22px;">16</span></div>
         <button class="pop-btn" id="btnAddType">+ Ajouter ce poste</button>
         <button class="pop-btn danger" id="btnDelType">✕ Retirer le poste sélectionné</button>
@@ -815,7 +818,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-163 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-164 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2071,7 +2074,7 @@ function renderContent(){
       // Signature de tout ce qui influence l'APPARENCE de la pastille (pas sa position ni
       // sa rotation, mises à jour séparément sans reconstruction) : si rien de tout ça n'a
       // changé, on réutilise le node existant tel quel.
-      const sig = type.color+'|'+(type.shape||'circle')+'|'+p.label+'|'+p.radius;
+      const sig = type.color+'|'+(type.shape||'circle')+'|'+p.label+'|'+p.radius+'|'+labelColorFor(type);
       let group = pastilleNodes.get(p.id);
       if (!group || group._sig !== sig){
         if (group) group.destroy();
@@ -2301,7 +2304,7 @@ function renderContent(){
     if (offPage){ lg.x = sheetWChk-legendWChk-40; lg.y = sheetHChk-legendHChk-40; }
     // Les couleurs de police et de fond font partie de la signature : les modifier doit
     // reconstruire la légende (sinon le changement ne s'afficherait pas).
-    const legendSig = JSON.stringify(types.map(t=>[t.id,t.color,t.shape,t.code,t.name,t.noNumber,t.defaultRadius])) + '|' + (lg.textColor||'') + '|' + (lg.bgColor||'') + '|c' + legendCols;
+    const legendSig = JSON.stringify(types.map(t=>[t.id,t.color,t.shape,t.code,t.name,t.noNumber,t.defaultRadius,t.textColor||''])) + '|' + (lg.textColor||'') + '|' + (lg.bgColor||'') + '|c' + legendCols;
     const legendFg = lg.textColor || null;
     const legendBg = (!lg.bgColor) ? '#ffffff' : (lg.bgColor==='transparent' ? 'rgba(0,0,0,0)' : lg.bgColor);
     const legendNoBg = lg.bgColor==='transparent';
@@ -2429,6 +2432,16 @@ function measureFontSizeForLabel(text, r){
   }
   return fontSize;
 }
+// v2.1-164 : couleur de l'étiquette d'une pastille. Par défaut AUTOMATIQUE : noir ou blanc, selon le meilleur contraste (WCAG) avec la
+// couleur du poste ; ou couleur choisie dans le crayon du poste (type.textColor). La pastille a un contour noir et un dégradé : on mesure
+// sur la couleur de base du poste.
+function autoTextColor(hex){
+  const n = parseInt((hex||'#0E6FA8').replace('#',''), 16);
+  const lin = (v)=>{ v /= 255; return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); };
+  const L = 0.2126*lin(n>>16) + 0.7152*lin((n>>8)&255) + 0.0722*lin(n&255);
+  return (1.05)/(L+0.05) >= (L+0.05)/0.05 ? '#ffffff' : '#111111'; // contraste avec blanc vs avec noir
+}
+function labelColorFor(type){ return (type && type.textColor) ? type.textColor : autoTextColor(type && type.color); }
 function buildPastilleGroup(type, r, labelText){
   const group = new Konva.Group();
   const gradStops = [0, lighten(type.color,32), 0.55, type.color, 1, darken(type.color,18)];
@@ -2451,7 +2464,7 @@ function buildPastilleGroup(type, r, labelText){
   const labelStr = String(labelText);
   const label = new Konva.Text({
     text:labelStr, fontSize:fontSizeForLabel(labelStr, r), fontStyle:'700', fontFamily:APP_FONT,
-    fill:'#ffffff', width:r*2, height:r*2, offsetX:r, offsetY:r, align:'center', verticalAlign:'middle',
+    fill:labelColorFor(type), width:r*2, height:r*2, offsetX:r, offsetY:r, align:'center', verticalAlign:'middle',
     // wrap:'none' est essentiel ici : par défaut Konva peut replier un texte trop large sur
     // plusieurs lignes (y compris en coupant un mot lettre par lettre s'il ne tient pas sur
     // une ligne), et seule la ligne du milieu restait visible dans la hauteur de la pastille
@@ -2459,7 +2472,7 @@ function buildPastilleGroup(type, r, labelText){
     // L'étiquette reste donc toujours sur une seule ligne ; la taille de police est déjà
     // ajustée par fontSizeForLabel() pour qu'elle tienne dans la pastille.
     wrap:'none', ellipsis:false,
-    shadowColor:'rgba(0,0,0,0.4)', shadowBlur:2, shadowOffset:{x:0,y:1}, shadowOpacity:0.5,
+    shadowColor: labelColorFor(type)==='#ffffff' ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)', shadowBlur:2, shadowOffset:{x:0,y:1}, shadowOpacity:0.5,
     listening:false, perfectDrawEnabled:false
   });
   group.add(base); group.add(ring); group.add(label);
@@ -5097,7 +5110,7 @@ function refreshTypeList(){
   // render() appelle cette fonction très souvent (chaque déplacement de pastille, chaque
   // valeur de curseur…) alors que la liste des postes, elle, ne change presque jamais :
   // reconstruire tout son HTML à chaque fois était un gaspillage inutile.
-  const sig = JSON.stringify(model.deviceTypes.map(t=>[t.id,t.code,t.name,t.color,t.shape,t.noNumber])) + '|' + selectedTypeId;
+  const sig = JSON.stringify(model.deviceTypes.map(t=>[t.id,t.code,t.name,t.color,t.shape,t.noNumber,t.textColor||''])) + '|' + selectedTypeId;
   // v2.1-151 : la taille n'est plus dans la signature (sinon la ligne était reconstruite pendant l'appui sur − / +, le bouton disparaissait
   // sous le doigt, le relâchement n'était jamais reçu et le compteur défilait jusqu'au bout) ; les nombres sont mis à jour sur place.
   if (sig === lastTypeListSig){
@@ -5167,6 +5180,7 @@ function refreshTypeList(){
     document.getElementById('newTypeCode').value = '';
     document.getElementById('newTypeName').value = '';
     document.getElementById('newTypeNoNumber').checked = false;
+  document.getElementById('newTypeTextAuto').checked = true; syncTextColorUI();
     document.getElementById('newTypeRadius').value = 16;
     document.getElementById('newTypeRadiusLabel').textContent = '16';
     document.getElementById('btnAddType').textContent = '+ Ajouter ce poste';
@@ -5180,6 +5194,14 @@ function refreshTypeList(){
   syncColorPickerToSelectedType();
 }
 let editingTypeId = null;
+// Champ « Police » du formulaire de poste : en mode automatique, la couleur affichée suit le contraste calculé et est grisée.
+function syncTextColorUI(){
+  const auto = document.getElementById('newTypeTextAuto').checked, inp = document.getElementById('newTypeTextColor');
+  if (auto) inp.value = autoTextColor(document.getElementById('currentColorPicker').value);
+  inp.disabled = auto; inp.style.opacity = auto ? '.45' : '1';
+}
+document.getElementById('newTypeTextAuto').addEventListener('change', syncTextColorUI);
+document.getElementById('currentColorPicker').addEventListener('input', syncTextColorUI);
 function startEditType(typeId){
   const t = model.deviceTypes.find(t=>t.id===typeId);
   if (!t) return;
@@ -5188,6 +5210,9 @@ function startEditType(typeId){
   document.getElementById('newTypeName').value = t.name;
   document.getElementById('currentColorPicker').value = t.color;
   document.getElementById('newTypeNoNumber').checked = !!t.noNumber;
+  document.getElementById('newTypeTextAuto').checked = !t.textColor;
+  document.getElementById('newTypeTextColor').value = t.textColor || autoTextColor(t.color);
+  syncTextColorUI();
   const r = t.defaultRadius || currentPastilleRadius;
   document.getElementById('newTypeRadius').value = r;
   document.getElementById('newTypeRadiusLabel').textContent = r;
@@ -5242,6 +5267,7 @@ document.getElementById('btnAddType').addEventListener('click', ()=>{
   const noNumber = document.getElementById('newTypeNoNumber').checked;
   const defaultRadius = parseInt(document.getElementById('newTypeRadius').value,10);
   const editing = editingTypeId ? model.deviceTypes.find(t=>t.id===editingTypeId) : null;
+  const textColor = document.getElementById('newTypeTextAuto').checked ? '' : document.getElementById('newTypeTextColor').value; // '' = contraste automatique
   // Chaque page possède sa propre copie de la liste des postes (copiée lors de l'ajout d'un
   // étage, avec les MÊMES identifiants) : une modification ou un ajout doit donc être
   // répercuté sur TOUTES les pages, sinon un poste renommé ou recoloré sur une page
@@ -5250,11 +5276,12 @@ document.getElementById('btnAddType').addEventListener('click', ()=>{
     const color = document.getElementById('currentColorPicker').value;
     pages.forEach(pg=>{
       const t = pg.deviceTypes.find(x=>x.id===editingTypeId);
-      if (t){ t.code = code; t.name = name; t.color = color; t.noNumber = noNumber; t.defaultRadius = defaultRadius; }
+      if (t){ t.code = code; t.name = name; t.color = color; t.noNumber = noNumber; t.defaultRadius = defaultRadius; if (textColor) t.textColor = textColor; else delete t.textColor; }
     });
     toast(pages.length>1 ? 'Poste modifié sur toutes les pages.' : 'Poste modifié.');
   } else {
     const t = { id: nextId('type-'), code, name, color: currentColor, shape:'circle', noNumber, defaultRadius };
+    if (textColor) t.textColor = textColor;
     pages.forEach(pg=>{
       if (!pg.deviceTypes.some(x=>x.id===t.id)) pg.deviceTypes.push({...t});
     });
@@ -5264,6 +5291,7 @@ document.getElementById('btnAddType').addEventListener('click', ()=>{
   document.getElementById('btnAddType').textContent = '+ Ajouter ce poste';
   nameInput.value=''; codeInput.value='';
   document.getElementById('newTypeNoNumber').checked = false;
+  document.getElementById('newTypeTextAuto').checked = true; syncTextColorUI();
   document.getElementById('newTypeRadius').value = 16;
   document.getElementById('newTypeRadiusLabel').textContent = '16';
   closeAllPopovers();
@@ -5587,6 +5615,7 @@ document.getElementById('btnAddTypeMenu').addEventListener('click', ()=>{
   document.getElementById('newTypeCode').value = '';
   document.getElementById('newTypeName').value = '';
   document.getElementById('newTypeNoNumber').checked = false;
+  document.getElementById('newTypeTextAuto').checked = true; syncTextColorUI();
   document.getElementById('newTypeRadius').value = 16;
   document.getElementById('newTypeRadiusLabel').textContent = '16';
   document.getElementById('btnAddType').textContent = '+ Ajouter ce poste';

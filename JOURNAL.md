@@ -1400,4 +1400,11 @@ v2.1-163 — Rappel de fichier discret ; « Séries » dans le tiroir Pastille
   Correctif : plus de bulle : un petit point orange apparaît sur l'icône Enregistrer et sur la tuile Fichier tant que le fichier .json n'est
   pas à jour (40 modifications, plus de 3 jours, ou jamais enregistré avec au moins 10 pastilles) et disparaît à l'enregistrement ;
   le contrôle des numéros devient une icône « Séries » sur la ligne du tiroir Pastille (liste des postes réduite à 50 px, étiquettes 8,5 px).
+
+v2.1-164 — Contraste : liste des postes la nuit, police des pastilles
+  Cause 1 : la nuit, la ligne du poste sélectionné gardait un fond bleu CLAIR avec un texte clair : illisible.
+  Correctif 1 : fond bleu foncé (#1f4468) + texte blanc la nuit.
+  Cause 2 : le numéro dans la pastille était toujours blanc (illisible sur les couleurs claires : jaune, vert clair, cyan).
+  Correctif 2 : couleur automatique noir / blanc selon le meilleur contraste (autoTextColor, WCAG) ; réglable dans le crayon du poste
+  (champ « Police » + case « Contraste auto »), propagée à toutes les pages, utilisée aussi par la légende, le récapitulatif et les exports.
 ```
