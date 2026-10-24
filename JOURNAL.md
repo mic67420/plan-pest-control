@@ -1319,4 +1319,14 @@ v2.1-150 — Contrôle intégral : nettoyage et fenêtre sombre du bas
   PLAN_LOCK_SHACKLE_*, lastTilePointerType, CSS tb-slider / tb-hint / size-ctl-lbl / .hint).
   Correctif : toast = fenêtre flottante ORANGE sous les tuiles (comme la bulle et les autres fenêtres) ;
   code et CSS morts supprimés ; vérifications et tests/smoke.js OK.
+
+v2.1-151 — Fenêtres unifiées, pavé de rotation en haut, barre de sélection supprimée, 2 correctifs
+  Cause 1 : le compteur de taille d'un poste (liste des postes) défilait sans s'arrêter : la taille était dans la signature de la liste,
+  donc la ligne était reconstruite à chaque pas, le bouton disparaissait sous le doigt et le relâchement n'arrivait jamais.
+  Correctif 1 : taille retirée de la signature (nombres mis à jour sur place) + relâchement écouté sur la fenêtre.
+  Cause 2 : l'appui long « sélectionner le plan » (2 s, 10 px) échouait au doigt avec un outil Pastille (tremblement du doigt).
+  Correctif 2 : 1 s, tolérance 22 px.
+  Fenêtres : closeOtherWindows() = règle unique (tiroirs, menus, réglages, taille poste, flèches : en ouvrir une referme les autres ; Échap ferme tout).
+  Pavé de rotation fine déplacé en haut (masqué pendant la découpe). Bandeaux sombres de découpe : CSS de base nettoyé.
+  Barre de sélection : poignée, infos, alignement, ✓, glissement, réserve de bas d'écran supprimés (code mort).
 ```

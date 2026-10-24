@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-150 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-151 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -122,11 +122,6 @@
   #btnEraserSquare.active, #btnEraserRound.active{background:var(--accent);border-color:var(--accent);color:#fff;}
   .size-preview-shape{display:flex;align-items:center;justify-content:center;}
   .size-preview-note{display:none;position:absolute;left:0;right:0;bottom:3px;text-align:center;font-size:9.5px;color:#8890a0;line-height:1.1;pointer-events:none;}
-  #selectionBar .step-btn-dark{
-    background:#F59E0B;border-color:#D98400;color:#1c2230;font-weight:700;
-    width:40px;height:36px;flex:none;padding:0;font-size:22px;line-height:1;touch-action:manipulation;
-    display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;
-  }
   .tb-check{display:flex;align-items:center;gap:4px;font-size:11px;color:#5c6478;flex:none;white-space:nowrap;}
 
   /* ---------- Popovers (reglages secondaires, ouverts au clic sur une icone) ---------- */
@@ -370,24 +365,14 @@
      désormais TOUJOURS ancrées en bas de l'écran, quel que soit le mode PC/mobile actif :
      positionnées près de l'élément concerné, elles pouvaient atterrir en plein milieu du
      plan et rester figées là par-dessus le contenu, sans aucun moyen de les déplacer. */
-  #selectionBar{
-    position:fixed;z-index:450;background:#1c2230;color:#fff;border-radius:8px;
-    /* Pleine largeur (v2.1-55) : ancrée à 8 px des deux bords plutôt que centrée depuis le
-       milieu de l'écran (left:50% + translate) — ce centrage ne laissait au navigateur que
-       la MOITIÉ de l'écran comme place disponible, d'où une barre étroite repliée en
-       hauteur sur plusieurs lignes, qui masquait le plan. Désormais les options s'étalent
-       horizontalement sur toute la largeur et ne passent à la ligne qu'en dernier recours. */
-    top:auto !important; bottom:12px; left:8px !important; right:8px; transform:none !important;
-    padding:8px 10px;font-size:13px;
-    display:none;gap:8px;align-items:center;box-shadow:0 8px 20px rgba(0,0,0,.25);
-    flex-wrap:wrap; row-gap:6px; justify-content:center; box-sizing:border-box;
-  }
+  /* v2.1-151 : l'ancienne barre sombre n'est plus jamais affichée ; elle ne sert que de réserve (cachée) aux contrôles avant leur passage dans un tiroir / une fenêtre */
+  #selectionBar{display:none !important;}
   /* v2.1-107 : options du texte dans le tiroir Texte (style clair, comme le reste du tiroir) */
   #textOptions{display:none;flex-basis:100%;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 4px 2px;margin-top:2px;border-top:1px solid #e3e6ec;}
   #textOptions.has-text{display:flex;}
   #textOptions button{background:#F1F3F6;border:1px solid #d8dce3;color:#1c2230;border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:600;cursor:pointer;}
   #textOptions button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-  #textOptions #selAlignGroup, #textOptions #selBgNone{display:none !important;} /* v2.1-108 : alignement et ∅ retirés du tiroir Texte */
+  #textOptions #selBgNone{display:none !important;} /* v2.1-108 : ∅ retiré du tiroir Texte */
   #textOptions label{font-size:11px;color:#5c6478 !important;}
   #textOptions button.sqB{width:26px;height:26px;padding:0;border-radius:50%;background:#fff;border:1px solid #d8dce3;color:#D98400;font-size:17px;}
   #textOptions input[type=color]{width:34px;height:32px;border:none;padding:0;border-radius:4px;background:none;}
@@ -521,53 +506,11 @@
   #selSettingsBody #selSizeWrap{flex:1 1 auto;min-width:0;}
   #selSettingsBody .rngB{min-width:56px;}
   #selSettingsBody #selLabel{width:62px !important;min-width:0;}
-  #selSettingsBody #selLabelConfirm{padding:8px 10px;}
   #selSettingsBody #selColorLabel{display:none;} /* le carré de couleur suffit : gagne de la place */
-  #selectionBarHandle{
-    display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex:none;
-    border-radius:7px;background:#2c3650;cursor:grab;touch-action:none;
-  }
-  #selectionBarHandle:active{cursor:grabbing;background:#3a4560;}
-  #selectionBar button{background:#2c3650;border:1px solid #3a4560;color:#fff;border-radius:6px;padding:8px 12px;font-size:12.5px;}
-  #selectionBar button:hover{background:#3a4560;}
-  #selectionBar button.active{background:var(--accent);border-color:var(--accent);}
-  #selectionBar input[type=range]#selFontSize{width:90px;}
-  #selectionBar input[type=color]{width:32px;height:30px;border:none;padding:0;border-radius:4px;}
 
-  #cutConfirmBar{
-    position:fixed;z-index:470;background:#1c2230;color:#fff;border-radius:8px;
-    /* Pleine largeur (v2.1-55) : ancrée à 8 px des deux bords plutôt que centrée depuis le
-       milieu de l'écran (left:50% + translate) — ce centrage ne laissait au navigateur que
-       la MOITIÉ de l'écran comme place disponible, d'où une barre étroite repliée en
-       hauteur sur plusieurs lignes, qui masquait le plan. Désormais les options s'étalent
-       horizontalement sur toute la largeur et ne passent à la ligne qu'en dernier recours. */
-    top:auto !important; bottom:12px; left:8px !important; right:8px; transform:none !important;
-    padding:8px 10px;font-size:13px;
-    display:none;gap:8px;align-items:center;box-shadow:0 8px 20px rgba(0,0,0,.3);
-    flex-wrap:wrap;justify-content:center;row-gap:6px;box-sizing:border-box;
-  }
-  #cutConfirmBar button{background:#2c3650;border:1px solid #3a4560;color:#fff;border-radius:6px;padding:9px 13px;font-size:12.5px;white-space:nowrap;}
-  #cutConfirmBar button:hover{background:#3a4560;}
-  #cutConfirmBar #cutConfirmYes{background:var(--accent);border-color:var(--accent);}
-  #cutConfirmBar #cutConfirmYes:hover{background:#2559c9;}
-
-  #pointCutBar{
-    position:fixed;z-index:470;background:#1c2230;color:#fff;border-radius:8px;
-    /* Pleine largeur (v2.1-55) : ancrée à 8 px des deux bords plutôt que centrée depuis le
-       milieu de l'écran (left:50% + translate) — ce centrage ne laissait au navigateur que
-       la MOITIÉ de l'écran comme place disponible, d'où une barre étroite repliée en
-       hauteur sur plusieurs lignes, qui masquait le plan. Désormais les options s'étalent
-       horizontalement sur toute la largeur et ne passent à la ligne qu'en dernier recours. */
-    top:auto !important; bottom:12px; left:8px !important; right:8px; transform:none !important;
-    padding:8px 10px;font-size:13px;
-    display:none;gap:8px;align-items:center;box-shadow:0 8px 20px rgba(0,0,0,.3);
-    flex-wrap:wrap;justify-content:center;row-gap:6px;box-sizing:border-box;
-  }
-  #pointCutBar button{background:#2c3650;border:1px solid #3a4560;color:#fff;border-radius:6px;padding:9px 13px;font-size:12.5px;white-space:nowrap;}
-  #pointCutBar button:hover{background:#3a4560;}
-  #pointCutBar button:disabled{opacity:.4;cursor:not-allowed;}
-  #pointCutBar #pointCutClose{background:var(--accent);border-color:var(--accent);}
-  #pointCutBar #pointCutClose:hover:not(:disabled){background:#2559c9;}
+  /* v2.1-151 : base commune des fenêtres de découpe (l'aspect orange et la position sont dans « body #cutConfirmBar, body #pointCutBar » plus haut) */
+  #cutConfirmBar, #pointCutBar{ position:fixed; z-index:470; display:none; gap:8px; align-items:center; flex-wrap:wrap; box-sizing:border-box; }
+  #pointCutBar button:disabled{ opacity:.4; cursor:not-allowed; }
 
   /* Text edit overlay */
   #textEditArea{
@@ -605,7 +548,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-150</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-151</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -784,21 +727,11 @@
 
 
 <div id="selectionBar">
-  <span id="selectionBarHandle" title="Glisser pour déplacer cette fenêtre n'importe où sur l'écran">
-    <svg width="18" height="18" viewBox="0 0 24 24"><path d="M9 12.5V5.2a1.6 1.6 0 0 1 3.2 0v5.8M12.2 11V3.6a1.6 1.6 0 0 1 3.2 0V11M15.4 11.5V5.4a1.6 1.6 0 0 1 3.2 0v9.4c0 3.9-2.6 7.2-7 7.2-3.3 0-5-1.4-6.6-4L3 13.8a1.5 1.5 0 0 1 2.5-1.7l1.7 2.3V7.6a1.6 1.6 0 0 1 3.2 0v4.9" fill="#D6493E" stroke="#7a241c" stroke-width="1" stroke-linejoin="round"/></svg>
-  </span>
-  <span id="selInfo">—</span>
-  <span id="selAlignGroup" style="display:none;gap:2px;">
-    <button id="selAlignLeft" title="Aligner à gauche"><svg width="15" height="13" viewBox="0 0 16 14"><rect x="0" y="0" width="16" height="2" fill="currentColor"/><rect x="0" y="6" width="10" height="2" fill="currentColor"/><rect x="0" y="12" width="13" height="2" fill="currentColor"/></svg></button>
-    <button id="selAlignCenter" title="Centrer"><svg width="15" height="13" viewBox="0 0 16 14"><rect x="0" y="0" width="16" height="2" fill="currentColor"/><rect x="3" y="6" width="10" height="2" fill="currentColor"/><rect x="1.5" y="12" width="13" height="2" fill="currentColor"/></svg></button>
-    <button id="selAlignRight" title="Aligner à droite"><svg width="15" height="13" viewBox="0 0 16 14"><rect x="0" y="0" width="16" height="2" fill="currentColor"/><rect x="6" y="6" width="10" height="2" fill="currentColor"/><rect x="3" y="12" width="13" height="2" fill="currentColor"/></svg></button>
-  </span>
   <span id="selFontSizeWrap" style="display:none;align-items:center;gap:4px;">
     <label style="font-size:10.5px;color:#c7cbd4;">Taille</label>
     <input type="range" id="selFontSize" min="6" max="200" title="Taille du texte">
   </span>
   <input type="text" id="selLabel" style="display:none;width:76px;font-size:16px;padding:3px 6px;border-radius:6px;border:1px solid #444d5e;background:#2a3142;color:#fff;" title="Renommer la pastille" maxlength="12">
-  <button id="selLabelConfirm" style="display:none;background:var(--accent);border-color:var(--accent);font-weight:700;" title="Valider le renommage et fermer">✓</button>
   <span id="selSizeWrap" style="display:none;align-items:center;gap:4px;flex-wrap:nowrap;">
     <button type="button" id="selSizeMinus" class="step-btn-dark" title="Réduire la pastille" aria-label="Réduire la pastille">−</button>
     <input type="range" id="selSize" min="6" max="80" style="display:none;width:70px;" title="Taille">
@@ -864,7 +797,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-150 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-151 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2605,7 +2538,7 @@ let rotFineEl = null, rotFineLabel = null, rotFineTimer = null, rotFineChanged =
 function ensureRotFine(){
   if (rotFineEl) return;
   rotFineEl = document.createElement('div');
-  rotFineEl.style.cssText = 'position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:790;display:none;align-items:center;gap:6px;'
+  rotFineEl.style.cssText = 'position:fixed;left:50%;top:calc(var(--topbar-h,96px) + 8px);transform:translateX(-50%);z-index:790;display:none;align-items:center;gap:6px;'
     + 'background:#F59E0B;color:#1c2230;padding:5px 8px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.25);'
     + 'font-size:13px;font-weight:600;touch-action:none;user-select:none;-webkit-user-select:none;';
   const mk = (txt, dir)=>{
@@ -2633,7 +2566,7 @@ function ensureRotFine(){
 }
 function refreshRotFine(pl){
   ensureRotFine();
-  if (!pl){ rotFineEl.style.display = 'none'; return; }
+  if (!pl || (activeTool && activeTool.startsWith('cut'))){ rotFineEl.style.display = 'none'; return; } // v2.1-151 : en haut comme les autres fenêtres, donc masqué pendant la découpe (fenêtres de découpe au même endroit)
   const a = (((pl.rotation||0)%360)+360)%360;
   rotFineLabel.textContent = (Math.round(a*10)/10).toFixed(1).replace('.',',')+'°';
   rotFineEl.style.display = 'flex';
@@ -2945,13 +2878,13 @@ function placeTextOptions(inTray){
   if (inTray === textOptionsInTray) return;
   textOptionsInTray = inTray;
   const tray = document.getElementById('textOptions'), bar = document.getElementById('selectionBar');
-  const ids = ['selAlignGroup','selFontSizeWrap','selColorWrap','selBgWrap'];
+  const ids = ['selFontSizeWrap','selColorWrap','selBgWrap'];
   if (inTray){
     ids.forEach(id=>tray.appendChild(document.getElementById(id)));
     tray.classList.add('has-text');
   } else {
     // retour dans la barre, à leur place d'origine
-    const before = { selAlignGroup:'selLabel', selFontSizeWrap:'selLabel', selColorWrap:'selLock', selBgWrap:'selLock' };
+    const before = { selFontSizeWrap:'selLabel', selColorWrap:'selLock', selBgWrap:'selLock' };
     ids.forEach(id=>bar.insertBefore(document.getElementById(id), document.getElementById(before[id])));
     tray.classList.remove('has-text');
   }
@@ -2969,7 +2902,7 @@ function openSelectionSettings(){
   if (!isLeg && !isPast) return;
   if (isPast){ onTileChosen('pastille'); openTileDrawer('pastille', false); return; } // v2.1-144 : UNE seule fenêtre (le tiroir Pastille) pour les réglages d'une pastille
   const pop = document.getElementById('popSelSettings'), body = document.getElementById('selSettingsBody');
-  closeAllPopovers(); closeAllTileDrawers();
+  closeOtherWindows('settings');
   document.getElementById('selSettingsTitle').textContent = isLeg ? 'Légende' : 'Pastille';
   const ids = isLeg ? ['selColorWrap','selBgWrap'] : ['selSizeWrap','selColorWrap']; // v2.1-142 : le nom a quitté cette fenêtre (icône crayon bleue)
   textOptionsInTray = false; // les contrôles quittent le tiroir Texte s'ils y étaient
@@ -3040,52 +2973,35 @@ function syncPastilleDrawer(){
 function refreshSelectionUI(){
   syncPastilleDrawer();
   if (selSettingsFor && selSettingsFor !== selectedId) closeSelectionSettings(); // autre sélection : la fenêtre se ferme
-  const bar = document.getElementById('selectionBar');
-  if (!selectedId){ placeTextOptions(false); lastTextDrawerId = null; bar.style.display='none'; scheduleBottomReserve(); document.getElementById('toolLockPlan').classList.remove('active'); updateLockIndicator(); return; }
+  if (!selectedId){ placeTextOptions(false); lastTextDrawerId = null; document.getElementById('toolLockPlan').classList.remove('active'); updateLockIndicator(); return; }
   const node = stage.findOne('#'+selectedId);
-  if (!node){ placeTextOptions(false); lastTextDrawerId = null; bar.style.display='none'; scheduleBottomReserve(); updateLockIndicator(); return; }
-  // La barre est ancrée en bas de l'écran par CSS (voir #selectionBar) plutôt que
-  // positionnée près de l'élément sélectionné : elle pouvait sinon atterrir en plein
-  // milieu du plan et y rester figée par-dessus le contenu, sans repère fixe pour la
-  // retrouver ni moyen de la déplacer.
+  if (!node){ placeTextOptions(false); lastTextDrawerId = null; updateLockIndicator(); return; }
   // v2.1-84 : plus de barre pour le plan (cadenas + croix sur le plan) ; v2.1-107 : ni pour un texte (options dans le tiroir Texte)
   const isTextSel = model.textes.some(t=>t.id===selectedId);
   placeTextOptions(isTextSel);
-  // v2.1-124 : plus de barre sombre non plus pour la légende ni les pastilles (cadenas + croix + icône bleue sur l'élément) ; seuls les logos la gardent
-  bar.style.display = 'none'; // v2.1-125 : plus de barre sombre du tout (logos compris) ; tout passe par cadenas + croix + icône bleue
   if (isTextSel && lastTextDrawerId !== selectedId){
     // Nouveau texte sélectionné : la tuile Texte devient active et son tiroir s'ouvre sur les options.
     lastTextDrawerId = selectedId;
     onTileChosen('texte'); openTileDrawer('texte', false);
   } else if (!isTextSel){ lastTextDrawerId = null; }
-  scheduleBottomReserve();
-  document.getElementById('selInfo').textContent = describeSelection();
   const selObj = findSelectedModelObject();
   document.getElementById('selLock').textContent = (selObj && selObj.locked) ? '🔒' : '🔓';
   const sizeInput = document.getElementById('selSize');
   const labelInput = document.getElementById('selLabel');
-  const labelConfirm = document.getElementById('selLabelConfirm');
   const p = model.pastilles.find(p=>p.id===selectedId);
   if (p){
     sizeInput.style.display='inline-block'; sizeInput.value = p.radius;
     document.getElementById('selSizeWrap').style.display='inline-flex';
     labelInput.style.display='inline-block';
-    labelConfirm.style.display='inline-block';
     if (document.activeElement !== labelInput) labelInput.value = p.label;
   }
-  else { document.getElementById('selSizeWrap').style.display='none'; sizeInput.style.display='none'; labelInput.style.display='none'; labelConfirm.style.display='none'; }
+  else { document.getElementById('selSizeWrap').style.display='none'; sizeInput.style.display='none'; labelInput.style.display='none'; }
   const t = model.textes.find(t=>t.id===selectedId);
-  const alignGroup = document.getElementById('selAlignGroup');
   const fontWrap = document.getElementById('selFontSizeWrap');
   if (t){
-    alignGroup.style.display = 'inline-flex';
     fontWrap.style.display = 'inline-flex';
     document.getElementById('selFontSize').value = t.fontSize;
-    ['selAlignLeft','selAlignCenter','selAlignRight'].forEach(id=>document.getElementById(id).classList.remove('active'));
-    const activeId = t.align==='center' ? 'selAlignCenter' : t.align==='right' ? 'selAlignRight' : 'selAlignLeft';
-    document.getElementById(activeId).classList.add('active');
   } else {
-    alignGroup.style.display = 'none';
     fontWrap.style.display = 'none';
   }
   const pl = findPlanById(selectedId);
@@ -3130,14 +3046,6 @@ function refreshSelectionUI(){
     document.getElementById('rngSaturation').value = pl.saturation||0;
     document.getElementById('rngHue').value = pl.hue||0;
   }
-}
-function describeSelection(){
-  if (selectedId==='legend-frame') return 'Légende';
-  if (findPlanById(selectedId)) return 'Plan (glissez les coins pour redimensionner)';
-  if (model.pastilles.find(p=>p.id===selectedId)) return 'Pastille';
-  if (model.textes.find(t=>t.id===selectedId)) return 'Texte';
-  if (model.logos.find(l=>l.id===selectedId)) return 'Logo';
-  return 'Élément';
 }
 document.getElementById('selDelete').addEventListener('click', ()=>{
   if (!selectedId) return;
@@ -3231,20 +3139,6 @@ document.getElementById('selLabel').addEventListener('keydown', (e)=>{
   e.stopPropagation(); // évite que Entrée/Échap remontent aux raccourcis globaux du canevas
   if (e.key==='Enter') e.target.blur();
 });
-document.getElementById('selLabelConfirm').addEventListener('click', (e)=>{
-  e.stopPropagation();
-  pushHistory(); // au cas où le champ n'a pas déclenché "change" (ex. validé sans avoir perdu le focus)
-  selectNode(null, null); // ferme la barre de sélection, comme demandé après validation du renommage
-});
-document.getElementById('selAlignLeft').addEventListener('click', ()=>setTextAlign('left'));
-document.getElementById('selAlignCenter').addEventListener('click', ()=>setTextAlign('center'));
-document.getElementById('selAlignRight').addEventListener('click', ()=>setTextAlign('right'));
-function setTextAlign(align){
-  const t = model.textes.find(t=>t.id===selectedId);
-  if (!t) return;
-  t.align = align;
-  pushHistory(); render();
-}
 document.getElementById('selFontSize').addEventListener('input', (e)=>{
   const t = model.textes.find(t=>t.id===selectedId);
   if (t){
@@ -3335,38 +3229,6 @@ stage.on('mouseleave touchend touchcancel', ()=>{ if (cutPreviewActive()) return
 // larges en bas et à droite de l'écran (voir plus bas, "Bandeaux de défilement tactiles").
 // Seul le pincement à deux doigts reste géré ici, pour le zoom.
 const canvasWrapEl = document.getElementById('canvasWrap');
-// Ces barres flottantes contextuelles (sélection, validation de découpe) sont ancrées en
-// bas de l'écran par-dessus le plan, quel que soit le mode PC/mobile actif : avec plusieurs
-// contrôles, elles peuvent être hautes et cacher une bonne partie de la feuille. Plutôt que
-// de les superposer, on réduit la zone visible/défilable du plan (#canvasWrap) de la
-// hauteur de la barre ouverte, pour qu'elle reste physiquement EN DEHORS du champ de
-// vision du plan, jamais dessus.
-function updateCanvasBottomReserve(){
-  const ids = ['selectionBar']; // v2.1-145 : les fenêtres de découpe sont flottantes en haut (plus de réserve en bas)
-  let maxH = 0;
-  ids.forEach(id=>{
-    const el = document.getElementById(id);
-    // Une fois glissée ailleurs à la main (voir makeBarDraggable), une barre n'est plus
-    // ancrée en bas : inutile de continuer à réserver de la place pour elle à cet endroit.
-    const stillDocked = el && el.style.bottom !== 'auto';
-    if (el && stillDocked && el.style.display!=='none' && el.offsetHeight>maxH) maxH = el.offsetHeight;
-  });
-  const newBottom = maxH>0 ? (maxH+28)+'px' : '';
-  if (newBottom !== lastBottomReserve){ // inchangé : rien à écrire, rien à relire (v2.1-62)
-    lastBottomReserve = newBottom;
-    canvasWrapEl.style.bottom = newBottom;
-    if (typeof updateScrollBands === 'function') updateScrollBands();
-  }
-}
-let lastBottomReserve = '';
-// Version regroupée sur une image d'écran, utilisée par refreshSelectionUI() (appelée à chaque
-// rendu) : mesurer la hauteur des barres juste après les avoir modifiées forçait un recalcul
-// complet de la page au milieu du rendu. Reportée à l'image suivante, une seule fois.
-let bottomReserveRAF = 0;
-function scheduleBottomReserve(){
-  if (bottomReserveRAF) return;
-  bottomReserveRAF = requestAnimationFrame(()=>{ bottomReserveRAF = 0; updateCanvasBottomReserve(); });
-}
 // Convertit un point écran (coordonnées client, ex. centre du viewport visible) en
 // coordonnées internes de la feuille (mêmes coordonnées que stagePointer()),
 // en tenant compte du zoom appliqué via transform CSS sur le conteneur Konva.
@@ -3477,7 +3339,7 @@ stage.onAny('touchend touchcancel', ()=>{ marginPan = null; });
 
 /* Appui prolongé sur un plan = sélection automatique (v2.1-118, essai : 2 s, doigt immobile), même quand un outil
    (ex. pastille) empêche la sélection par simple appui. */
-const PLAN_LONGPRESS_SELECT_MS = 2000, PLAN_LONGPRESS_MOVE_PX = 10;
+const PLAN_LONGPRESS_SELECT_MS = 1000, PLAN_LONGPRESS_MOVE_PX = 22; // v2.1-151 : 1 s et tolérance 22 px (2 s / 10 px échouaient au doigt avec un outil de la tuile Pastille : le tremblement du doigt annulait l appui)
 let planLongPress = null; // { timer, x, y }
 function cancelPlanLongPress(){ if (planLongPress){ clearTimeout(planLongPress.timer); planLongPress = null; } }
 stage.on('touchstart', (e)=>{
@@ -4362,14 +4224,12 @@ function updatePointCutBar(){
   const bar = document.getElementById('pointCutBar');
   if (activeTool!=='cut-point' || cutPoints.length===0 || pendingCutPolygon){
     bar.style.display = 'none';
-    updateCanvasBottomReserve();
     return;
   }
   document.getElementById('pointCutCount').textContent = cutPoints.length + (cutPoints.length>1?' points':' point');
   document.getElementById('pointCutClose').disabled = cutPoints.length<3;
   hideBubble();
   bar.style.display = 'flex'; // position gérée par CSS (fenêtre orange flottante sous les tuiles)
-  updateCanvasBottomReserve();
 }
 document.getElementById('pointCutUndo').addEventListener('click', ()=>{
   cutPoints.pop();
@@ -4412,13 +4272,11 @@ function showCutConfirm(polygonPts){
   hideBubble(); // la fenêtre de validation prend la place de la bulle « Tracez le rectangle… »
   const bar = document.getElementById('cutConfirmBar');
   bar.style.display = 'flex'; // position gérée par CSS (fenêtre orange flottante sous les tuiles)
-  updateCanvasBottomReserve();
 }
 function hideCutConfirm(){
   pendingCutPolygon = null;
   const bar = document.getElementById('cutConfirmBar');
   if (bar) bar.style.display = 'none';
-  updateCanvasBottomReserve();
   ghostGroup.destroyChildren(); uiLayer.batchDraw();
   updatePointCutBar();
 }
@@ -5158,8 +5016,12 @@ function refreshTypeList(){
   // render() appelle cette fonction très souvent (chaque déplacement de pastille, chaque
   // valeur de curseur…) alors que la liste des postes, elle, ne change presque jamais :
   // reconstruire tout son HTML à chaque fois était un gaspillage inutile.
-  const sig = JSON.stringify(model.deviceTypes.map(t=>[t.id,t.code,t.name,t.color,t.shape,t.noNumber,t.defaultRadius])) + '|' + selectedTypeId;
-  if (sig === lastTypeListSig){ updateDropdownButton(); syncColorPickerToSelectedType(); return; }
+  const sig = JSON.stringify(model.deviceTypes.map(t=>[t.id,t.code,t.name,t.color,t.shape,t.noNumber])) + '|' + selectedTypeId;
+  // v2.1-151 : la taille n'est plus dans la signature (sinon la ligne était reconstruite pendant l'appui sur − / +, le bouton disparaissait
+  // sous le doigt, le relâchement n'était jamais reçu et le compteur défilait jusqu'au bout) ; les nombres sont mis à jour sur place.
+  if (sig === lastTypeListSig){
+    document.querySelectorAll('#deviceTypeDropdownList .dd-item').forEach((row,i)=>{ const n = row.querySelector('.sz-n'), t = model.deviceTypes[i]; if (n && t && n.textContent !== String(typeSizeOf(t))) n.textContent = typeSizeOf(t); });
+    updateDropdownButton(); syncColorPickerToSelectedType(); return; }
   lastTypeListSig = sig;
 
   const list = document.getElementById('deviceTypeDropdownList');
@@ -5368,6 +5230,7 @@ function bindStepper(btn, step, read, write, onEnd){
     e.preventDefault(); e.stopPropagation();
     try{ btn.setPointerCapture(e.pointerId); }catch(err){ /* sans conséquence */ }
     stop(); doStep();
+    window.addEventListener('pointerup', stop, { once:true }); // filet si le bouton est retiré du DOM en plein appui
     delayTimer = setTimeout(()=>{
       let n = 0;
       repeatTimer = setInterval(()=>{
@@ -5488,13 +5351,22 @@ function closeAllPopovers(){
   const list = document.getElementById('deviceTypeDropdownList');
   if (list) list.classList.remove('open');
 }
+// v2.1-151 : règle commune à TOUTES les fenêtres (tiroirs, menus, réglages, taille poste, flèches) : en ouvrir une referme les
+// autres, sauf celle de la famille « keep » ('popover' | 'drawer' | 'sizeAll' | 'nudge' | 'settings').
+function closeOtherWindows(keep){
+  if (keep !== 'popover') closeAllPopovers();
+  if (keep !== 'drawer') closeAllTileDrawers();
+  if (keep !== 'sizeAll') document.getElementById('sizeAllWin').classList.remove('show');
+  if (keep !== 'settings') closeSelectionSettings();
+  if (keep !== 'nudge' && nudgeOpen){ nudgeOpen = false; syncPastilleDrawer(); }
+}
 function bindPopover(triggerId, popId){
   const trigger = document.getElementById(triggerId);
   const pop = document.getElementById(popId);
   trigger.addEventListener('click', (e)=>{
     e.stopPropagation();
     const isOpen = pop.classList.contains('open');
-    closeAllPopovers();
+    closeOtherWindows('popover'); closeAllPopovers();
     if (!isOpen){ pop.classList.add('open'); positionFloating(trigger, pop); }
   });
   pop.addEventListener('click', (e)=>e.stopPropagation());
@@ -5594,54 +5466,6 @@ const TILE_TOOL_CATEGORIES = {
   // à refléter comme "actif" une fois le tiroir refermé.
   texte: [],
 };
-// Poignée "main rouge" : permet de glisser la barre de sélection n'importe où sur l'écran
-// plutôt que de rester figée en bas au centre. Les propriétés CSS de la barre utilisent
-// !important pour rester ancrées par défaut (voir plus haut) : on les surcharge donc aussi
-// avec la priorité !important côté JS (seul moyen de l'emporter), uniquement une fois qu'on
-// commence à la glisser.
-function makeBarDraggable(barEl, handleEl){
-  let dragging = false, startX=0, startY=0, startLeft=0, startTop=0;
-  function onDown(e){
-    e.stopPropagation();
-    const pt = e.touches ? e.touches[0] : e;
-    dragging = true;
-    const rect = barEl.getBoundingClientRect();
-    startX = pt.clientX; startY = pt.clientY;
-    startLeft = rect.left; startTop = rect.top;
-    // La barre est en pleine largeur (ancrée aux deux bords) : on fige sa largeur actuelle
-    // avant de la détacher, sinon elle se rétrécirait d'un coup au premier mouvement.
-    barEl.style.setProperty('width', rect.width+'px', 'important');
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('touchmove', onMove, {passive:false});
-    document.addEventListener('mouseup', onUp);
-    document.addEventListener('touchend', onUp);
-  }
-  function onMove(e){
-    if (!dragging) return;
-    if (e.cancelable) e.preventDefault();
-    const pt = e.touches ? e.touches[0] : e;
-    let newLeft = startLeft + (pt.clientX - startX);
-    let newTop = startTop + (pt.clientY - startY);
-    newLeft = Math.max(4, Math.min(window.innerWidth - barEl.offsetWidth - 4, newLeft));
-    newTop = Math.max(4, Math.min(window.innerHeight - barEl.offsetHeight - 4, newTop));
-    barEl.style.setProperty('left', newLeft+'px', 'important');
-    barEl.style.setProperty('top', newTop+'px', 'important');
-    barEl.style.setProperty('bottom', 'auto', 'important');
-    barEl.style.setProperty('right', 'auto', 'important');
-    barEl.style.setProperty('transform', 'none', 'important');
-  }
-  function onUp(){
-    dragging = false;
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('touchmove', onMove);
-    document.removeEventListener('mouseup', onUp);
-    document.removeEventListener('touchend', onUp);
-    if (typeof updateCanvasBottomReserve === 'function') updateCanvasBottomReserve();
-  }
-  handleEl.addEventListener('mousedown', onDown);
-  handleEl.addEventListener('touchstart', onDown, {passive:true});
-}
-makeBarDraggable(document.getElementById('selectionBar'), document.getElementById('selectionBarHandle'));
 
 // Tiroir Pastille (v2.1-86) : fermeture après 2 s sans appui, sauf si un sous-menu (liste des postes,
 // ajout de poste…) est ouvert dans l'intervalle : on repousse alors de 2 s.
@@ -5682,7 +5506,7 @@ function openTileDrawer(tileId, allowToggle=true){
   if (!group) return;
   const wasOpen = group.classList.contains('mobile-open');
   if (wasOpen && !allowToggle) return; // déjà ouvert (ex. par le survol) : rien à faire
-  closeAllTileDrawers();
+  closeOtherWindows('drawer'); closeAllTileDrawers();
   if (wasOpen) return; // un appui sur une tuile déjà ouverte la referme simplement
   equalizeDrawerHeights();
   const barRect = document.getElementById('mobileTileBar').getBoundingClientRect();
@@ -5930,6 +5754,7 @@ document.getElementById('btnNudgeToggle').addEventListener('click', ()=>{
   const p = model.pastilles.find(q=>q.id===selectedId);
   if (!p){ showTimedBubble('Touchez d\'abord une pastille'); return; }
   if (p.locked){ showTimedBubble('Pastille verrouillée : déverrouillez-la d\'abord'); return; }
+  if (!nudgeOpen) closeOtherWindows('nudge');
   nudgeOpen = !nudgeOpen; syncPastilleDrawer();
 });
 document.getElementById('selNudgeClose').addEventListener('click', ()=>{ nudgeOpen = false; syncPastilleDrawer(); });
@@ -5980,7 +5805,7 @@ document.getElementById('selNudgeClose').addEventListener('click', ()=>{ nudgeOp
   document.getElementById('btnSizeAll').addEventListener('click', ()=>{
     if (win.classList.contains('show')){ win.classList.remove('show'); return; }
     if (!model.pastilles.length){ showTimedBubble('Aucune pastille sur ce plan'); return; }
-    closeAllTileDrawers(); listEl.classList.remove('open'); fill(); win.classList.add('show');
+    closeOtherWindows('sizeAll'); listEl.classList.remove('open'); fill(); win.classList.add('show');
   });
 })();
 document.getElementById('btnUndo').addEventListener('click', undo);
@@ -5996,7 +5821,7 @@ window.addEventListener('keydown', (e)=>{
     if (d && keyNudge(d[0], d[1])) e.preventDefault();
   }
   if (!typing && (e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); document.getElementById('btnSave').click(); }
-  if (e.key==='Escape' && !typing && !activeTool){ if (selectedId) selectNode(null, null); closeSelectionSettings(); closeAllPopovers(); closeAllTileDrawers(); }
+  if (e.key==='Escape' && !typing && !activeTool){ if (selectedId) selectNode(null, null); closeOtherWindows(''); }
   if (e.key==='Delete' || e.key==='Backspace'){
     if (selectedId && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='TEXTAREA'){
       document.getElementById('selDelete').click();
