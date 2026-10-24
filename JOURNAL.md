@@ -1254,4 +1254,8 @@ v2.1-142 — Grille /2, pastille : 4 icônes en ligne + réglages sur une ligne,
    sombre (barre, tuiles, tiroirs, fenêtres ; feuille inchangée ; icônes sur pastille claire).
  - Contraste des tuiles en mode jour : 4 propositions montrées à Mic (A bordure fine foncée, B fond bleu-gris, C bordure bleue +
    ombre, D liseré de couleur) ; choix en attente, aucune appliquée.
+
+v2.1-143 — Tuiles plus visibles en mode jour (proposition D)
+ - Fond blanc, bordure grise, ombre légère et liseré de couleur par tuile (Page foncé, Vue turquoise, Fichier bleu, Plan violet,
+   Pastille rouge, Texte orange) ; uniquement hors modes Soleil / Nuit.
 ```

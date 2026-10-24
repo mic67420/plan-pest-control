@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-142 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-143 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -416,6 +416,17 @@
   body.desk.mobile-mode .tb-group.mobile-open{ left:max(6px, calc(50% - 310px)); right:max(6px, calc(50% - 310px)); }
   body.desk.mobile-mode .popover{ left:max(8px, calc(50% - 310px)) !important; right:auto; width:min(460px, calc(100vw - 16px)); max-width:none; min-width:0; }
   body.desk .tb-icon{ max-width:92px; }
+  /* v2.1-143 : tuiles plus visibles en mode JOUR (proposition D choisie par Mic) : fond blanc, bordure grise, ombre légère et liseré
+     de couleur par tuile. Les modes Soleil et Nuit gardent leurs propres règles (d'où le :not). */
+  body.mobile-mode:not(.sun-mode):not(.night-mode) #mobileTileBar .mtile,
+  body.mobile-mode:not(.sun-mode):not(.night-mode) #mobileTileBar .mtile-split button{ background:#fff; border:1px solid #BFC7D4; border-bottom-width:5px; box-shadow:0 1px 3px rgba(0,0,0,.18); }
+  body:not(.sun-mode):not(.night-mode) #mobileTileBar .mtile[data-tile="page"]{ border-bottom-color:#2B3242; }
+  body:not(.sun-mode):not(.night-mode) #mobileTileBar .mtile[data-tile="vue"]{ border-bottom-color:#2AA6B0; }
+  body:not(.sun-mode):not(.night-mode) #mobileTileBar .mtile[data-tile="historique"]{ border-bottom-color:#0E6FA8; }
+  body:not(.sun-mode):not(.night-mode) #mobileTileBar .mtile[data-tile="plan"]{ border-bottom-color:#7A5AD8; }
+  body:not(.sun-mode):not(.night-mode) #mobileTileBar .mtile[data-tile="pastille"]{ border-bottom-color:#D6493E; }
+  body:not(.sun-mode):not(.night-mode) #mobileTileBar .mtile[data-tile="texte"]{ border-bottom-color:#E8A83C; }
+  body:not(.sun-mode):not(.night-mode) #mobileTileBar .mtile.active{ background:var(--accent); }
   /* v2.1-142 : bouton d'affichage à 3 états (Jour / Soleil / Nuit) : seul le dessin du mode actif est visible */
   #btnSun .th-sun, #btnSun .th-night{ display:none; }
   body.sun-mode #btnSun .th-day, body.night-mode #btnSun .th-day{ display:none; }
@@ -554,7 +565,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-142</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-143</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -805,7 +816,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-142 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-143 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
