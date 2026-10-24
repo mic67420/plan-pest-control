@@ -1244,4 +1244,14 @@ v2.1-141 — Nouvelles icônes, lot 5 (dernier) : pastilles rondes, Outils image
    aplat), saturation, teinte. Menu d'export : icône devant PNG / JPEG / PDF / PPTX.
  - Le jeu d'icônes est complet ; les copies de travail (feuilles SVG, découpes, apply.py / patch5.py) sont dans le dossier
    temporaire de la session, pas dans le dépôt.
+
+v2.1-142 — Grille /2, pastille : 4 icônes en ligne + réglages sur une ligne, mode d'affichage Jour / Soleil / Nuit
+ - Grille d'accroche : GRID_STEP 10 -> 5 (carreaux divisés par 2). Test « placement déporté » : centres (205,195,335,250).
+ - Pastille sélectionnée : cadenas, renommer (nouvelle icône bleue, crayon blanc), supprimer, réglages rangés EN LIGNE au-dessus
+   d'elle (placeBadges, badgeState.row). Renommer ouvre une carte de saisie (askPastilleLabel) qui réutilise les gestionnaires de
+   #selLabel. Fenêtre de réglages : taille + couleur + flèches ← ↑ ↓ → sur UNE ligne (360 px), plus de champ de nom ni de libellé.
+ - Bouton d'affichage à 3 états (jour -> plein soleil -> nuit, mémorisé) avec 3 dessins (soleil + nuage, soleil, lune) ; mode nuit
+   sombre (barre, tuiles, tiroirs, fenêtres ; feuille inchangée ; icônes sur pastille claire).
+ - Contraste des tuiles en mode jour : 4 propositions montrées à Mic (A bordure fine foncée, B fond bleu-gris, C bordure bleue +
+   ombre, D liseré de couleur) ; choix en attente, aucune appliquée.
 ```

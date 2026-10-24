@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-141 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-142 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -416,6 +416,31 @@
   body.desk.mobile-mode .tb-group.mobile-open{ left:max(6px, calc(50% - 310px)); right:max(6px, calc(50% - 310px)); }
   body.desk.mobile-mode .popover{ left:max(8px, calc(50% - 310px)) !important; right:auto; width:min(460px, calc(100vw - 16px)); max-width:none; min-width:0; }
   body.desk .tb-icon{ max-width:92px; }
+  /* v2.1-142 : bouton d'affichage à 3 états (Jour / Soleil / Nuit) : seul le dessin du mode actif est visible */
+  #btnSun .th-sun, #btnSun .th-night{ display:none; }
+  body.sun-mode #btnSun .th-day, body.night-mode #btnSun .th-day{ display:none; }
+  body.sun-mode #btnSun .th-sun, body.night-mode #btnSun .th-night{ display:block; }
+  /* v2.1-142 : mode « nuit » — barre, tuiles, tiroirs et fenêtres sombres, feuille inchangée (blanche). Les icônes ont un contour
+     sombre : elles gardent une petite pastille claire derrière elles pour rester lisibles sur le fond sombre. */
+  body.night-mode{ --ink:#e9edf4; --ink-dim:#9aa4b6; --bg:#0d1017; }
+  body.night-mode #topbar{ background:#161b26; border-bottom:1px solid #2a3243; }
+  body.night-mode #topbar .brand{ color:#e9edf4; }
+  body.night-mode #mobileTileBar .mtile, body.night-mode #mobileTileBar .mtile-split button{ background:#242c3c; color:#e9edf4; }
+  body.night-mode #mobileTileBar .mtile.active{ background:#0E6FA8; color:#fff; }
+  body.night-mode #mobileTileBar .mtile .icon, body.night-mode #mobileTileBar .mtile-split .icon, body.night-mode .tb-icon .icon{ background:#eef1f6; border-radius:7px; padding:2px; box-sizing:content-box; }
+  body.night-mode .tb-icon{ color:#e9edf4; }
+  body.night-mode .tb-icon .tb-icon-label{ color:#e9edf4; }
+  body.night-mode .tb-icon:hover{ background:#2a3243; }
+  body.night-mode.mobile-mode .tb-group.mobile-open, body.night-mode .popover{ background:rgba(22,27,38,var(--drawer-alpha,1)) !important; color:#e9edf4; }
+  body.night-mode .pop-btn, body.night-mode .pop-tool-btn, body.night-mode .doc-row{ background:#242c3c; color:#e9edf4; border-color:#394258; }
+  body.night-mode .doc-row .doc-name{ color:#e9edf4; } body.night-mode .doc-row .doc-meta{ color:#9aa4b6; }
+  body.night-mode .pop-row, body.night-mode .pop-row label, body.night-mode .pop-section-title, body.night-mode #popSelSettings .sel-title, body.night-mode #zoomLabel, body.night-mode #pageIndicator{ color:#b8c1d1 !important; }
+  body.night-mode .rngB-track{ background:#394258; }
+  body.night-mode .sqB, body.night-mode .step-btn, body.night-mode #selSettingsClose, body.night-mode #selNudge button{ background:#242c3c; border-color:#394258; }
+  body.night-mode #selNudge button{ color:#e9edf4; }
+  body.night-mode .rngE-val, body.night-mode .size-ctl-row .val, body.night-mode .doc-empty{ color:#e9edf4; }
+  body.night-mode #canvasWrap{ background:#0d1017; }
+  body.night-mode #saveBadge{ color:#6fd49a !important; }
   /* v2.1-127 : mode « plein soleil » — contraste maximal en extérieur */
   body.sun-mode{ --ink:#000; --bg:#9aa0aa; }
   body.sun-mode #topbar{ background:#fff; border-bottom:2px solid #000; }
@@ -439,11 +464,11 @@
   .doc-row button{border:1px solid #d8dce3;background:#F1F3F6;color:#1c2230;border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:600;cursor:pointer;flex:none;}
   .doc-row button.open{background:var(--accent);border-color:var(--accent);color:#fff;}
   .doc-empty{font-size:12.5px;color:#5c6478;padding:6px 2px;}
-  #selNudge{display:none;align-items:center;gap:8px;margin-top:10px;}
+  #selNudge{display:none;align-items:center;gap:4px;flex:none;}
   #selNudge.show{display:flex;}
-  #selNudge label{font-size:11px;color:#5c6478;margin-right:4px;}
-  #selNudge button{width:44px;height:38px;border-radius:10px;border:1px solid #d8dce3;background:#F1F3F6;color:#1c2230;font-size:19px;font-weight:700;line-height:1;padding:0;cursor:pointer;touch-action:manipulation;}
+  #selNudge button{width:34px;height:36px;border-radius:9px;border:1px solid #d8dce3;background:#F1F3F6;color:#1c2230;font-size:17px;font-weight:700;line-height:1;padding:0;cursor:pointer;touch-action:manipulation;}
   #selNudge button:active{background:var(--accent-soft);border-color:var(--accent);}
+  #selSettingsBody .rngE-val{display:none;} /* gagne de la place : la taille se voit sur la pastille */
   #selSettingsBody #selSizeWrap{flex:1 1 auto;min-width:0;}
   #selSettingsBody .rngB{min-width:56px;}
   #selSettingsBody #selLabel{width:62px !important;min-width:0;}
@@ -529,7 +554,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-141</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-142</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -570,7 +595,7 @@
     <button class="tb-icon" id="btnZoomIn" title="Zoom avant"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="693.8 522.9 115.2 115.2"><path fill="#222331" d="M762.9 605.3C762.1 605.6 761.3 606 760.4 606.3C745.1 612.4 728.8 609.4 717 597.7C704.6 585.3 702.8 565 712.4 550.4C727.2 528 758.7 527.2 775 548.4C785.2 561.7 785.4 582.8 774 595.5C773.3 596.2 772.6 596.9 771.9 597.6C773.1 598.7 774.3 599.8 775.4 601.0C775.4 601 776.2 601.8 776.2 601.9C778.1 603.8 777.9 601.7 779.1 602.9C784.7 608.6 790.3 614.3 796 619.9C796 619.9 796.6 620.6 796.6 620.6C799.9 624.1 799.4 629.7 794.9 631.9C791.2 633.8 788.4 631.9 785.7 629.3C781.1 624.9 776.8 620.1 772.2 615.7C771.1 614.7 769.9 613.9 769.3 612.6C767.8 609.5 765.3 607.7 762.9 605.3Z"/><path fill="white" d="M744.7 536.8C763.7 536.9 779 552.3 779 571.3C779 590.2 763.7 605.6 744.7 605.7C725.6 605.8 710.1 590.4 710.1 571.3C710.1 552.2 725.6 536.7 744.7 536.8Z"/><path fill="#222331" d="M742.5 569.5C742.4 565.3 742.3 561.1 742.3 556.9C742.3 556 742.3 555.1 743.4 554.9C745.9 554.7 746.5 554.8 746.5 557.2C746.5 561.3 746.5 565.4 746.5 569.5C750.3 569.6 754.1 569.6 758 569.5C758.9 569.5 760.6 569.1 760.7 570.5C761 572.9 761 573.5 758.5 573.5C754.5 573.5 750.5 573.5 746.5 573.5C746.5 577.5 746.6 581.5 746.5 585.5C746.5 586.4 746.5 587.2 745.5 587.3C743 587.5 742.4 587.5 742.4 585.0C742.5 581.1 742.6 577.2 742.5 573.3C738.4 573.2 734.3 573.2 730.2 573.2C729.5 573.2 728.6 573.3 728.3 572.4C727.8 570.8 728.1 569.5 729.9 569.5C734.1 569.5 738.3 569.5 742.5 569.5Z"/><path fill="white" d="M777.5 606.4C778.5 607.2 779.4 608 780.2 608.9C784.6 613.2 788.8 617.7 793.1 622.2C794.6 623.7 796.2 625.9 794.4 627.9C792 630.5 789.1 627.7 787.4 626.0C782.5 621.1 777.6 616.2 772.9 611.1L777.5 606.4Z"/><path fill="white" d="M766.4 603.4L769.5 600.3L774.4 604.5L770.9 608.0L766.4 603.4Z"/></svg></button>
     <button class="tb-icon" id="btnZoomFit" title="Ajuster à l'écran"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="68.5 691.8 100.6 100.6"><path fill="#222331" d="M161.4 699.9C157.4 699.9 153.4 700 149.4 699.9C148.4 699.9 146.1 700.1 145.7 698.7C144.8 696.3 148.2 696.5 149.4 696.5C154.7 696.4 159.9 696.4 165.1 696.5C165.1 701.8 165.2 707.1 165.2 712.5C165.1 717.3 161.4 717 161.4 712.7C161.5 708.4 161.4 704.2 161.4 699.9Z"/><path fill="#222331" d="M72.3 696.3C77.5 696.4 82.7 696.3 88 696.3C88.8 696.3 90.3 696.2 90.9 697.0C92.6 699.3 89.5 699.9 88 700.0C83.9 700 79.8 700 75.8 700.0C75.7 704.4 75.7 708.8 75.8 713.2C75.8 714.1 75.7 715.1 74.8 715.5C72.5 716.5 72.3 714.2 72.3 712.7C72.2 707.2 72.2 701.8 72.3 696.3Z"/><path fill="#222331" d="M161.6 784.0C161.7 780.1 161.6 776.1 161.7 772.2C161.7 771.1 161.5 769.1 162.7 768.5C165.3 767.1 165.2 770.5 165.2 771.9C165.1 777.1 165 782.3 165 787.5C159.7 787.6 154.5 787.5 149.2 787.6C148.5 787.6 146.1 787.9 145.6 786.8C144.4 783.8 148.6 784.1 150.2 784.1C154 784.1 157.8 784 161.6 784.0Z"/><path fill="#222331" d="M72.3 787.7C72.3 782.3 72.2 776.9 72.3 771.4C72.3 770.6 72.1 768.9 73.2 768.5C75 767.9 75.8 769.1 75.8 770.7C75.8 775.1 75.7 779.6 75.7 784.0C79.8 784 83.9 784.1 88 784.0C88.9 784 90.7 783.9 91 785.1C91.8 787.7 89.9 787.6 88 787.6C82.8 787.6 77.6 787.6 72.3 787.7Z"/></svg></button>
     <button class="tb-icon" id="btnLockAll" title="Tout verrouiller"><svg class="icon lock-closed" xmlns="http://www.w3.org/2000/svg" viewBox="856.2 687.6 100.9 100.9"><path fill="#222331" d="M884.7 731.1C884.6 725.9 884.3 720.7 884.8 715.4C886.3 700.4 903.2 691.3 916.7 698.1C924.4 702 928.7 709.4 928.8 717.9C928.9 722.3 928.8 726.7 928.8 731.1C935.2 731.2 939.2 730.4 939.2 737.7C939.2 737.7 939.2 739.7 939.2 739.7C939.1 752.5 939.5 765.2 939.4 778.0C939.4 783.2 936.8 784.5 932 784.6C915 784.8 898.1 784.7 881.2 784.7C876.3 784.7 873.9 783.6 873.9 778.5C873.9 778.4 873.8 777.2 873.8 777.2C873.9 764.4 873.7 751.5 873.8 738.7C873.9 730.7 876.8 731.3 884.7 731.1Z"/><path fill="#EF4F45" d="M877.7 734.9L935.3 734.8C935.5 736.6 935.6 738.4 935.6 740.2C935.8 752.1 935.6 764 935.7 776.0C935.8 781.4 934.9 781.3 929.5 781.3C913.6 781.4 897.8 781.3 881.9 781.0C877.2 780.9 877.5 780 877.5 775.5C877.5 772.5 877.6 769.6 877.6 766.7C877.6 756.1 877.2 745.5 877.7 734.9Z"/><path fill="#222331" d="M903.1 759.7C902.3 758.7 901.5 757.7 900.8 756.8C895.6 750.2 903.4 740.6 910.6 745.3C915.3 748.4 915 753.3 911.8 757.3C911.3 758 910.7 758.5 910.2 759.1L910.1 771.9L903.2 771.8L903.1 759.7Z"/><path fill="white" d="M888.3 731.1C888.2 726.9 888.2 722.7 888.2 718.4C888.2 718.4 888.2 717.2 888.2 717.2C888.6 705.5 900.9 696.6 912.1 700.1C920.2 702.7 925.1 709.7 925.2 717.9C925.2 722.3 925.2 726.6 925.2 730.9L888.3 731.1Z"/></svg><svg class="icon lock-open" xmlns="http://www.w3.org/2000/svg" viewBox="163.7 132.8 275.1 275.1"><path fill="#25284F" d="M229.9 239.9C229.9 233.1 229.8 226.3 229.9 219.5C230.1 201.2 237.1 184.7 249.7 171.6C272.1 148.4 308.2 142.9 336.5 158.6C358.9 171 372.2 193.6 372.7 219.2C372.9 231.3 372.8 243.3 372.9 255.4C373.8 255.4 374.8 255.4 375.7 255.5C392.5 256 403.8 269.2 403.7 285.7C403.7 297.2 403.8 308.7 403.8 320.2C403.7 336 404 351.9 403.8 367.7C403.7 371.4 403.3 374.8 401.9 378.2C396.9 390.2 386.7 397.3 373.7 397.4C348.5 397.6 323.2 397.3 298 397.4C275.4 397.4 252.8 397.6 230.2 397.4C230.2 397.4 228.7 397.3 228.7 397.3C210.9 396.9 198.9 384.8 198.6 367.0C198.6 366.9 198.5 365 198.5 365.0C198.5 338.8 198.3 312.6 198.5 286.5C198.6 268.3 210.9 255.9 229.5 255.6C229.5 255.6 231.7 255.5 231.7 255.5C275.7 255.3 319.6 255.3 363.6 255.5C363.6 243.8 363.6 232.1 363.5 220.5C363.3 209.5 360.6 198.3 354.7 189.0C345 173.5 329.4 163 311.4 160.0C274.5 154 239.4 182.2 239.2 220C239.1 226.6 239.2 233.3 239.2 239.9L229.9 239.9Z"/><path fill="#FC3836" d="M304.7 264.3C304.7 264.3 311.2 264.3 311.2 264.3C332.2 264.3 353.2 264.1 374.2 264.3C377.1 264.4 379.5 264.8 382.2 265.9C392.6 270.4 394.5 278 394.6 288.5C394.7 293.4 394.7 298.3 394.7 303.2C394.8 323.6 395.1 344.1 394.8 364.5C394.8 364.5 394.8 365.9 394.8 366.0C394.4 378.4 386.9 387.9 374 388.1C373.9 388.1 372.5 388.1 372.5 388.1C342.2 388.3 311.9 388.1 281.7 388.2C264.3 388.2 246.9 388.2 229.4 388.0C225.7 388 222.1 387.6 218.8 385.8C210.6 381.4 207.7 374.6 207.6 365.7C207.6 365.7 207.6 362.7 207.6 362.7C207.5 337.6 207.3 312.5 207.5 287.5C207.6 273.1 215.9 264.7 230.2 264.4C254.8 264 280.3 264.3 304.7 264.3Z"/></svg></button>
-    <button class="tb-icon" id="btnSun" title="Plein soleil"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="222.2 686.7 110.7 110.7"><path fill="#222331" d="M276.7 712.7C292.8 712.5 306 725.4 306.1 741.5C306.3 757.6 293.3 770.8 277.2 770.8C261.2 770.9 248.1 758 248 742.0C247.9 726 260.7 712.9 276.7 712.7Z"/><path fill="#FC9D36" d="M277.2 716.1C291.3 716.2 302.7 727.6 302.7 741.7C302.7 755.8 291.3 767.2 277.2 767.3C263 767.3 251.5 755.9 251.5 741.7C251.5 727.6 263 716.1 277.2 716.1Z"/><path fill="#222331" d="M234.7 738.8C235.8 738.8 238.5 738.7 238.9 740.2C239.7 743 234.4 742.7 233.2 742.7C231.6 742.7 229 743.1 227.5 742.2C226.3 741.5 226.3 740.8 227.1 739.8C228.3 738.3 233.4 738.8 234.7 738.8Z"/><path fill="#222331" d="M323.2 739.2C324.4 739.2 326.5 738.9 327.3 740.2C328.7 742.6 325.7 742.9 324.2 742.9C322.2 742.9 320.2 742.9 318.2 742.8C316.8 742.8 314.1 742 315.6 740.0C316.5 738.7 322.8 739.2 323.2 739.2Z"/><path fill="#222331" d="M248.2 768.6C249 768.8 249.6 769.5 249.7 770.3C250.1 771.9 243.6 778.1 242.2 778.3C242.1 778.3 241.7 778.2 241.5 778.2C237.2 777.2 247 768.4 248.2 768.6Z"/><path fill="#222331" d="M277.2 780.3C277.6 780.3 278.2 780.4 278.5 780.7C279.3 781.4 278.8 787.6 278.8 788.2C278.9 789.9 278.9 792.1 276.7 792.2C276.5 792.2 276.4 792.1 276.2 792.1C274.7 791.5 275.3 786.1 275.3 784.2C275.3 782.8 275 780 277.2 780.3Z"/><path fill="#222331" d="M242.7 705.2C243.5 705.2 244.1 705.9 244.7 706.5C245.7 707.5 246.7 708.6 247.7 709.6C247.7 709.6 248.2 710.2 248.2 710.2C249.1 711.1 250.8 714.2 248.2 714.4C246.9 714.5 236.4 705.4 242.7 705.2Z"/><path fill="#222331" d="M277.2 691.8C277.7 691.8 278.1 692 278.4 692.5C279.2 693.8 279.9 703.7 277.2 703.6C275.5 703.6 275.3 700.3 275.3 699.2C275.2 697.7 274.5 691.8 277.2 691.8Z"/><path fill="#222331" d="M307.2 769.5C309.5 769.6 317.8 777.7 312.2 778.1C310.6 778.2 307.2 773.8 306.3 772.7C305.4 771.6 305.1 769.4 307.2 769.5Z"/><path fill="#222331" d="M312.7 705.6C314.9 705.9 313.3 708.4 312.6 709.2C311.8 710.1 308 714.6 306.7 714.7C306.6 714.7 306.4 714.7 306.3 714.6C303.3 713 309.8 705.2 312.7 705.6Z"/></svg></button>
+    <button class="tb-icon" id="btnSun" title="Mode d'affichage : jour / plein soleil / nuit"><svg class="icon th-day" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="38" cy="38" r="22" fill="#F59E0B" stroke="#25212D" stroke-width="5"/><path d="M30 82a15 15 0 0 1 3-29 20 20 0 0 1 38 3 13 13 0 0 1-2 26Z" fill="#fff" stroke="#25212D" stroke-width="5" stroke-linejoin="round"/></svg><svg class="icon th-sun" xmlns="http://www.w3.org/2000/svg" viewBox="196.8 69 117.2 117.2"><path fill="#25212D" d="M256.7 101.8C270.7 102 281.9 113.4 282 127.3C282.2 141.3 271.2 152.8 257.2 153.4C247.8 153.7 239 149 234.1 140.9C229.2 132.9 229.1 122.8 233.8 114.7C238.5 106.5 247.3 101.6 256.7 101.8Z"/><path fill="#F89426" d="M255.7 105.4C268 105 278.2 114.8 278.5 127.1C278.8 139.4 269 149.6 256.7 149.8C244.5 150 234.4 140.3 234.1 128.1C233.8 115.8 243.5 105.7 255.7 105.4Z"/><path fill="#F89426" d="M282.2 150.0C283 150.1 284.1 151.2 284.7 151.7C287.8 154.6 291.2 157.5 293.9 160.7C295 162 293 164.2 291.7 164.0C290.1 163.8 281.7 155.2 280.2 153.3C279.2 152 280.6 149.8 282.2 150.0Z"/><path fill="#F89426" d="M229.7 149.8C230.7 149.9 231.6 150.6 231.5 151.7C231.3 153.1 220.9 164.3 219.2 164.4C217.9 164.4 217.1 163.4 217.2 162.2C217.4 159.4 228.2 149.7 229.7 149.8Z"/><path fill="#F89426" d="M219.7 90.0C220.6 89.9 221.2 90.9 221.9 91.5C224.5 94.1 227.2 96.6 229.8 99.2C231.4 100.8 231.7 103.8 228.7 103.8C226.5 103.8 220.2 95.7 218.7 94.2C217.1 92.4 217.2 90.2 219.7 90.0Z"/><path fill="#F89426" d="M216.7 124.1C217.1 124.1 217.6 124.1 218 124.1C219.4 124.1 220.9 125.5 220.4 127.0C219.8 128.9 214 128.2 213.2 128.2C213.2 128.2 210.2 128.2 210.2 128.2C208.8 128.2 203.7 129 202.5 127.2C201.1 125 203.9 124.1 205.4 124.1C209.2 124.1 212.9 124.1 216.7 124.1Z"/><path fill="#F89426" d="M291.7 90.2C291.7 90.2 292.1 90.6 292.1 90.6C293.4 91.4 294.3 92.4 293.2 93.7C292.2 95.1 283.8 104.2 281.7 104.0C280.9 103.9 280 103.3 279.9 102.5C279.7 100.9 290.3 90 291.7 90.2Z"/><path fill="#F89426" d="M255.7 75.5C257.5 75.5 257.9 76.6 257.9 78.2C257.9 81.9 257.9 85.7 257.9 89.5C257.9 91 257.9 93.5 255.7 93.3C254 93.2 253.9 91.5 253.8 90.2C253.7 86.6 253.7 83 253.7 79.4C253.7 77.8 254 75.6 255.7 75.5Z"/><path fill="#F89426" d="M299.7 124.1C301.2 124.1 302.7 124.1 304.2 124.1C305.3 124.1 308.3 123.8 308.8 125.4C309.6 127.7 306.8 128.3 305.2 128.2C301.7 128.1 298.2 128.2 294.7 128.2C294.7 128.2 293.7 128.2 293.7 128.2C292 128.1 290.5 127.1 291.6 125.2C292.6 123.3 299 124.1 299.7 124.1Z"/><path fill="#F89426" d="M255.2 161.9C257.6 161.5 257.9 163.4 257.9 165.2C257.9 168.4 257.9 171.7 257.9 175.0C257.8 176.7 258 179.2 255.7 179.5C254.5 179.7 254 177.9 254 176.7C253.9 172.5 254 168.4 254 164.2C254 163.3 254.3 162.1 255.2 161.9Z"/></svg><svg class="icon th-night" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M60 10A40 40 0 1 0 90 62 32 32 0 0 1 60 10Z" fill="#FFD54A" stroke="#25212D" stroke-width="5" stroke-linejoin="round"/><path d="M78 18l2.6 6.2 6.2 2.6-6.2 2.6-2.6 6.2-2.6-6.2-6.2-2.6 6.2-2.6Z" fill="#FFD54A" stroke="#25212D" stroke-width="3" stroke-linejoin="round"/></svg></button>
     <div class="pop-row" id="drawerAlphaRow" style="flex:1 1 100%;"><label>Fond</label><input type="range" id="rngDrawerAlpha" min="0" max="100" value="100" title="Opacité du fond des tiroirs"></div>
   </div>
   <div class="sep"></div>
@@ -767,20 +792,20 @@
 <div id="toast"></div>
 <div class="popover" id="popSelSettings">
   <div class="sel-head"><span class="sel-title" id="selSettingsTitle">Réglages</span><button type="button" id="selSettingsClose" aria-label="Fermer les réglages" title="Fermer">✕</button></div>
-  <div id="selSettingsBody"></div>
-  <div id="selNudge" title="Déplacer la pastille d'un cran">
-    <label>Position</label>
+  <div id="selSettingsBody">
+    <div id="selNudge" title="Déplacer la pastille d'un cran">
     <button type="button" data-dx="-1" data-dy="0" aria-label="Vers la gauche">←</button>
     <button type="button" data-dx="0" data-dy="-1" aria-label="Vers le haut">↑</button>
     <button type="button" data-dx="0" data-dy="1" aria-label="Vers le bas">↓</button>
     <button type="button" data-dx="1" data-dy="0" aria-label="Vers la droite">→</button>
+  </div>
   </div>
 </div>
 <div id="bubble"></div>
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-141 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-142 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -814,7 +839,7 @@ const CORNER_PRESETS = {
   landscape: { companyLogo:{x:1.0908, y:-6.9594, width:233.4828}, clientLogo:{x:923, y:40},
                date:{x:7.7742, y:763.9092}, address:{x:941.9865, y:154.3668}, legend:{x:812.5173, y:719.1541} }
 };
-const GRID_STEP = 10; // v2.1-92 : carreaux divisés par 2 (était 20)
+const GRID_STEP = 5; // v2.1-92 : carreaux divisés par 2 (était 20) ; v2.1-142 : encore divisés par 2 (était 10)
 // 20 étapes (au lieu de 40, v2.1-63) : chaque retouche d'un plan (gomme, pot, découpe) garde en mémoire une
 // copie complète de l'image ; 40 copies pouvaient saturer la mémoire d'un téléphone.
 const HISTORY_LIMIT = 20;
@@ -2686,8 +2711,8 @@ function nodeForId(id){
 // toujours au premier plan. Pour ne pas toucher au reste du code, `lockIndicatorGroup` et `lockBadge` gardent
 // l'interface qu'avaient les anciens objets Konva (visible(), position() en coordonnées FEUILLE, path.data()) ;
 // c'est placeBadges() qui convertit en position écran, à chaque affichage, défilement, zoom ou redimensionnement.
-let badgeOverlay = null, badgeLockEl = null, badgeDelEl = null, badgeCutEl = null, badgeSetEl = null;
-const badgeState = { show:false, lock:{x:0,y:0}, delShow:false, toolsShow:false, setShow:false, locked:false };
+let badgeOverlay = null, badgeLockEl = null, badgeDelEl = null, badgeCutEl = null, badgeSetEl = null, badgeRenEl = null;
+const badgeState = { show:false, lock:{x:0,y:0}, delShow:false, toolsShow:false, setShow:false, locked:false, row:null, renShow:false };
 function placeBadges(){
   if (!badgeOverlay) return;
   const wrap = document.getElementById('canvasWrap').getBoundingClientRect();
@@ -2696,6 +2721,16 @@ function placeBadges(){
   if (!badgeState.show) return;
   const host = sheetShadowHostEl.getBoundingClientRect();
   const px = host.left - wrap.left + badgeState.lock.x*zoom, py = host.top - wrap.top + badgeState.lock.y*zoom;
+  badgeRenEl.style.display = badgeState.renShow ? 'flex' : 'none';
+  if (badgeState.row){
+    // v2.1-142 : pastille sélectionnée = 4 icônes en LIGNE au-dessus d'elle (cadenas, renommer, supprimer, réglages)
+    const cx = host.left - wrap.left + badgeState.row.x*zoom;
+    const topY = host.top - wrap.top + badgeState.row.y*zoom - badgeState.row.r*zoom - 40;
+    const y = Math.max(2, topY), x0 = cx - 58; // 4 icônes de 26 px, écart 8 px : 128 px, centrées
+    [badgeLockEl, badgeRenEl, badgeDelEl, badgeSetEl].forEach((el, i)=>{ el.style.display = 'flex'; el.style.transform = 'translate('+(x0+i*34)+'px,'+y+'px)'; });
+    badgeCutEl.style.display = 'none';
+    return;
+  }
   badgeLockEl.style.transform = 'translate('+(px-13)+'px,'+(py-13)+'px)';
   badgeDelEl.style.display = badgeState.delShow ? 'flex' : 'none';
   badgeDelEl.style.transform = 'translate('+(px-13)+'px,'+(py+32-13)+'px)'; // 32 px écran sous le cadenas, quel que soit le zoom
@@ -2758,12 +2793,16 @@ function ensureLockBadge(){
     openTileDrawer('plan', false);
     document.getElementById('btnPlanSettings').click();
   });
+  // v2.1-142 : icône bleue « renommer » (crayon blanc) pour la pastille : ouvre une petite carte de saisie du nom
+  badgeRenEl = toolBtn('Renommer la pastille', '<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="884.1 663.4 103 103"><path fill="#25212D" d="M935.2 667.4C961.6 667.2 983.1 688.5 983.1 714.9C983.1 741.2 961.6 762.6 935.2 762.4C909.1 762.2 888.1 741 888.1 714.9C888.1 688.8 909.1 667.6 935.2 667.4Z"/><path fill="#3962F5" d="M934.7 671.0C959.1 670.5 979.2 690 979.5 714.4C979.8 738.8 960.1 758.7 935.7 758.8C911.6 758.8 892 739.5 891.7 715.4C891.4 691.3 910.6 671.5 934.7 671.0Z"/><path fill="#fff" d="M913 738.2 916.2 724.6 944.5 696.3a4.6 4.6 0 0 1 6.5 0l6.7 6.7a4.6 4.6 0 0 1 0 6.5L929.4 737.8Z"/><path fill="#3962F5" d="M919.8 726.4 927.6 734.2 916.6 736.4Z" opacity=".0"/><path fill="none" stroke="#3962F5" stroke-width="2.2" stroke-linecap="round" d="M941.2 699.7 954.4 712.9"/></svg>', ()=>{ askPastilleLabel(); });
   document.body.appendChild(badgeOverlay);
   document.getElementById('canvasWrap').addEventListener('scroll', schedulePlaceBadges, { passive:true });
   window.addEventListener('resize', schedulePlaceBadges);
   const refreshLockSvg = ()=>{ badgeLockEl.innerHTML = lockSvg(badgeState.locked) + '<span style="position:absolute;inset:-9px;"></span>'; };
   lockIndicatorGroup = { visible(v){ if (v === undefined) return badgeState.show; badgeState.show = !!v; placeBadges(); } };
   lockBadge = {
+    ren: { visible(v){ badgeState.renShow = !!v; } },
+    row: { set(v){ badgeState.row = v; } },
     g: { position(p){ if (!p) return { x:badgeState.lock.x, y:badgeState.lock.y }; badgeState.lock = { x:p.x, y:p.y }; }, scale(){} },
     path: { data(d){ badgeState.locked = (d === LOCK_PATH_CLOSED); refreshLockSvg(); } },
     del: { visible(v){ if (v === undefined) return badgeState.delShow; badgeState.delShow = !!v; }, position(){}, scale(){} },
@@ -2815,8 +2854,10 @@ function updateLockIndicator(duringRotation){
     const d = (pastille.radius + 9 + 2) + (13 + 2)/zoom;
     const a = 300*Math.PI/180;
     lockBadge.g.position({ x: node.x() + d*Math.sin(a), y: node.y() - d*Math.cos(a) });
+    lockBadge.row.set({ x:node.x(), y:node.y(), r:pastille.radius }); // les 4 icônes se rangent en ligne au-dessus de la pastille (placeBadges)
   } else {
     lockBadge.g.position({ x: box.x + box.width + off, y: box.y - off });
+    lockBadge.row.set(null);
   }
   lockBadge.g.scale({ x:1/zoom, y:1/zoom });
   // Croix de suppression : seulement pour un plan, juste sous le cadenas (v2.1-84).
@@ -2826,6 +2867,7 @@ function updateLockIndicator(duringRotation){
   lockBadge.del.visible(hasBadgeSet || isLogoSel);
   lockBadge.tools.visible(!!findPlanById(selectedId)); // ciseaux : plan seulement (v2.1-115)
   lockBadge.set.visible(hasBadgeSet);
+  lockBadge.ren.visible(!!pastille);
   if (hasBadgeSet){
     const gp = lockBadge.g.position();
     lockBadge.del.position({ x:gp.x, y:gp.y + 32/zoom });
@@ -2874,10 +2916,11 @@ function openSelectionSettings(){
   const pop = document.getElementById('popSelSettings'), body = document.getElementById('selSettingsBody');
   closeAllPopovers(); closeAllTileDrawers();
   document.getElementById('selSettingsTitle').textContent = isLeg ? 'Légende' : 'Pastille';
-  const ids = isLeg ? ['selColorWrap','selBgWrap'] : ['selLabel','selLabelConfirm','selSizeWrap','selColorWrap'];
+  const ids = isLeg ? ['selColorWrap','selBgWrap'] : ['selSizeWrap','selColorWrap']; // v2.1-142 : le nom a quitté cette fenêtre (icône crayon bleue)
   textOptionsInTray = false; // les contrôles quittent le tiroir Texte s'ils y étaient
   document.getElementById('textOptions').classList.remove('has-text');
   ids.forEach(id=>body.appendChild(document.getElementById(id)));
+  body.appendChild(document.getElementById('selNudge')); // flèches en dernier, sur la même ligne
   const bar = document.getElementById('mobileTileBar').getBoundingClientRect();
   pop.style.top = Math.round(bar.bottom + 6) + 'px';
   pop.classList.add('open');
@@ -5800,6 +5843,29 @@ window.addEventListener('keydown', (e)=>{
 // Nom de fichier sûr (v2.1-79) : sans caractères interdits sous Windows.
 function cleanFileName(n){ return (n||'').replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,80); }
 // Petite carte orange qui demande le nom du document (résout null si Annuler).
+// v2.1-142 : renommer la pastille sélectionnée (icône crayon bleue) — petite carte orange ; les gestionnaires existants du champ
+// caché #selLabel (mise à jour du numéro + historique) font le travail, comme avant dans la barre de sélection.
+function askPastilleLabel(){
+  const pa = model.pastilles.find(q=>q.id===selectedId); if (!pa) return;
+  const card = document.createElement('div');
+  card.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);max-width:calc(100vw - 32px);width:300px;background:#F59E0B;color:#1c2230;padding:12px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);z-index:950;font-size:13px;font-weight:500;display:flex;flex-direction:column;gap:8px;';
+  const bar = document.getElementById('mobileTileBar'); const r = bar ? bar.getBoundingClientRect() : null;
+  card.style.top = ((r && r.height ? r.bottom : 58) + 6)+'px';
+  card.innerHTML = '<div>Nom de la pastille</div><input type="text" maxlength="12" style="font:inherit;font-size:16px;padding:8px;border:none;border-radius:8px;width:100%;box-sizing:border-box;">'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end;"><button type="button" data-a="no" style="font:inherit;padding:8px 14px;border:none;border-radius:8px;background:#fff7e6;">Annuler</button>'
+    + '<button type="button" data-a="ok" style="font:inherit;padding:8px 14px;border:none;border-radius:8px;background:#1c2230;color:#fff;">OK</button></div>';
+  const input = card.querySelector('input'); input.value = pa.label || '';
+  const done = (v)=>{
+    card.remove();
+    if (v === null) return;
+    const lab = document.getElementById('selLabel'); lab.value = v;
+    lab.dispatchEvent(new Event('input', { bubbles:true })); lab.dispatchEvent(new Event('change', { bubbles:true }));
+  };
+  card.querySelector('[data-a="ok"]').addEventListener('click', ()=>done(input.value.trim()));
+  card.querySelector('[data-a="no"]').addEventListener('click', ()=>done(null));
+  input.addEventListener('keydown', (e)=>{ e.stopPropagation(); if (e.key==='Enter') done(input.value.trim()); else if (e.key==='Escape') done(null); });
+  document.body.appendChild(card); input.focus(); input.select();
+}
 function askDocName(prefill){
   return new Promise(resolve=>{
     const card = document.createElement('div');
@@ -6207,7 +6273,7 @@ const SHORT_ICON_LABELS = {
   'Déplacer cette page vers la gauche':'Page ←','Déplacer cette page vers la droite':'Page →',
   'Supprimer la page courante':'Suppr.','Nouveau projet':'Nouveau',
   'Orientation portrait':'Portrait','Orientation paysage':'Paysage','Zoom arrière':'Zoom −','Zoom avant':'Zoom +',
-  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Page récapitulative des postes':'Récap.','Plein soleil':'Soleil','Ouvrir un projet':'Ouvrir',
+  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Page récapitulative des postes':'Récap.','Mode d\'affichage : jour / plein soleil / nuit':'Jour','Ouvrir un projet':'Ouvrir',
   'Importer un plan':'Importer','Découpe rectangulaire':'Découpe □','Découpe point par point':'Découpe pts',
   'Outils image : pipette, pot de peinture, gomme, réglages':'Outils image','Pot de peinture intelligent':'Pot peinture',
   'Gomme carrée':'Gomme','Placement classique':'Classique','Placement déporté':'Déporté',
@@ -6261,16 +6327,23 @@ document.getElementById('btnLockAll').addEventListener('click', ()=>{
   pushHistory(); render();
   toast(anyOpen ? 'Tout est verrouillé sur cette page.' : 'Tout est déverrouillé sur cette page.');
 });
-// v2.1-127 : mode « plein soleil » (contraste renforcé, bordures noires, fond du plan plus sombre), mémorisé sur l'appareil.
-let sunMode = false;
-try{ sunMode = localStorage.getItem('ppc_sun') === '1'; }catch(e){}
-function applySunMode(){
-  document.body.classList.toggle('sun-mode', sunMode);
-  const btn = document.getElementById('btnSun'); if (btn) btn.classList.toggle('active', sunMode);
-  try{ localStorage.setItem('ppc_sun', sunMode ? '1' : '0'); }catch(e){}
+// v2.1-127 / v2.1-142 : mode d'affichage à 3 états (jour -> plein soleil -> nuit), mémorisé sur l'appareil ; l'ancien réglage
+// « ppc_sun » (plein soleil seulement) est repris.
+const THEMES = ['day', 'sun', 'night'], THEME_LABELS = { day:'Jour', sun:'Soleil', night:'Nuit' };
+let theme = 'day';
+try{ const t = localStorage.getItem('ppc_theme'); theme = THEMES.includes(t) ? t : (localStorage.getItem('ppc_sun') === '1' ? 'sun' : 'day'); }catch(e){}
+function applyTheme(){
+  document.body.classList.toggle('sun-mode', theme === 'sun');
+  document.body.classList.toggle('night-mode', theme === 'night');
+  const btn = document.getElementById('btnSun');
+  if (btn){
+    btn.classList.toggle('active', theme !== 'day');
+    const lbl = btn.querySelector('.tb-icon-label'); if (lbl) lbl.textContent = THEME_LABELS[theme];
+  }
+  try{ localStorage.setItem('ppc_theme', theme); }catch(e){}
 }
-document.getElementById('btnSun').addEventListener('click', ()=>{ sunMode = !sunMode; applySunMode(); });
-applySunMode();
+document.getElementById('btnSun').addEventListener('click', ()=>{ theme = THEMES[(THEMES.indexOf(theme)+1) % THEMES.length]; applyTheme(); toast('Affichage : '+THEME_LABELS[theme]); });
+applyTheme();
 function updateGridButton(){
   const btn = document.getElementById('btnGrid');
   const txt = gridVisible ? "Grille d'accroche activée" : "Grille d'accroche désactivée";
