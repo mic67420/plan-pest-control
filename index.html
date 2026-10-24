@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-157 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-158 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -434,6 +434,19 @@
   #sizeAllWin label.sz-all{ display:flex; align-items:center; gap:8px; }
   #sizeAllWin .sz-btns{ display:flex; justify-content:flex-end; }
   #sizeAllWin .sz-btns button{ font:inherit; padding:8px 14px; border:none; border-radius:8px; background:#1c2230; color:#fff; }
+  /* v2.1-158 : « Contrôle des numéros » (trous et doublons dans les séries E1, E2…) — même fenêtre orange sous les tuiles */
+  #ctrlWin{ position:fixed; left:50%; top:calc(var(--topbar-h, 96px) + 8px); transform:translateX(-50%); z-index:790; display:none; flex-direction:column; gap:8px;
+    width:min(340px, calc(100vw - 16px)); max-height:calc(100vh - var(--topbar-h, 96px) - 24px); box-sizing:border-box; background:#F59E0B; color:#1c2230; border-radius:14px; padding:12px; font-size:13px; font-weight:500; box-shadow:0 4px 14px rgba(0,0,0,.3); }
+  #ctrlWin.show{ display:flex; }
+  #ctrlWin .cw-list{ display:flex; flex-direction:column; gap:6px; overflow-y:auto; min-height:0; }
+  #ctrlWin .cw-row{ background:#fff; border-radius:8px; padding:8px 10px; display:flex; flex-direction:column; gap:4px; }
+  #ctrlWin .cw-head{ display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px; }
+  #ctrlWin .cw-ok{ color:#1f7a4d; font-weight:600; }
+  #ctrlWin .cw-miss{ color:#c0392b; font-weight:700; }
+  #ctrlWin .cw-dup{ color:#b35c00; font-weight:700; }
+  #ctrlWin .cw-btn, #ctrlWin .cw-btns button{ font:inherit; padding:7px 12px; border:none; border-radius:8px; background:#1c2230; color:#fff; }
+  #ctrlWin .cw-head .cw-btn{ margin-left:auto; padding:5px 10px; font-size:12px; }
+  #ctrlWin .cw-btns{ display:flex; justify-content:flex-end; }
   /* v2.1-145 : fenêtres de découpe = fenêtres flottantes ORANGE sous les tuiles (comme les autres), plus de barre sombre en bas */
   body #cutConfirmBar, body #pointCutBar{
     top:calc(var(--topbar-h, 96px) + 8px) !important; bottom:auto !important; left:50% !important; right:auto !important;
@@ -552,7 +565,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-157</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-158</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -787,11 +800,16 @@
   <label class="sz-all"><input type="checkbox" id="sizeAllPages" style="width:20px;height:20px;"> Toutes les pages</label>
   <div class="sz-btns"><button type="button" id="sizeAllClose">Fermer</button></div>
 </div>
+<div id="ctrlWin">
+  <div style="font-weight:700;">Contrôle des numéros</div>
+  <div class="cw-list" id="ctrlList"></div>
+  <div class="cw-btns"><button type="button" id="ctrlClose">Fermer</button></div>
+</div>
 <div id="bubble"></div>
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-157 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-158 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2565,8 +2583,8 @@ function refreshRotFine(pl){
   if (!pl){ rotFineEl.style.display = 'none'; rotFinePlanId = null; return; }
   // v2.1-157 : pavé de rotation et fenêtre « Tailles » partagent la même place : l'un ferme l'autre. Plan nouvellement sélectionné ->
   // « Tailles » se ferme ; « Tailles » ouverte ensuite (plan déjà sélectionné) -> le pavé se masque.
-  if (pl.id !== rotFinePlanId){ rotFinePlanId = pl.id; sizeWin.classList.remove('show'); }
-  if (sizeWin.classList.contains('show') || (activeTool && activeTool.startsWith('cut'))){ rotFineEl.style.display = 'none'; return; } // v2.1-151 : en haut comme les autres fenêtres, donc masqué pendant la découpe (fenêtres de découpe au même endroit)
+  if (pl.id !== rotFinePlanId){ rotFinePlanId = pl.id; sizeWin.classList.remove('show'); document.getElementById('ctrlWin').classList.remove('show'); }
+  if (sizeWin.classList.contains('show') || document.getElementById('ctrlWin').classList.contains('show') || (activeTool && activeTool.startsWith('cut'))){ rotFineEl.style.display = 'none'; return; } // v2.1-151 : en haut comme les autres fenêtres, donc masqué pendant la découpe (fenêtres de découpe au même endroit)
   const a = (((pl.rotation||0)%360)+360)%360;
   rotFineLabel.textContent = (Math.round(a*10)/10).toFixed(1).replace('.',',')+'°';
   rotFineEl.style.display = 'flex';
@@ -5090,6 +5108,11 @@ function refreshTypeList(){
     positionFloating(document.getElementById('deviceTypeDropdownBtn'), pop);
   });
   list.appendChild(addRow);
+  const ctrlRow = document.createElement('div');
+  ctrlRow.className = 'dd-item dd-add';
+  ctrlRow.innerHTML = '<span style="font-size:17px;line-height:1;color:#D98400;font-weight:700;width:20px;text-align:center;">?</span><span class="nm" style="font-weight:600;">Contrôle des numéros (trous, doublons)</span>';
+  ctrlRow.addEventListener('click', (e)=>{ e.stopPropagation(); openCtrlWin(); });
+  list.appendChild(ctrlRow);
   updateDropdownButton();
   syncColorPickerToSelectedType();
 }
@@ -5347,8 +5370,68 @@ function closeOtherWindows(keep){
   if (keep !== 'drawer' && keep !== 'popover') closeAllTileDrawers(); // un menu s'ouvre DEPUIS un tiroir : celui-ci reste ouvert (sinon son bouton disparaît et le menu ne sait plus où se placer)
   if (keep !== 'sizeAll'){ const w = document.getElementById('sizeAllWin'); if (w.classList.contains('show')){ w.classList.remove('show'); refreshRotFine(rotatablePlan()); } }
   if (keep !== 'settings') closeSelectionSettings();
+  if (keep !== 'ctrl') closeCtrlWin();
   if (keep !== 'nudge' && nudgeOpen){ nudgeOpen = false; syncPastilleDrawer(); }
 }
+// v2.1-158 : contrôle des séries de numéros. Pour chaque lettre (code du poste), toutes pages confondues : numéros posés,
+// numéros qui MANQUENT dans la suite 1…max (trous) et numéros en DOUBLE. « Renuméroter » remet la lettre en suite continue
+// 1…n (ordre des pages puis ordre de pose), annulable.
+function numberSeries(){
+  const by = new Map();
+  pages.forEach((pg, pi)=>pg.pastilles.forEach(p=>{
+    const m = /^(.*?)(\d+)$/.exec(p.label||''); if (!m || !m[1]) return;
+    const o = by.get(m[1]) || { code:m[1], nums:new Map(), total:0 };
+    const n = parseInt(m[2],10); o.nums.set(n, (o.nums.get(n)||0)+1); o.total++; by.set(m[1], o);
+  }));
+  return [...by.values()].sort((a,b)=>a.code.localeCompare(b.code)).map(o=>{
+    const max = Math.max(...o.nums.keys());
+    const missing = []; for (let i=1;i<=max;i++) if (!o.nums.has(i)) missing.push(i);
+    const dups = [...o.nums.entries()].filter(([,c])=>c>1).map(([n])=>n).sort((a,b)=>a-b);
+    return { code:o.code, total:o.total, max, missing, dups };
+  });
+}
+function renumberCode(code){
+  let n = 0;
+  const re = /^(.*?)(\d+)$/;
+  pages.forEach(pg=>pg.pastilles.forEach(p=>{ const m = re.exec(p.label||''); if (m && m[1]===code) p.label = code + (++n); }));
+  return n;
+}
+function closeCtrlWin(){
+  const w = document.getElementById('ctrlWin');
+  if (!w.classList.contains('show')) return;
+  w.classList.remove('show');
+  if (typeof rotatablePlan === 'function') refreshRotFine(rotatablePlan());
+}
+function fillCtrlWin(){
+  const list = document.getElementById('ctrlList'); list.innerHTML = '';
+  const series = numberSeries();
+  if (!series.length){ list.innerHTML = '<div class="cw-row">Aucune pastille numérotée.</div>'; return; }
+  const fmt = (a)=>a.join(', ');
+  series.forEach(se=>{
+    const row = document.createElement('div'); row.className = 'cw-row';
+    const bad = se.missing.length || se.dups.length;
+    row.innerHTML = '<div class="cw-head"><span>'+escapeAttr(se.code)+'</span><span style="font-weight:500;font-size:12px;">'+se.total+' pastille'+(se.total>1?'s':'')+'</span></div>'
+      + (bad ? '' : '<div class="cw-ok">✓ série complète 1 → '+se.max+'</div>')
+      + (se.missing.length ? '<div class="cw-miss">Manque : '+fmt(se.missing.map(n=>se.code+n))+'</div>' : '')
+      + (se.dups.length ? '<div class="cw-dup">En double : '+fmt(se.dups.map(n=>se.code+n))+'</div>' : '');
+    if (bad){
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'cw-btn'; b.textContent = 'Renuméroter 1 → '+se.total;
+      b.addEventListener('click', async ()=>{
+        if (!(await askYesNo('Renuméroter toutes les pastilles « '+se.code+' » de 1 à '+se.total+' ?'))) return;
+        renumberCode(se.code); pushHistory(); resetContentNodeCaches(); render(); fillCtrlWin();
+      });
+      row.querySelector('.cw-head').appendChild(b);
+    }
+    list.appendChild(row);
+  });
+}
+function openCtrlWin(){
+  closeOtherWindows('ctrl'); closeAllPopovers();
+  fillCtrlWin();
+  document.getElementById('ctrlWin').classList.add('show');
+  if (rotFineEl) rotFineEl.style.display = 'none';
+}
+document.getElementById('ctrlClose').addEventListener('click', closeCtrlWin);
 function bindPopover(triggerId, popId){
   const trigger = document.getElementById(triggerId);
   const pop = document.getElementById(popId);

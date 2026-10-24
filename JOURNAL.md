@@ -1365,4 +1365,9 @@ v2.1-156 — Audit complet
 v2.1-157 — Pavé de rotation et fenêtre « Tailles » : l'un ferme l'autre
   Cause : les deux s'affichent au même endroit (sous les tuiles) et pouvaient se superposer.
   Correctif : sélectionner un plan ferme « Tailles » ; ouvrir « Tailles » masque le pavé ; le pavé revient quand « Tailles » se ferme.
+
+v2.1-158 — Contrôle des numéros (trous et doublons)
+  Besoin : repérer les trous dans les séries (E1, E2, E4 -> E3 manque) et les doublons.
+  Réalisation : ligne « Contrôle des numéros » au bas de la liste des postes -> fenêtre orange sous les tuiles : par lettre,
+  toutes pages confondues, « Manque : E3 », « En double : E4 » ou « série complète » ; bouton « Renuméroter 1 -> n » (confirmation, annulable).
 ```
