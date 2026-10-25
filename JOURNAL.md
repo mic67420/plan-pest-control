@@ -1493,4 +1493,12 @@ v2.1-176 — Crayon du poste : aperçu = forme réelle, couleur par la forme, tr
   (shapeSvgInner, partagé avec les listes) ; le sélecteur de couleur transparent recouvre la forme (toucher la forme = changer la couleur) ;
   taille de la forme de 24 à 64 px selon le curseur (rayon 6 à 40), ligne à hauteur fixe pour éviter les sauts ; numéro dans l'aperçu (lettres plus bas
   dans le triangle).
+
+v2.1-177 — Sélection de dessins superposés ; contour bleu de la sélection
+  Retour de Mic : rectangle sélectionné mais poignées pas sur ses angles. Enquête : 4 scénarios au doigt (tracé, sélection au curseur rouge, glisser
+  poignées, déplacer, tourner) et 3 parcours aléatoires de 70 actions : poignées toujours exactes (écart 0). Cause la plus probable : un AUTRE dessin
+  (rempli, ou blanc donc invisible) posé au-dessus était choisi à la place du rectangle visé (l'intérieur d'un dessin rempli comptait comme touché).
+  Correctif : shapeAtPoint() choisit le CONTOUR le plus proche de la pointe (à égalité le plus haut) ; l'intérieur d'un dessin rempli ne compte qu'en
+  dernier recours ; le toucher direct d'un dessin utilise la même règle. Contour bleu pointillé de la boîte du dessin sélectionné (reste affiché s'il est
+  verrouillé) : on voit toujours QUEL dessin est choisi, même blanc.
 ```

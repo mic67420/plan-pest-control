@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-176 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-177 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -627,7 +627,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-176</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-177</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -895,7 +895,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-176 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-177 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2143,7 +2143,12 @@ function renderShapes(){
     if (!node){
       node = new Konva.Group({ id:sh.id, name:'shape', draggable:true });
       node.add(makeShapeBody(sh, false), makeShapeBody(sh, true));
-      node.on('click tap', ()=>{ if (isDrawTool(activeTool)) return; selectNode(node, sh.id); });
+      node.on('click tap', ()=>{
+        if (isDrawTool(activeTool)) return;
+        const p = stagePointer(), hit = p ? shapeAtPoint(p) : null; // même règle que le curseur rouge : le contour le plus proche gagne (v2.1-177)
+        const target = hit || sh;
+        selectNode(shapeNodes.get(target.id) || node, target.id);
+      });
       node.on('dragmove', ()=>{ updateShapeHandles(); updateRotateIcons(); });
       node.on('dragend', ()=>{
         const ss = model.shapes.find(x=>x.id===sh.id); if (!ss) return;
@@ -2162,8 +2167,10 @@ function renderShapes(){
 }
 // Poignées sur les ANGLES du dessin sélectionné (4 pour rectangle / ellipse : les coins de sa boîte, même tournée ; 2 extrémités pour une
 // ligne / flèche). Petits points, zone de saisie de 32 px. Glisser une poignée = redimensionner, l'angle opposé reste fixe à l'écran.
+// v2.1-177 : contour bleu pointillé de la boîte du dessin sélectionné (on voit QUEL dessin est choisi, même s'il est blanc ou transparent).
+const shapeOutline = new Konva.Line({ visible:false, listening:false, stroke:'#0E6FA8', strokeWidth:1.5, dash:[6,4], closed:true });
 const shapeHandles = new Konva.Group({ visible:false });
-uiLayer.add(shapeHandles);
+uiLayer.add(shapeOutline, shapeHandles);
 (function(){
   [0,1,2,3].forEach(k=>{
     const h = new Konva.Group({ draggable:true, name:'shape-handle' });
@@ -2203,9 +2210,13 @@ uiLayer.add(shapeHandles);
 function selectedShape(){ return selectedId ? (model.shapes||[]).find(x=>x.id===selectedId) || null : null; }
 function updateShapeHandles(skip){
   const sh = selectedShape(), node = sh && shapeNodes.get(sh.id);
-  if (!sh || !node || sh.locked || isDrawTool(activeTool)){ if (shapeHandles.visible()){ shapeHandles.visible(false); uiLayer.batchDraw(); } return; }
+  if (!sh || !node || isDrawTool(activeTool)){ if (shapeHandles.visible() || shapeOutline.visible()){ shapeHandles.visible(false); shapeOutline.visible(false); uiLayer.batchDraw(); } return; }
+  if (sh.locked){ if (shapeHandles.visible()){ shapeHandles.visible(false); uiLayer.batchDraw(); } } // verrouillé : pas de poignées, mais le contour reste
   const g = { x:node.x(), y:node.y(), rotation:node.rotation() }; // pendant le glissement du dessin, les poignées le suivent
   const corners = shapeCornersLocal(sh);
+  shapeOutline.points(corners.flatMap(c=>{ const w = shapeToWorld(g, c[0], c[1]); return [w.x, w.y]; }));
+  shapeOutline.setAttrs({ closed: corners.length > 2, strokeWidth: 1.5/zoom, dash:[6/zoom, 4/zoom], visible:true }); shapeOutline.moveToTop();
+  if (sh.locked){ uiLayer.batchDraw(); return; }
   shapeHandles.getChildren().forEach((h, k)=>{
     if (k >= corners.length){ h.visible(false); return; }
     h.visible(true);
@@ -2219,27 +2230,31 @@ function updateShapeHandles(skip){
 // compte si le dessin est rempli.
 function shapeAtPoint(pt){
   const tol = Math.max(14/zoom, 2);
-  for (let i = (model.shapes||[]).length - 1; i >= 0; i--){
-    const sh = model.shapes[i];
+  const list = model.shapes || [];
+  let best = null, bestD = Infinity, interior = null;
+  for (let i = list.length - 1; i >= 0; i--){ // du plus haut au plus bas
+    const sh = list[i];
     const r = -(sh.rotation||0)*Math.PI/180, c = Math.cos(r), s = Math.sin(r);
     const dx = pt.x - sh.x, dy = pt.y - sh.y;
     const lx = dx*c - dy*s, ly = dx*s + dy*c; // point dans le repère du dessin
     const t = tol + shapeStroke(sh)/2;
+    let edge, inside = false;
     if (sh.kind === 'line' || sh.kind === 'arrow'){
-      const px = Math.max(0, Math.min(sh.width, lx));
-      if (Math.hypot(lx-px, ly) <= t) return sh;
+      edge = Math.hypot(lx - Math.max(0, Math.min(sh.width, lx)), ly);
     } else if (sh.kind === 'rect'){
-      const inside = lx >= 0 && lx <= sh.width && ly >= 0 && ly <= sh.height;
-      const nearEdge = lx >= -t && lx <= sh.width+t && ly >= -t && ly <= sh.height+t && !(lx > t && lx < sh.width-t && ly > t && ly < sh.height-t);
-      if ((sh.fill && inside) || nearEdge) return sh;
-    } else if (sh.kind === 'ellipse'){
-      const a = sh.width/2, b = sh.height/2, ex = (lx-a), ey = (ly-b);
-      const d = Math.hypot(ex/Math.max(a,1), ey/Math.max(b,1)); // 1 = sur l'ellipse
-      const edge = Math.abs(d-1) * Math.min(Math.max(a,1), Math.max(b,1)) <= t;
-      if ((sh.fill && d <= 1) || edge) return sh;
+      const ox = Math.max(-lx, 0, lx - sh.width), oy = Math.max(-ly, 0, ly - sh.height);
+      inside = ox === 0 && oy === 0;
+      edge = inside ? Math.min(lx, sh.width - lx, ly, sh.height - ly) : Math.hypot(ox, oy);
+    } else {
+      const a = Math.max(sh.width/2, 1), b = Math.max(sh.height/2, 1), d = Math.hypot((lx-a)/a, (ly-b)/b); // 1 = sur l'ellipse
+      inside = d <= 1; edge = Math.abs(d-1) * Math.min(a, b);
     }
+    // v2.1-177 : on vise un CONTOUR : le dessin dont le trait est le plus proche de la pointe gagne (à égalité, le plus haut) ; l'intérieur d'un dessin
+    // rempli ne compte qu'en dernier recours. Avant, un grand dessin rempli (ou blanc, donc invisible) posé par-dessus volait la sélection.
+    if (edge <= t && edge < bestD){ best = sh; bestD = edge; }
+    if (sh.fill && inside && !interior) interior = sh;
   }
-  return null;
+  return best || interior;
 }
 // Création d'un dessin à partir des 2 points validés.
 function addShapeFromTool(tool, p1, p2){

@@ -333,6 +333,20 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       closeAllPopovers(); editingTypeId = null;
       return star && small < big && big - small > 20 && picker && tri;
     }), 'crayon : aperçu = forme réelle (étoile), taille suit le curseur, la forme choisit la couleur, étiquette du triangle plus bas');
+    // v2.1-177 : sélection de dessins superposés : le contour le plus proche gagne (un grand dessin rempli au-dessus ne vole plus la sélection), contour bleu de la sélection
+    ok(await pg.evaluate(()=>{
+      closeOtherWindows(''); resetRemoteGesture();
+      model.shapes = [
+        { id:'dessous', kind:'rect', x:100, y:100, width:200, height:150, rotation:0, color:'#000000', sw:4, dash:false, fill:false, locked:false },
+        { id:'dessus', kind:'rect', x:100, y:100, width:300, height:260, rotation:0, color:'#ffffff', sw:4, dash:false, fill:true, locked:false } ];
+      render();
+      const onEdge = shapeAtPoint({ x:200, y:250 });            // sur le bord bas du petit rectangle, DANS le grand (rempli)
+      const onBig = shapeAtPoint({ x:400, y:230 });             // sur le bord droit du grand
+      const inside = shapeAtPoint({ x:250, y:200 });            // intérieur du grand rempli, loin de tout contour
+      const outline = (()=>{ selectNode(shapeNodes.get('dessous'), 'dessous'); return shapeOutline.visible() && shapeOutline.points().length === 8; })();
+      model.shapes = []; render();
+      return onEdge && onEdge.id === 'dessous' && onBig && onBig.id === 'dessus' && inside && inside.id === 'dessus' && outline && !shapeOutline.visible();
+    }), 'dessins superposés : le contour visé gagne, contour bleu de la sélection');
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');
