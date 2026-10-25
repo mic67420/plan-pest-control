@@ -238,6 +238,25 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       ok(await pg.evaluate(()=>{ addBlankPage(0); return true; }) && await pg.evaluate(async()=>{ await new Promise(r=>setTimeout(r,300)); switchToPage(1); const r1 = remoteCursor === null && remoteAnchor === null; switchToPage(0); return r1; }), 'pastille déportée : changer de page abandonne le placement en cours');
       await pg.evaluate(()=>{ resetRemoteGesture(); while (pages.length>1) pages.pop(); currentPageIndex = 0; model = pages[0]; model.pastilles = []; model.anchors = []; model.lines = []; resetContentNodeCaches(); onTileChosen('plan'); render(); updatePageIndicator(); });
     }
+    // v2.1-168 : dessins simples (rectangle, ellipse, ligne, flèche)
+    ok(await pg.evaluate(async()=>{
+      resetRemoteGesture(); closeOtherWindows(''); delete model.shapes; render(); // document d'avant les dessins : aucune erreur
+      const a = Array.isArray(model.shapes) && model.shapes.length === 0;
+      drawStyle.color = '#D6493E'; drawStyle.width = 4; drawStyle.dash = true; drawStyle.fill = true;
+      const made = ['draw-rect','draw-ellipse','draw-line','draw-arrow'].map((t,i)=>addShapeFromTool(t, { x:100, y:100+i*60 }, { x:260, y:140+i*60 }));
+      const b = made.every(Boolean) && model.shapes.length === 4 && shapeNodes.size === 4 && model.shapes.map(x=>x.kind).join() === 'rect,ellipse,line,arrow';
+      const tiny = addShapeFromTool('draw-rect', { x:5, y:5 }, { x:7, y:300 }) === null; // trop fin : refusé
+      const sh = model.shapes[0]; selectNode(shapeNodes.get(sh.id), sh.id);
+      const c = shapeHandles.visible() && transformer.nodes().length === 0 && lockIndicatorGroup.visible();
+      sh.locked = true; render(); const d = !shapeHandles.visible(); sh.locked = false; render();
+      document.getElementById('selDelete').click(); const e = model.shapes.length === 3 && !shapeNodes.has(sh.id);
+      undo(); await new Promise(r=>setTimeout(r,400)); const f = model.shapes.length === 4;
+      const ids = JSON.stringify(model.shapes.map(x=>x.kind)); addBlankPage(0); await new Promise(r=>setTimeout(r,300)); switchToPage(1); const g = (model.shapes||[]).length === 0; switchToPage(0); pages.pop(); currentPageIndex = 0; model = pages[0]; resetContentNodeCaches(); render();
+      const h = JSON.stringify(model.shapes.map(x=>x.kind)) === ids;
+      model.shapes = []; render();
+      return a && b && tiny && c && d && e && f && g && h;
+    }), 'dessins : création des 4 formes, poignées, verrou, suppression, annuler, une page à part, anciens documents');
+    ok(await pg.evaluate(()=>{ onTileChosen('plan'); openDrawWin(); const a = isDrawTool(activeTool) && document.getElementById('drawWin').classList.contains('show'); closeOtherWindows('sizeAll'); const b = !document.getElementById('drawWin').classList.contains('show') && !isDrawTool(activeTool); return a && b; }), 'fenêtre Dessin : ouvre l\'outil de tracé, se referme avec les autres fenêtres');
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

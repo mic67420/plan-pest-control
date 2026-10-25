@@ -1431,4 +1431,14 @@ v2.1-167 — Icônes : contours noirs purs et plus épais
   Correctif : règle CSS unique sur tous les svg.icon (tuiles, tiroirs, menus) : remplissages et traits sombres -> #000 avec un trait de
   0,7 px à l'écran (vector-effect non-scaling-stroke, même épaisseur quelle que soit la taille du dessin) ; Annuler / Rétablir inactifs
   35 % -> 55 %. Les couleurs vives des icônes ne changent pas. Contrôlé en jour et en nuit sur les 6 tiroirs.
+
+v2.1-168 — Dessins simples (rectangle, ellipse, ligne, flèche)
+  Besoin (Mic) : outils de dessin de base dans la tuile Plan, fenêtre orange minimaliste en haut, tracé « comme les ciseaux ».
+  Réalisation : icône « Dessin » dans le tiroir Plan -> fenêtre orange (4 outils, 7 couleurs + sélecteur, 3 épaisseurs, pointillé, remplissage
+  semi-transparent, consigne affichée dans la fenêtre). Tracé au doigt avec le curseur déporté des ciseaux (1er point validé, 2e point =
+  création, le curseur reste pour enchaîner) ; à la souris : glisser. Données : model.shapes[] par page (cloneModel, historique, sauvegarde auto,
+  .json, anciens documents sans dessins OK). Un dessin se touche pour être sélectionné (outil de tracé désactivé), se déplace en glissant,
+  se redimensionne par ses 2 poignées (jamais exportées), se verrouille et se supprime comme un logo ; ses réglages suivent la fenêtre.
+  Calque sous les lignes de raccord et les pastilles, exporté sur toutes les pages (PDF / PPTX / PNG / impression).
+  Pendant un tracé, les dessins existants ne captent pas le doigt (on peut tracer par-dessus).
 ```

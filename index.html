@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-167 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-168 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -466,6 +466,23 @@
   #sizeAllWin .sz-btns{ display:flex; justify-content:flex-end; }
   #sizeAllWin .sz-btns button{ font:inherit; padding:8px 14px; border:none; border-radius:8px; background:#1c2230; color:#fff; }
   /* v2.1-158 : « Contrôle des numéros » (trous et doublons dans les séries E1, E2…) — même fenêtre orange sous les tuiles */
+  /* v2.1-168 : fenêtre « Dessin » : orange, minimaliste, sous les tuiles */
+  #drawWin{ position:fixed; left:50%; top:calc(var(--topbar-h, 96px) + 8px); transform:translateX(-50%); z-index:790; display:none; flex-direction:column; gap:8px;
+    width:min(340px, calc(100vw - 16px)); box-sizing:border-box; background:#F59E0B; color:#1c2230; border-radius:14px; padding:10px; box-shadow:0 4px 14px rgba(0,0,0,.3); }
+  #drawWin.show{ display:flex; }
+  #drawWin .dw-hint{ font-size:12.5px; font-weight:600; line-height:1.25; padding:0 2px; min-height:16px; }
+  #drawWin .dw-row{ display:flex; align-items:center; gap:6px; }
+  #drawWin button{ flex:1 1 0; min-width:0; height:42px; border:none; border-radius:10px; background:#fff7e6; color:#1c2230; display:flex; align-items:center; justify-content:center; font:inherit; font-size:16px; padding:0; }
+  #drawWin button.active{ background:#1c2230; color:#fff; }
+  #drawWin button.active svg *{ stroke:#fff; } #drawWin button.active svg path[fill="#000"]{ fill:#fff; }
+  #drawWin .dw-x{ flex:0 0 42px; }
+  #drawWin .dw-colors button{ height:34px; border:3px solid #fff7e6; }
+  #drawWin .dw-colors button.active{ border-color:#1c2230; }
+  #drawWin .dw-colors input[type=color]{ flex:0 0 42px; height:34px; border:none; border-radius:10px; padding:0; background:#fff7e6; }
+  #drawWin .dw-w{ display:block; width:60%; background:#1c2230; border-radius:2px; }
+  #drawWin button.active .dw-w{ background:#fff; }
+  #drawWin .dw-dash{ letter-spacing:1px; font-weight:700; }
+  #drawWin .dw-fill{ width:22px; height:16px; border:2.5px solid currentColor; border-radius:3px; background:repeating-linear-gradient(45deg, currentColor 0 2px, transparent 2px 6px); opacity:.9; }
   #ctrlWin{ position:fixed; left:50%; top:calc(var(--topbar-h, 96px) + 8px); transform:translateX(-50%); z-index:790; display:none; flex-direction:column; gap:8px;
     width:min(340px, calc(100vw - 16px)); max-height:calc(100vh - var(--topbar-h, 96px) - 24px); max-height:calc(100dvh - var(--topbar-h, 96px) - 24px); box-sizing:border-box; background:#F59E0B; color:#1c2230; border-radius:14px; padding:12px; font-size:13px; font-weight:500; box-shadow:0 4px 14px rgba(0,0,0,.3); }
   #ctrlWin.show{ display:flex; }
@@ -596,7 +613,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-167</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-168</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -672,6 +689,7 @@
     <button class="tb-icon" id="toolLockPlan" title="Verrouiller le plan"><svg class="icon lock-closed" xmlns="http://www.w3.org/2000/svg" viewBox="856.2 687.6 100.9 100.9"><path fill="#222331" d="M884.7 731.1C884.6 725.9 884.3 720.7 884.8 715.4C886.3 700.4 903.2 691.3 916.7 698.1C924.4 702 928.7 709.4 928.8 717.9C928.9 722.3 928.8 726.7 928.8 731.1C935.2 731.2 939.2 730.4 939.2 737.7C939.2 737.7 939.2 739.7 939.2 739.7C939.1 752.5 939.5 765.2 939.4 778.0C939.4 783.2 936.8 784.5 932 784.6C915 784.8 898.1 784.7 881.2 784.7C876.3 784.7 873.9 783.6 873.9 778.5C873.9 778.4 873.8 777.2 873.8 777.2C873.9 764.4 873.7 751.5 873.8 738.7C873.9 730.7 876.8 731.3 884.7 731.1Z"/><path fill="#EF4F45" d="M877.7 734.9L935.3 734.8C935.5 736.6 935.6 738.4 935.6 740.2C935.8 752.1 935.6 764 935.7 776.0C935.8 781.4 934.9 781.3 929.5 781.3C913.6 781.4 897.8 781.3 881.9 781.0C877.2 780.9 877.5 780 877.5 775.5C877.5 772.5 877.6 769.6 877.6 766.7C877.6 756.1 877.2 745.5 877.7 734.9Z"/><path fill="#222331" d="M903.1 759.7C902.3 758.7 901.5 757.7 900.8 756.8C895.6 750.2 903.4 740.6 910.6 745.3C915.3 748.4 915 753.3 911.8 757.3C911.3 758 910.7 758.5 910.2 759.1L910.1 771.9L903.2 771.8L903.1 759.7Z"/><path fill="white" d="M888.3 731.1C888.2 726.9 888.2 722.7 888.2 718.4C888.2 718.4 888.2 717.2 888.2 717.2C888.6 705.5 900.9 696.6 912.1 700.1C920.2 702.7 925.1 709.7 925.2 717.9C925.2 722.3 925.2 726.6 925.2 730.9L888.3 731.1Z"/></svg><svg class="icon lock-open" xmlns="http://www.w3.org/2000/svg" viewBox="163.7 132.8 275.1 275.1"><path fill="#25284F" d="M229.9 239.9C229.9 233.1 229.8 226.3 229.9 219.5C230.1 201.2 237.1 184.7 249.7 171.6C272.1 148.4 308.2 142.9 336.5 158.6C358.9 171 372.2 193.6 372.7 219.2C372.9 231.3 372.8 243.3 372.9 255.4C373.8 255.4 374.8 255.4 375.7 255.5C392.5 256 403.8 269.2 403.7 285.7C403.7 297.2 403.8 308.7 403.8 320.2C403.7 336 404 351.9 403.8 367.7C403.7 371.4 403.3 374.8 401.9 378.2C396.9 390.2 386.7 397.3 373.7 397.4C348.5 397.6 323.2 397.3 298 397.4C275.4 397.4 252.8 397.6 230.2 397.4C230.2 397.4 228.7 397.3 228.7 397.3C210.9 396.9 198.9 384.8 198.6 367.0C198.6 366.9 198.5 365 198.5 365.0C198.5 338.8 198.3 312.6 198.5 286.5C198.6 268.3 210.9 255.9 229.5 255.6C229.5 255.6 231.7 255.5 231.7 255.5C275.7 255.3 319.6 255.3 363.6 255.5C363.6 243.8 363.6 232.1 363.5 220.5C363.3 209.5 360.6 198.3 354.7 189.0C345 173.5 329.4 163 311.4 160.0C274.5 154 239.4 182.2 239.2 220C239.1 226.6 239.2 233.3 239.2 239.9L229.9 239.9Z"/><path fill="#FC3836" d="M304.7 264.3C304.7 264.3 311.2 264.3 311.2 264.3C332.2 264.3 353.2 264.1 374.2 264.3C377.1 264.4 379.5 264.8 382.2 265.9C392.6 270.4 394.5 278 394.6 288.5C394.7 293.4 394.7 298.3 394.7 303.2C394.8 323.6 395.1 344.1 394.8 364.5C394.8 364.5 394.8 365.9 394.8 366.0C394.4 378.4 386.9 387.9 374 388.1C373.9 388.1 372.5 388.1 372.5 388.1C342.2 388.3 311.9 388.1 281.7 388.2C264.3 388.2 246.9 388.2 229.4 388.0C225.7 388 222.1 387.6 218.8 385.8C210.6 381.4 207.7 374.6 207.6 365.7C207.6 365.7 207.6 362.7 207.6 362.7C207.5 337.6 207.3 312.5 207.5 287.5C207.6 273.1 215.9 264.7 230.2 264.4C254.8 264 280.3 264.3 304.7 264.3Z"/></svg></button>
     <button class="tb-icon" id="toolCutRect" title="Découpe rectangulaire"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="63 849.6 105.8 105.8"><path fill="#222331" d="M126.4 911.7C124.7 907.3 123 902.8 121.5 898.2C121.2 897.2 120.2 895.3 120.9 894.2C122.3 891.9 123.8 894.5 124.4 895.7C127.5 901.7 131 907.6 133.3 914.0C136.3 914.8 139.1 916 141.9 917.3C142.2 917.2 142.3 917 142.4 916.7C144.9 909.9 153.7 909 157.1 915.1C161.7 923.5 149.1 929.6 143.7 923.1C141.1 920.1 142.4 921.9 138.7 921.0C137.2 920.7 135.1 921 135.7 923.1C136.7 926.4 137.2 926.3 139.9 928.6C144.7 932.5 144 940.3 137.4 941.8C129.1 943.9 125.8 934.1 130.2 928.3C131.2 927 133.5 927.8 132 926.4C130.9 925.4 130.8 925.2 130.5 923.7C130.3 922.5 130.1 921.4 129.9 920.2C123.6 917.6 117.4 914.9 111.2 912.0C110.3 911.6 105.6 909.9 105.9 908.2C106.1 906.8 107.2 906.4 108.4 906.8C114.4 908.4 120.4 910.1 126.4 911.7Z"/><path fill="white" d="M149.7 914.3C151.3 914.1 152.8 914.8 153.7 916.1C154.6 917.4 154.7 919.1 154 920.5C153.2 921.9 151.8 922.8 150.2 922.8C147.9 922.8 146.1 921 145.9 918.8C145.8 916.5 147.4 914.5 149.7 914.3Z"/><path fill="white" d="M135.2 930.7C137.4 930.6 139.2 932.2 139.3 934.3C139.4 936.5 137.8 938.3 135.7 938.5C134.3 938.6 132.9 937.9 132.2 936.7C131.4 935.6 131.3 934.1 131.9 932.8C132.6 931.6 133.8 930.7 135.2 930.7Z"/><path fill="#222331" d="M77.7 853.6C78.3 853.7 78.9 853.7 79.5 853.9C80.6 854.3 81.1 857.5 77.9 857.3C74.2 857 76.1 861.1 74.2 861.6C70 862.5 70.9 853.5 77.7 853.6Z"/><path fill="#222331" d="M96.7 853.9C97.3 853.9 97.9 853.9 98.5 853.9C100.4 854 100.4 857.4 98 857.4C95.5 857.4 93.1 857.4 90.7 857.4C90.2 857.4 89.6 857.5 89.2 857.4C88 857.1 87.6 854 89.9 853.9C91 853.9 92.1 854 93.2 853.9C93.2 853.9 96.7 853.9 96.7 853.9Z"/><path fill="#222331" d="M116.2 853.9C116.2 853.9 117.2 853.9 117.2 853.9C118.7 853.9 120.8 855.7 119.1 857.0C118 857.9 112.4 857.5 111.7 857.5C111 857.5 110.2 857.5 109.4 857.4C107.8 857.2 107.6 854 109.9 853.9C112 853.9 114.1 853.9 116.2 853.9Z"/><path fill="#222331" d="M149.7 853.8C150.2 853.8 150.7 853.8 151.2 853.8C155.1 854.1 157.3 861.4 153.2 861.3C152.1 861.3 152 860.3 151.8 859.5C150.9 855.3 148.2 858.3 147.1 856.4C145.7 853.9 148 853.8 149.7 853.8Z"/><path fill="#222331" d="M137.7 854.0C138.4 854.1 138.6 854.6 138.6 855.2C138.7 856.8 138.3 857.5 136.7 857.4C134.4 857.4 132 857.4 129.7 857.4C129 857.4 127.8 857.6 127.6 856.7C127.2 855 127.5 854 129.2 854.0C131 854 136.4 853.7 137.7 854.0Z"/><path fill="#222331" d="M74.2 941.5C75 941.5 75.1 942 75.2 942.7C75.6 946.7 74.4 946.1 77.7 948.0C78.3 948.3 79.6 949.7 78.7 950.5C78.3 950.8 76.7 951 76.2 950.9C71.4 950.4 70 941 74.2 941.5Z"/><path fill="#222331" d="M128.2 944.8C129.3 944.9 129.4 945.9 129.2 946.8C128.7 950.3 127.4 950.7 124.2 950.6C123.3 950.6 121.1 950.9 120.5 949.8C119.2 947.3 123 947.4 124.2 947.4C127.2 947.3 124.8 944.4 128.2 944.8Z"/><path fill="#222331" d="M73.7 868.3C75.1 868.2 75.4 870.3 75.4 871.7C75.4 873.2 75.4 874.7 75.4 876.2C75.5 878.1 75 878.6 73.2 878.6C73.2 878.6 72.9 878.5 72.9 878.5C71.7 878.3 72.1 874.5 72.1 873.7C72 871.9 70.9 868.5 73.7 868.3Z"/><path fill="#222331" d="M74.2 904.8C74.4 904.8 74.8 904.9 75 905.0C75.7 905.7 75.2 912.3 75.3 913.2C75.3 914.2 75.4 915 74.2 915.1C72.8 915.3 72.1 914.6 72.1 913.2C72.2 911.3 72.2 909.4 72.2 907.4C72.2 905.7 72 904.5 74.2 904.8Z"/><path fill="#222331" d="M153.7 868.4C154.1 868.4 154.6 868.4 154.9 868.6C155.8 869.4 155.4 875.9 155.2 877.1C155 878.2 154.7 878.4 153.7 878.4C152.6 878.4 152.1 878.1 152.1 876.7C152.1 874.6 152.1 872.4 152.1 870.2C152.1 868.8 152.2 868.4 153.7 868.4Z"/><path fill="#222331" d="M74.2 887.0C74.5 887 74.8 887 75 887.2C75.6 887.9 75.5 895.4 75.2 896.1C74.8 897 73.1 897 72.7 896.8C72.2 896.5 72.2 895.8 72.2 895.2C72.1 893.4 72.2 891.5 72.2 889.7C72.1 887.9 72.3 886.9 74.2 887.0Z"/><path fill="#222331" d="M74.2 923.4C74.2 923.4 74.5 923.4 74.5 923.4C75.8 923.7 75.1 929.1 75.1 929.5C75.1 929.9 75.6 933.4 74.2 933.5C72.9 933.6 72.1 933 72.1 931.7C72.1 929.6 72.1 927.4 72.1 925.2C72.1 923.7 72.4 923.1 74.2 923.4Z"/><path fill="#222331" d="M153.7 886.1C154.9 886.2 155.3 886.2 155.3 887.9C155.2 889.9 155.4 892 155.1 894.0C155 895.1 153.8 895.9 152.7 895.3C152.1 895 152 894.2 152 893.5C152 891.7 151.9 889.9 151.9 888.2C151.9 886.7 152.3 886 153.7 886.1Z"/><path fill="#222331" d="M89.2 947.5C90 947.5 94.2 946.9 94.9 948.2C96.1 950.6 93.6 950.8 92 950.8C91.9 950.8 88.2 950.8 88.2 950.8C87.3 950.8 86.2 950.9 85.9 949.8C85.1 947.3 87.7 947.5 89.2 947.5Z"/><path fill="#222331" d="M104.2 947.5C105.5 947.4 107.9 947.6 109 947.6C110 947.6 111.1 947.4 111.9 948.2C115.1 951.5 106.4 950.6 106.2 950.6C106.2 950.6 105.4 950.7 105.4 950.7C102.4 950.7 103.3 947.6 104.2 947.5Z"/></svg></button>
     <button class="tb-icon" id="toolCutPoint" title="Découpe point par point"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="225.5 850.4 105.8 105.8"><path fill="#222331" d="M289.1 912.1C287.1 907.2 285.4 902.2 283.7 897.1C283.3 896.1 282.4 894.4 283.7 893.7C285.2 892.7 285.9 893.5 286.6 894.9C287.8 897 288.9 899.3 290.1 901.4C292.4 905.8 295 910 297.4 914.4L304.4 916.8C308 912.1 312 907.8 317.6 912.8C326.9 921 312.9 931.4 306.3 922.8C303.8 919.5 305.2 921.5 302.7 921.7C300.8 921.8 298.6 919.3 299.4 923.0C299.7 924.2 298.7 926.1 300 926.8C302.3 928.2 304.2 929.3 305.3 931.9C309.2 941.7 292.7 947.4 291 936.0C290.3 931 292.3 929.3 296.1 926.9L291.9 920.4C289.8 919.4 288 918.5 285.9 917.4C281 914.9 275.9 913 270.9 910.6C269.9 910.2 268.6 909.6 268.4 908.5C267.9 905.9 270.6 906.6 272 907.0C277.7 908.5 283.5 910.2 289.1 912.1Z"/><path fill="white" d="M312.7 914.3C314.2 914.2 315.7 915 316.5 916.3C317.3 917.6 317.3 919.2 316.5 920.5C315.7 921.8 314.2 922.6 312.7 922.5C310.5 922.3 308.9 920.6 308.9 918.4C308.9 916.2 310.5 914.4 312.7 914.3Z"/><path fill="white" d="M298.7 930.5C300.8 930.6 302.5 932.4 302.5 934.5C302.5 936.7 300.8 938.4 298.7 938.6C297.2 938.6 295.8 937.9 295 936.6C294.2 935.3 294.2 933.7 295 932.4C295.8 931.2 297.2 930.4 298.7 930.5Z"/><path fill="#222331" d="M312.2 902.2C312 902.3 311.9 902.3 311.7 902.4C310 903.2 309.8 901.6 309.1 900.3C307.9 897.9 307.4 897 305.2 895.7C303.4 894.6 303.8 887.8 305.7 887.6C309 887.3 307.3 890.5 307.6 892.3C308.8 894.1 310 895.9 311.2 897.7C311.6 898.5 313.8 901.6 312.2 902.2Z"/><path fill="#222331" d="M236.9 951.8C236.9 949 237 946.2 237 943.4C237.1 942 238.4 941.3 239.7 941.9C240.4 942.2 240.4 942.8 240.4 943.5C240.4 944.5 240.4 945.6 240.3 946.7C240.3 950 242.8 947.6 243.5 948.9C244.6 951.4 243 951.9 241 951.9C239.6 951.9 238.3 951.8 236.9 951.8Z"/><path fill="#222331" d="M246.2 907.0C247 907 249 908.4 249.2 909.1C249.4 910 243.1 917.6 242.7 917.7C242.5 917.7 242.2 917.5 242.1 917.4C240.3 915.8 239.7 915.5 241.2 913.6C241.8 912.8 242.5 912 243.1 911.3C243.7 910.5 245.2 907 246.2 907.0Z"/><path fill="#222331" d="M308.7 868.4C311.3 868.5 311.4 868.6 311.1 870.9C310.9 873 310.6 875.1 310.3 877.2C310.1 879.3 309.6 880.6 307.2 880.3C306 880.1 306.8 876.8 306.8 876.5C307.2 874 307.6 871.6 307.9 869.2C308 868.8 308.2 868.4 308.7 868.4Z"/><path fill="#222331" d="M289.2 854.9C289.5 855 289.7 855.1 289.9 855.4C291 858.1 288.8 858 286.9 858.2C285.9 858.3 280.2 859.1 278.7 858.9C277.5 858.8 277.6 856.7 278 855.9C278.4 855.3 280.1 855.4 280.7 855.3C283.4 855.2 286 855 288.7 854.9C288.7 854.9 289.2 854.9 289.2 854.9Z"/><path fill="#222331" d="M268.7 856.5C268.7 856.5 269.2 856.5 269.2 856.5C270.3 856.6 270.5 858.2 269.9 858.9C268.9 860 260.9 860.4 259.2 860.4C259.2 860.4 258.7 860.4 258.7 860.4C256.9 860.5 256.8 858.4 257.8 857.7C258.6 857 267.3 856.5 268.7 856.5Z"/><path fill="#222331" d="M237.2 874.7C237.4 874.7 237.8 874.9 238 874.9C240.3 876.1 239.6 876.6 238.2 878.6C236.9 880.4 235.6 882.3 234.2 884.1C233.8 884.7 233.4 885.5 232.7 885.5C232.6 885.5 232.3 885.4 232.3 885.3C229.8 884.3 231.2 882.2 232.3 880.8C233.5 879.2 234.7 877.6 236 876.0C236.4 875.5 236.6 874.9 237.2 874.7Z"/><path fill="#222331" d="M249.7 859.8C251.4 859.5 251.6 861.9 250.5 863.2C249.2 864.9 247.9 866.6 246.5 868.2C246 868.8 245.5 869.7 244.7 869.7C243.9 869.8 241.6 868.3 243 866.7C243.7 865.9 248.1 860 249.7 859.8Z"/><path fill="#222331" d="M237.7 922.4C239.6 922.3 240.4 922.1 240.4 923.9C240.4 926 240.4 928.1 240.4 930.2C240.4 932.4 240.9 934.2 238.2 934.1C237.2 934 237 933.1 237 932.2C237 929.5 237 926.9 237 924.2C237 923.5 237 922.4 237.7 922.4Z"/><path fill="#222331" d="M274.7 948.4C277.1 948.4 279.6 948.1 282 948.4C283.3 948.5 283.9 950.2 283.2 951.2C282.7 952.1 274.9 951.7 274.2 951.7C273.3 951.7 271.9 951.8 271.6 950.8C270.9 948.4 273.2 948.4 274.7 948.4Z"/><path fill="#222331" d="M254.7 948.3C257.2 948.4 259.7 948.1 262.2 948.4C263.4 948.6 263.8 950 263.3 951.0C262.8 952.2 256.9 951.7 255.2 951.7C254.3 951.7 252.6 952.1 252 951.0C251 948.6 252.9 948.3 254.7 948.3Z"/><path fill="#222331" d="M236.7 890.8C238.1 890.7 242.6 899 242.9 899.7C243.5 901.1 242.2 902.9 241.2 902.4C240.4 902.1 240.1 901.1 239.7 900.4C238.6 898.4 237.6 896.4 236.4 894.4C235.9 893.5 234.6 890.9 236.7 890.8Z"/><path fill="#222331" d="M298.7 854.4C300.5 854.2 305.3 859.1 306.2 860.2C307.1 861.3 306.2 863.2 305.2 863.3C304.9 863.4 304.6 863.2 304.4 863.0C302.6 861 300.7 859.3 298.6 857.7C297.4 856.8 296.7 854.5 298.7 854.4Z"/></svg></button>
+    <button class="tb-icon" id="btnDraw" title="Dessin (rectangle, ellipse, ligne, flèche)"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="38" width="46" height="34" rx="3" fill="none" stroke="#000" stroke-width="6"/><circle cx="66" cy="60" r="22" fill="#FEEBB6" stroke="#000" stroke-width="6"/><path d="M14 26L50 12" stroke="#D6493E" stroke-width="7" stroke-linecap="round"/><path d="M40 10l12 1-7 10z" fill="#D6493E"/></svg></button>
     <div class="pop-wrap">
       <button class="tb-icon" id="btnPlanSettings" title="Outils image : pipette, pot de peinture, gomme, réglages"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="541 853 99.1 99.1"><path fill="#222331" d="M555.5 933.3C555.7 933 555.8 932.8 556 932.5C559 924 571.4 922.1 574.9 931.2C575.2 931.9 575.4 932.7 575.7 933.4C595.1 933.7 614.5 933.3 634 933.4C634.6 933.4 635.2 933.5 635.5 934.2C636.4 936.7 634.4 937.2 632.5 937.2C613.6 937 594.7 936.9 575.8 937.3C575.8 937.3 575.5 937.9 575.5 938.0C574.4 941.2 572.3 943.4 569 944.3C562.1 946.2 558.8 942.8 555.7 937.2C554 937.2 552.2 937.2 550.4 937.1C544.6 936.9 545.4 933.6 550.4 933.5C552.1 933.4 553.8 933.4 555.5 933.3Z"/><path fill="white" d="M565.7 928.6C568 928.6 570.1 929.7 571.2 931.7C572.4 933.6 572.4 936.1 571.2 938.0C570.1 940 568 941.1 565.7 941.1C562.3 941 559.7 938.2 559.7 934.8C559.7 931.5 562.3 928.7 565.7 928.6Z"/><path fill="#222331" d="M555.6 900.6C555.9 900.2 556 900 556.2 899.5C558 893.3 565 890.4 570.7 893.4C574.3 895.4 574.4 897.4 576.1 900.5C595.2 900.7 614.3 900.6 633.5 900.6C634 900.6 634.2 900.6 634.7 900.6C635.8 900.7 635.9 902.4 635.6 903.2C634.9 905 630.7 904.3 629.7 904.3C613.9 904.1 592.3 904 576.2 904.3C575.7 905.1 575.3 905.9 574.8 906.7C571.3 912.1 564.4 913.7 559.3 909.2C557.4 907.5 557 905.4 555.8 904.2C553.8 904.2 551.9 904.2 549.9 904.2C548.6 904.2 546.6 904.3 546.6 902.5C546.5 900 548 900.5 549.9 900.6C551.8 900.6 553.7 900.6 555.6 900.6Z"/><path fill="white" d="M565.2 895.7C567.5 895.5 569.7 896.6 571 898.5C572.3 900.5 572.4 902.9 571.2 905.0C570.1 907 568 908.3 565.7 908.3C562.3 908.3 559.6 905.6 559.4 902.2C559.3 898.9 561.8 896 565.2 895.7Z"/><path fill="#222331" d="M610.7 868.8C611.2 867.9 611.4 866.9 611.9 866.0C615.2 859.6 624.1 858.8 628.7 864.6C629.6 865.7 630.3 867.9 630.9 868.5C631.7 869.4 635.7 868.4 635.4 870.9C635.1 874.2 631.4 871.5 630.3 873.8C628.3 877.7 625 880.2 620.4 880.0C614.6 879.8 613.4 876.9 610.7 872.5C590.5 872.3 570.2 872.5 550 872.5C545.2 872.5 545.4 869 550.4 868.9C570.5 868.8 590.6 869.1 610.7 868.8Z"/><path fill="white" d="M620.7 864.1C624.1 864.1 626.8 866.7 627 870.1C627.1 873.4 624.6 876.3 621.2 876.5C619 876.6 616.8 875.6 615.6 873.7C614.4 871.8 614.3 869.4 615.3 867.4C616.4 865.4 618.5 864.1 620.7 864.1Z"/></svg></button>
       <div class="popover" id="popPlanSettings">
@@ -835,6 +853,24 @@
   <label class="sz-all"><input type="checkbox" id="sizeAllPages" style="width:20px;height:20px;"> Toutes les pages</label>
   <div class="sz-btns"><button type="button" id="sizeAllClose">Fermer</button></div>
 </div>
+<div id="drawWin">
+  <div id="drawHint" class="dw-hint"></div>
+  <div class="dw-row dw-tools">
+    <button type="button" data-tool="draw-rect" title="Rectangle"><svg viewBox="0 0 24 24" width="26" height="26"><rect x="3" y="6" width="18" height="12" rx="1" fill="none" stroke="#000" stroke-width="2.4"/></svg></button>
+    <button type="button" data-tool="draw-ellipse" title="Cercle / ellipse"><svg viewBox="0 0 24 24" width="26" height="26"><ellipse cx="12" cy="12" rx="9" ry="6.5" fill="none" stroke="#000" stroke-width="2.4"/></svg></button>
+    <button type="button" data-tool="draw-line" title="Ligne"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M4 19L20 5" stroke="#000" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+    <button type="button" data-tool="draw-arrow" title="Flèche"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M4 19L19 6" stroke="#000" stroke-width="2.4" stroke-linecap="round"/><path d="M20 4l.5 8-3.2-2.6-4-1.3z" fill="#000"/></svg></button>
+    <button type="button" id="drawClose" class="dw-x" title="Fermer" aria-label="Fermer">✕</button>
+  </div>
+  <div class="dw-row dw-colors" id="drawColors"><input type="color" id="drawColor" value="#D6493E" title="Autre couleur"></div>
+  <div class="dw-row">
+    <button type="button" data-w="2" title="Fin"><span class="dw-w" style="height:2px"></span></button>
+    <button type="button" data-w="4" title="Moyen"><span class="dw-w" style="height:4px"></span></button>
+    <button type="button" data-w="8" title="Épais"><span class="dw-w" style="height:8px"></span></button>
+    <button type="button" id="drawDash" title="Trait plein / pointillé"><span class="dw-dash">╌╌</span></button>
+    <button type="button" id="drawFill" title="Sans remplissage / remplissage semi-transparent"><span class="dw-fill"></span></button>
+  </div>
+</div>
 <div id="ctrlWin">
   <div style="font-weight:700;">Contrôle des numéros</div>
   <div class="cw-list" id="ctrlList"></div>
@@ -844,7 +880,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-167 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-168 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1275,7 +1311,8 @@ function nextId(prefix){ return prefix + (idCounter++); }
 function createEmptyModel(){
   return {
     orientation: 'portrait',
-    plans: [], // [{id,dataURL,originalDataURL,x,y,width,height,rotation,locked,brightness,contrast,saturation,hue}] — plusieurs plans possibles par page
+    plans: [], // [{id,dataURL,originalDataURL,x,y,width,height,rotation,locked,brightness,contrast,saturation,hue}] — plusieurs plans possible
+    shapes: [], // v2.1-168 : dessins simples [{id,kind:'rect'|'ellipse'|'line'|'arrow',x1,y1,x2,y2,color,width,dash,fill,locked}]s par page
     deviceTypes: [
       // Liste fournie par l'utilisateur (v2.1-53), dans cet ordre. Les identifiants des
       // postes déjà existants sont conservés (type-E, type-nt, type-R…) pour rester
@@ -1335,6 +1372,7 @@ function cloneModel(m){
     lines: m.lines.map(l=>({...l})),
     textes: m.textes.map(t=>({...t})),
     logos: m.logos.map(l=>({...l})),
+    shapes: (m.shapes||[]).map(s=>({...s})),
     legend: { ...m.legend },
   };
 }
@@ -1383,6 +1421,7 @@ function resetContentNodeCaches(){
   pastilleNodes.forEach(n=>n.destroy()); pastilleNodes.clear();
   textNodes.forEach(n=>n.destroy()); textNodes.clear();
   logoNodes.forEach(n=>n.destroy()); logoNodes.clear();
+  shapeNodes.forEach(n=>n.destroy()); shapeNodes.clear();
   if (legendGroupNode){ legendGroupNode.destroy(); legendGroupNode = null; }
   linesLayerGroup.destroyChildren();
   lastLinesSig = null;
@@ -1652,9 +1691,17 @@ let lastRecapSig = null;
 const pastillesLayerGroup = new Konva.Group();
 const textesLayerGroup = new Konva.Group();
 const logosLayerGroup = new Konva.Group();
+// v2.1-168 : dessins simples (rectangle, ellipse, ligne, flèche) : sous les lignes de raccord et les pastilles, au-dessus du plan.
+const shapesLayerGroup = new Konva.Group();
+const shapeNodes = new Map();
+const DRAW_TOOLS = ['draw-rect','draw-ellipse','draw-line','draw-arrow'];
+const DRAW_KIND = { 'draw-rect':'rect', 'draw-ellipse':'ellipse', 'draw-line':'line', 'draw-arrow':'arrow' };
+function isDrawTool(t){ return DRAW_TOOLS.includes(t); }
+let drawStart = null; // premier point validé (feuille) d'un dessin en cours
+const drawStyle = { color:'#D6493E', width:3, dash:false, fill:false };
 const legendLayerGroup = new Konva.Group();
 // v2.1-91 : les textes en dernier = toujours au premier plan (au-dessus des logos et de la légende).
-contentLayer.add(recapGroup, linesLayerGroup, pastillesLayerGroup, logosLayerGroup, legendLayerGroup, textesLayerGroup);
+contentLayer.add(recapGroup, shapesLayerGroup, linesLayerGroup, pastillesLayerGroup, logosLayerGroup, legendLayerGroup, textesLayerGroup);
 const gridGroup = new Konva.Group({ listening:false });
 gridLayer.add(gridGroup);
 // Quadrillage : la COUCHE entière est masquée quand la grille est cachée (et non seulement son
@@ -1745,6 +1792,7 @@ function scheduleRender(){
   renderRAF = requestAnimationFrame(()=>{ renderRAF = 0; render(); });
 }
 function render(){
+  if (!model.shapes) model.shapes = []; // v2.1-168 : documents d'avant les dessins
   ensureDefaultDeviceTypes(); // garantit que les postes "par défaut" (souris/rat) sont toujours présents
   applySheetSize();
   renderPlan();
@@ -1975,6 +2023,130 @@ let lastTouchStartTs = 0;
 window.addEventListener('touchstart', ()=>{ lastTouchStartTs = Date.now(); }, { passive:true, capture:true });
 let pastilleNodes = new Map();
 let textNodes = new Map();
+
+/* ---------------------------- Dessins simples (v2.1-168) ---------------------------------
+   Rectangle, ellipse, ligne, flèche : deux points (coins ou extrémités) + style (couleur, épaisseur, pointillé, remplissage).
+   Tracé au doigt comme les ciseaux (curseur déporté : on valide le 1er point puis le 2e) ; à la souris : glisser. Une fois posé,
+   un dessin se déplace en glissant le corps, se redimensionne avec ses 2 poignées, se verrouille et se supprime comme un logo. */
+function shapeRgba(hex, a){
+  const m = /^#([0-9a-f]{6})$/i.exec(hex || '');
+  const n = m ? parseInt(m[1], 16) : 0xD6493E;
+  return 'rgba('+(n>>16)+','+((n>>8)&255)+','+(n&255)+','+a+')';
+}
+function shapeDash(sh){ return sh.dash ? [sh.width*2.5, sh.width*2] : []; }
+function applyShapeGeometry(body, sh){
+  const x = Math.min(sh.x1,sh.x2), y = Math.min(sh.y1,sh.y2), w = Math.abs(sh.x2-sh.x1), h = Math.abs(sh.y2-sh.y1);
+  if (sh.kind==='rect') body.setAttrs({ x, y, width:w, height:h });
+  else if (sh.kind==='ellipse') body.setAttrs({ x:x+w/2, y:y+h/2, radiusX:Math.max(w/2,0.5), radiusY:Math.max(h/2,0.5) });
+  else body.points([sh.x1, sh.y1, sh.x2, sh.y2]);
+}
+// hit=true : copie invisible, trait plein et épais (zone de toucher confortable même pour un pointillé fin) ; hit=false : le dessin visible.
+function makeShapeBody(sh, hit){
+  const common = hit
+    ? { stroke:'transparent', strokeWidth:Math.max(sh.width, 26/zoom), fill: sh.fill ? 'transparent' : undefined, listening:true }
+    : { stroke:sh.color, strokeWidth:sh.width, dash:shapeDash(sh), lineCap:'round', lineJoin:'round', fill: sh.fill ? shapeRgba(sh.color, 0.25) : undefined, listening:false };
+  common.perfectDrawEnabled = false;
+  let body;
+  if (sh.kind==='rect') body = new Konva.Rect(common);
+  else if (sh.kind==='ellipse') body = new Konva.Ellipse(Object.assign({ radiusX:1, radiusY:1 }, common));
+  else if (sh.kind==='arrow'){
+    const L = 10 + sh.width*2.2;
+    body = new Konva.Arrow(Object.assign({ points:[0,0,0,0], pointerLength:L, pointerWidth:L, fill: hit ? 'transparent' : sh.color }, common, { fill: hit ? 'transparent' : sh.color }));
+  }
+  else body = new Konva.Line(Object.assign({ points:[0,0,0,0] }, common));
+  applyShapeGeometry(body, sh);
+  return body;
+}
+function updateShapeBodies(node, sh){
+  const [vis, hit] = node.getChildren();
+  const L = 10 + sh.width*2.2;
+  vis.setAttrs({ stroke:sh.color, strokeWidth:sh.width, dash:shapeDash(sh) });
+  hit.setAttrs({ strokeWidth:Math.max(sh.width, 26/zoom) });
+  if (sh.kind==='arrow'){ vis.setAttrs({ fill:sh.color, pointerLength:L, pointerWidth:L }); hit.setAttrs({ pointerLength:L, pointerWidth:L }); }
+  else if (sh.kind!=='line'){ vis.fill(sh.fill ? shapeRgba(sh.color, 0.25) : null); hit.fill(sh.fill ? 'transparent' : null); }
+  applyShapeGeometry(vis, sh); applyShapeGeometry(hit, sh);
+}
+function renderShapes(){
+  if (!model.shapes) model.shapes = [];
+  const seen = new Set();
+  const drawing = isDrawTool(activeTool);
+  model.shapes.forEach((sh, orderIdx)=>{
+    seen.add(sh.id);
+    let node = shapeNodes.get(sh.id);
+    if (!node){
+      node = new Konva.Group({ id:sh.id, name:'shape', draggable:true });
+      node.add(makeShapeBody(sh, false), makeShapeBody(sh, true));
+      node.on('click tap', ()=>{ if (isDrawTool(activeTool)) return; selectNode(node, sh.id); });
+      node.on('dragmove', ()=>updateShapeHandles());
+      node.on('dragend', ()=>{
+        const ss = model.shapes.find(x=>x.id===sh.id); if (!ss) return;
+        const dx = node.x(), dy = node.y();
+        ss.x1 += dx; ss.x2 += dx; ss.y1 += dy; ss.y2 += dy;
+        node.position({ x:0, y:0 });
+        pushHistory(); render();
+      });
+      shapeNodes.set(sh.id, node);
+      shapesLayerGroup.add(node);
+    }
+    updateShapeBodies(node, sh);
+    node.draggable(!sh.locked);
+    node.listening(!drawing); // pendant un tracé, les dessins existants ne gênent pas le curseur (on peut tracer par-dessus)
+    node.zIndex(Math.min(orderIdx, shapesLayerGroup.children.length-1));
+  });
+  for (const [id, node] of shapeNodes){ if (!seen.has(id)){ node.destroy(); shapeNodes.delete(id); } }
+}
+// Poignées des 2 points du dessin sélectionné (petits points, zone de saisie de 32 px) : glisser = redimensionner / orienter.
+const shapeHandles = new Konva.Group({ visible:false });
+uiLayer.add(shapeHandles);
+(function(){
+  [1,2].forEach(k=>{
+    const h = new Konva.Group({ draggable:true, name:'shape-handle' });
+    h.add(new Konva.Circle({ radius:16, fill:'rgba(0,0,0,0.001)' }));
+    h.add(new Konva.Circle({ radius:6, fill:'#ffffff', stroke:'#0E6FA8', strokeWidth:2, listening:false }));
+    h.on('dragmove', ()=>{
+      const sh = model.shapes.find(x=>x.id===selectedId), node = sh && shapeNodes.get(sh.id); if (!sh || !node) return;
+      sh['x'+k] = h.x(); sh['y'+k] = h.y();
+      updateShapeBodies(node, sh);
+      updateLockIndicator();
+      contentLayer.batchDraw();
+    });
+    h.on('dragend', ()=>{ pushHistory(); render(); });
+    shapeHandles.add(h);
+  });
+})();
+function selectedShape(){ return selectedId ? (model.shapes||[]).find(x=>x.id===selectedId) || null : null; }
+function updateShapeHandles(){
+  const sh = selectedShape(), node = sh && shapeNodes.get(sh.id);
+  if (!sh || !node || sh.locked || isDrawTool(activeTool)){ if (shapeHandles.visible()){ shapeHandles.visible(false); uiLayer.batchDraw(); } return; }
+  const off = { x:node.x(), y:node.y() }; // pendant le glissement du dessin, les poignées le suivent
+  const [h1, h2] = shapeHandles.getChildren();
+  h1.position({ x:sh.x1+off.x, y:sh.y1+off.y }); h2.position({ x:sh.x2+off.x, y:sh.y2+off.y });
+  [h1, h2].forEach(h=>h.scale({ x:1/zoom, y:1/zoom }));
+  shapeHandles.visible(true); shapeHandles.moveToTop();
+  uiLayer.batchDraw();
+}
+// Création d'un dessin à partir des 2 points validés.
+function addShapeFromTool(tool, p1, p2){
+  const kind = DRAW_KIND[tool]; if (!kind) return null;
+  const len = Math.hypot(p2.x-p1.x, p2.y-p1.y);
+  const w = Math.abs(p2.x-p1.x), h = Math.abs(p2.y-p1.y);
+  if (kind==='line' || kind==='arrow' ? len < 6 : (w < 6 || h < 6)){ document.getElementById('drawHint').textContent = 'Tracé trop petit, réessayez.'; return null; }
+  const sh = { id: nextId('shape-'), kind, x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y, color:drawStyle.color, width:drawStyle.width, dash:drawStyle.dash, fill:drawStyle.fill, locked:false };
+  model.shapes.push(sh);
+  pushHistory(); render();
+  return sh;
+}
+// Aperçu du tracé en cours (même rendu que le dessin final).
+function drawShapePreview(tip){
+  ghostGroup.destroyChildren();
+  if (isDrawTool(activeTool) && drawStart){
+    const sh = { kind:DRAW_KIND[activeTool], x1:drawStart.x, y1:drawStart.y, x2:tip.x, y2:tip.y, color:drawStyle.color, width:drawStyle.width, dash:drawStyle.dash, fill:drawStyle.fill };
+    ghostGroup.add(makeShapeBody(sh, false));
+    ghostGroup.add(new Konva.Circle({ x:drawStart.x, y:drawStart.y, radius:4/zoom, fill:drawStyle.color, stroke:'#fff', strokeWidth:1/zoom, listening:false }));
+  }
+  uiLayer.batchDraw();
+}
+
 let logoNodes = new Map();
 let legendGroupNode = null;
 let lastLinesSig = null; // signature des lignes de raccord affichées (voir renderContent)
@@ -2094,6 +2266,9 @@ function renderContent(){
     });
     }
   } catch(err){ console.warn('Rendu des lignes de raccord interrompu :', err); }
+
+  // dessins simples (v2.1-168)
+  try{ renderShapes(); } catch(err){ console.warn('Rendu des dessins interrompu :', err); }
 
   // pastilles — rendu vectoriel haut de gamme, mis à jour de façon incrémentale
   try{
@@ -2423,7 +2598,7 @@ function renderContent(){
     // être recréé (changement d'apparence, voir la mise en cache par "signature" plus haut)
     // — réattachait les poignées sur la pastille dès le rendu suivant la sélection,
     // annulant silencieusement l'exclusion pourtant faite au moment du clic.
-    const isPastille = model.pastilles.some(p=>p.id===selectedId);
+    const isPastille = model.pastilles.some(p=>p.id===selectedId) || (model.shapes||[]).some(sh=>sh.id===selectedId); // v2.1-168
     if (node && !isPastille){ transformer.nodes([node]); transformer.rotateEnabled(rotateAllowedFor(selectedId)); transformer.forceUpdate(); } // forceUpdate : le cadre de sélection suit la NOUVELLE taille du texte (ajusté à son contenu)
     else if (!node){ transformer.nodes([]); selectedId=null; }
     else { transformer.nodes([]); }
@@ -2525,7 +2700,7 @@ function selectNode(node, modelId){
   // taille se règle via le curseur "Taille" dédié) et gênaient le glisser-déposer pour la
   // déplacer sur le plan : on n'attache donc le cadre de transformation qu'aux autres types
   // d'éléments (plan, texte, logo, légende).
-  const isPastille = modelId && model.pastilles.some(p=>p.id===modelId);
+  const isPastille = modelId && (model.pastilles.some(p=>p.id===modelId) || (model.shapes||[]).some(sh=>sh.id===modelId)); // v2.1-168 : un dessin a ses propres poignées, pas de cadre
   transformer.nodes(modelId && !isPastille ? [node] : []);
   // Plan : plus de poignée de rotation (remplacée par la zone de rotation "main" tout autour
   // du cadre, façon Paint.NET — voir plus bas, v2.1-56). Les autres éléments la gardent.
@@ -2695,7 +2870,7 @@ function refreshRotFine(pl){
   // v2.1-157 : pavé de rotation et fenêtre « Tailles » partagent la même place : l'un ferme l'autre. Plan nouvellement sélectionné ->
   // « Tailles » se ferme ; « Tailles » ouverte ensuite (plan déjà sélectionné) -> le pavé se masque.
   if (pl.id !== rotFinePlanId){ rotFinePlanId = pl.id; sizeWin.classList.remove('show'); document.getElementById('ctrlWin').classList.remove('show'); }
-  if (sizeWin.classList.contains('show') || document.getElementById('ctrlWin').classList.contains('show') || (activeTool && activeTool.startsWith('cut'))){ rotFineEl.style.display = 'none'; return; } // v2.1-151 : en haut comme les autres fenêtres, donc masqué pendant la découpe (fenêtres de découpe au même endroit)
+  if (sizeWin.classList.contains('show') || document.getElementById('ctrlWin').classList.contains('show') || document.getElementById('drawWin').classList.contains('show') || (activeTool && activeTool.startsWith('cut'))){ rotFineEl.style.display = 'none'; return; } // v2.1-151 : en haut comme les autres fenêtres, donc masqué pendant la découpe (fenêtres de découpe au même endroit)
   const a = (((pl.rotation||0)%360)+360)%360;
   rotFineLabel.textContent = (Math.round(a*10)/10).toFixed(1).replace('.',',')+'°';
   rotFineEl.style.display = 'flex';
@@ -2820,7 +2995,7 @@ const LOCK_PATH_OPEN = 'M -3.6 0 V -5.6 A 3.6 3.6 0 0 1 3.6 -5.6 V -4.2';
 function nodeForId(id){
   if (!id) return null;
   if (id === 'legend-frame') return legendGroupNode;
-  return planImageNodes.get(id) || pastilleNodes.get(id) || textNodes.get(id) || logoNodes.get(id) || null;
+  return planImageNodes.get(id) || pastilleNodes.get(id) || textNodes.get(id) || logoNodes.get(id) || shapeNodes.get(id) || null;
 }
 // v2.1-114 : cadenas et croix de suppression en éléments HTML (et non plus dessinés dans le canevas Konva, qui
 // s'arrête aux bords de la feuille) : ils restent visibles HORS de la page, quand l'élément touche un bord, et
@@ -2885,9 +3060,10 @@ function ensureLockBadge(){
     if (model.pastilles.some(p=>p.id===selectedId)){ document.getElementById('selDelete').click(); return; }
     const isLeg = selectedId === 'legend-frame';
     const isLogo = model.logos.some(l=>l.id===selectedId);
-    if (!findPlanById(selectedId) && !isTxt && !isLeg && !isLogo) return;
+    const isShape = (model.shapes||[]).some(sh=>sh.id===selectedId); // v2.1-168
+    if (!findPlanById(selectedId) && !isTxt && !isLeg && !isLogo && !isShape) return;
     const sid = selectedId;
-    askYesNo(isLeg ? 'Masquer la légende ?' : isTxt ? 'Supprimer ce texte ?' : isLogo ? 'Supprimer ce logo ?' : 'Supprimer le plan ?').then(ok=>{ if (ok && selectedId===sid) document.getElementById('selDelete').click(); });
+    askYesNo(isLeg ? 'Masquer la légende ?' : isTxt ? 'Supprimer ce texte ?' : isLogo ? 'Supprimer ce logo ?' : isShape ? 'Supprimer ce dessin ?' : 'Supprimer le plan ?').then(ok=>{ if (ok && selectedId===sid) document.getElementById('selDelete').click(); });
   });
   badgeDelEl.style.display = 'none';
   // v2.1-115 : ciseaux = découpe rectangulaire prête en un appui ; réglage = fenêtre « Outils image » ouverte directement.
@@ -2962,7 +3138,7 @@ function updateLockIndicator(duringRotation){
   const isPlanSel = !!findPlanById(selectedId);
   transformer.borderStrokeWidth(isPlanSel ? 3/zoom : 1.5);
   transformer.borderStroke(isPlanSel ? '#2FA8F5' : '#0E6FA8');
-  const box = node.getClientRect({ relativeTo: stage }); // v2.1-118 : relatif au stage = coordonnées FEUILLE (relativeTo uiLayer ajoutait la marge et décalait le cadenas)
+  const box = (shapeNodes.has(selectedId) ? node.getChildren()[0] : node).getClientRect({ relativeTo: stage }); // v2.1-168 : un dessin se mesure sur son tracé visible (pas sur sa zone de toucher élargie) ; v2.1-118 : relatif au stage = coordonnées FEUILLE (relativeTo uiLayer ajoutait la marge et décalait le cadenas)
   const off = 16/zoom;
   const pastille = model.pastilles.find(p=>p.id===selectedId);
   if (pastille){
@@ -2978,7 +3154,7 @@ function updateLockIndicator(duringRotation){
   lockBadge.g.scale({ x:1/zoom, y:1/zoom });
   // Croix de suppression : seulement pour un plan, juste sous le cadenas (v2.1-84).
   const isPlanSel2 = !!findPlanById(selectedId) || model.textes.some(t=>t.id===selectedId); // plan ou texte (v2.1-107)
-  const isLogoSel = model.logos.some(l=>l.id===selectedId); // v2.1-125 : le logo a cadenas + croix (pas d'icône bleue : rien à régler)
+  const isLogoSel = model.logos.some(l=>l.id===selectedId) || (model.shapes||[]).some(sh=>sh.id===selectedId); // v2.1-168 : un dessin se comporte comme un logo (cadenas + croix) ; v2.1-125 : le logo a cadenas + croix (pas d'icône bleue : rien à régler)
   const hasBadgeSet = isPlanSel2 || selectedId==='legend-frame' || !!pastille; // v2.1-124 : croix + icône bleue aussi pour légende et pastille
   lockBadge.del.visible(hasBadgeSet || isLogoSel);
   lockBadge.tools.visible(!!findPlanById(selectedId)); // ciseaux : plan seulement (v2.1-115)
@@ -3097,6 +3273,7 @@ function syncPastilleDrawer(){
 }
 function refreshSelectionUI(){
   syncPastilleDrawer();
+  updateShapeHandles(); syncDrawWinFromSelection(); // v2.1-168
   if (selSettingsFor && selSettingsFor !== selectedId) closeSelectionSettings(); // autre sélection : la fenêtre se ferme
   if (!selectedId){ placeTextOptions(false); lastTextDrawerId = null; document.getElementById('toolLockPlan').classList.remove('active'); updateLockIndicator(); return; }
   const node = stage.findOne('#'+selectedId);
@@ -3188,6 +3365,7 @@ document.getElementById('selDelete').addEventListener('click', ()=>{
   model.pastilles = model.pastilles.filter(p=>p.id!==selectedId);
   model.textes = model.textes.filter(t=>t.id!==selectedId);
   model.logos = model.logos.filter(l=>l.id!==selectedId);
+  model.shapes = (model.shapes||[]).filter(sh=>sh.id!==selectedId); // v2.1-168
   model.lines = model.lines.filter(l=>l.toPastilleId!==selectedId);
   selectedId = null;
   pushHistory(); render();
@@ -3202,6 +3380,7 @@ function findSelectedModelObject(){
       || findPlanById(selectedId)
       || model.textes.find(t=>t.id===selectedId)
       || model.logos.find(l=>l.id===selectedId)
+      || (model.shapes||[]).find(sh=>sh.id===selectedId)
       || null;
 }
 document.getElementById('selLock').addEventListener('click', ()=>{
@@ -3299,6 +3478,7 @@ window.addEventListener('touchcancel', ()=>{ ghostBlockedByPastille = false; });
 // v2.1-146 : vrai si un tracé de découpe est « en cours » (zone validée en attente, OU 2e coin relâché mais pas encore validé au
 // cercle, OU points déjà posés) : ses pointillés ne doivent pas être effacés par un simple relâchement du doigt.
 function cutPreviewActive(){
+  if (isDrawTool(activeTool) && drawStart) return true; // v2.1-168 : tracé d'un dessin en cours (souris ou doigt)
   return !!pendingCutPolygon || !!(remoteCursor && ((remoteCursor.tool==='cut-rect' && remoteCursor.phase==='end' && cutRectStart) || (remoteCursor.tool==='cut-point' && cutPoints.length>0)));
 }
 function updateGhost(pos){
@@ -3339,7 +3519,7 @@ stage.on('mousemove touchmove', (e)=>{
   // En placement/tracé déporté au doigt (pastille, gomme, découpe), c'est le curseur dédié
   // (drawRemoteCursor / previews spécifiques) qui sert d'aperçu ; l'ancien aperçu fantôme
   // resterait collé sous le doigt et ferait doublon avec le point réellement visé.
-  if (['place-remote','eraser','cut-rect','cut-point'].includes(activeTool) && isRealTouch(e)) return;
+  if (['place-remote','eraser','cut-rect','cut-point',...DRAW_TOOLS].includes(activeTool) && isRealTouch(e)) return;
   if (e.evt && e.evt.cancelable) e.evt.preventDefault();
   const pos = stagePointer();
   if (!pos) return;
@@ -3589,8 +3769,9 @@ function resetRemoteGesture(){
   remoteCursorDragActive = false; remoteCursorDragOnHandle = false;
   if (remoteCursorRAF){ cancelAnimationFrame(remoteCursorRAF); remoteCursorRAF = null; }
   pendingRemoteCursorPos = null;
-  remoteAnchor = null;
+  remoteAnchor = null; drawStart = null;
   if (remoteCursor && remoteCursor.tool === 'pastille'){ remoteCursor = null; drawRemoteCursor(); }
+  else if (remoteCursor && isDrawTool(remoteCursor.tool)){ remoteCursor.phase = 'start'; drawRemoteCursor(); }
 }
 let lastRemoteConfirmAt = 0;
 function scheduleRemoteCursorMove(pos){
@@ -3606,6 +3787,7 @@ function scheduleRemoteCursorMove(pos){
     // à jour son aperçu.
     if (remoteCursor.tool==='eraser'){ /* v2.1-97 : l'aperçu du trait est mis à jour par drawRemoteCursor ; effacement au relâchement */ }
     else if (remoteCursor.tool==='cut-rect' && remoteCursor.phase==='end' && cutRectStart){ drawCutPreview(remoteCursor.tip); }
+    else if (isDrawTool(remoteCursor.tool) && remoteCursor.phase==='end' && drawStart){ drawShapePreview(remoteCursor.tip); }
     else if (remoteCursor.tool==='cut-point' && cutPoints.length>0){ drawCutPreview(remoteCursor.tip); }
   });
 }
@@ -3614,6 +3796,7 @@ function scheduleRemoteCursorMove(pos){
 // un appui long resté sans effet (voir remoteToolPendingGate ci-dessous).
 function createRemoteCursorForTool(tool, pos){
   if (tool==='place-remote'){ remoteCursor = { tool:'pastille', phase:'anchor', tip: remoteTipFromHandlePos(pos) }; return true; }
+  if (isDrawTool(tool)){ remoteCursor = { tool, phase:'start', tip: remoteTipFromHandlePos(pos) }; return true; } // v2.1-168 : un dessin n'exige pas de plan
   const targetNode = cutTargetNodeAt(pos);
   if (!targetNode){ toast('Touchez un plan pour le découper.'); return false; }
   cutTargetPlanId = targetNode.id();
@@ -3626,7 +3809,7 @@ function createRemoteCursorForTool(tool, pos){
 // long resté immobile bascule en déplacement du plan dans toutes les directions.
 let remoteToolPendingGate = null; // {startX,startY,resolved,panning,lastX,lastY,timer}
 stage.on('touchstart', (e)=>{
-  if (!['place-remote','cut-rect','cut-point'].includes(activeTool)) return;
+  if (!['place-remote','cut-rect','cut-point',...DRAW_TOOLS].includes(activeTool)) return;
   const touches = e.evt.touches;
   if (touches && touches.length > 1){
     // v2.1-166 : 2e doigt = pincement : le geste d'un doigt en attente est abandonné (avant, le relâchement du 1er doigt créait un curseur
@@ -3673,7 +3856,7 @@ stage.on('touchstart', (e)=>{
   }
 });
 stage.on('touchmove', (e)=>{
-  if (!['place-remote','cut-rect','cut-point'].includes(activeTool)) return;
+  if (!['place-remote','cut-rect','cut-point',...DRAW_TOOLS].includes(activeTool)) return;
   const touches = e.evt.touches;
   const t = touches && touches[0];
   if (remoteToolPendingGate && !remoteToolPendingGate.resolved){
@@ -3714,7 +3897,7 @@ stage.on('touchmove', (e)=>{
   scheduleRemoteCursorMove(pos); // regroupé sur requestAnimationFrame pour rester fluide
 });
 stage.on('touchend touchcancel', (e)=>{
-  if (!['place-remote','cut-rect','cut-point'].includes(activeTool)) return;
+  if (!['place-remote','cut-rect','cut-point',...DRAW_TOOLS].includes(activeTool)) return;
   if (remoteToolPendingGate){
     const wasPanning = remoteToolPendingGate.panning;
     clearTimeout(remoteToolPendingGate.timer);
@@ -3734,7 +3917,7 @@ stage.on('touchend touchcancel', (e)=>{
   remoteCursorDragActive = false;
   if (remoteCursorRAF){ cancelAnimationFrame(remoteCursorRAF); remoteCursorRAF = null; }
   pendingRemoteCursorPos = null;
-  if (remoteCursor && cutPreviewActive() && !pendingCutPolygon) drawCutPreview(remoteCursor.tip); // dernier tracé conservé après le relâchement (v2.1-146)
+  if (remoteCursor && cutPreviewActive() && !pendingCutPolygon){ if (isDrawTool(remoteCursor.tool)) drawShapePreview(remoteCursor.tip); else drawCutPreview(remoteCursor.tip); } // dernier tracé conservé après le relâchement (v2.1-146)
   if (remoteCursorDragOnHandle && !remoteCursorDragMoved) confirmRemoteCursor(); // tap net sur le cercle = validation
   remoteCursorDragOnHandle = false;
 });
@@ -3900,6 +4083,7 @@ function remoteCursorColor(){
     }
     if (remoteCursor.tool==='eraser') return '#C0392B';
     if (remoteCursor.tool==='cut-rect' || remoteCursor.tool==='cut-point') return '#0E6FA8';
+    if (isDrawTool(remoteCursor.tool)) return drawStyle.color;
   }
   return '#0E6FA8';
 }
@@ -4014,6 +4198,21 @@ function confirmRemoteCursor(){
       pushHistory(); render();
       drawRemoteCursor();
       toast('Pastille placée. Touchez le plan pour le point réel suivant.');
+    }
+  } else if (isDrawTool(remoteCursor.tool)){
+    // v2.1-168 : dessin — 1er point validé, puis 2e point = création ; le curseur reste en place pour enchaîner un autre dessin
+    if (remoteCursor.phase==='start'){
+      drawStart = {x, y};
+      remoteCursor = { tool:remoteCursor.tool, phase:'end', tip:{x, y} };
+      drawRemoteCursor();
+      syncDrawWin();
+    } else {
+      const start = drawStart, tool = remoteCursor.tool;
+      drawStart = null;
+      remoteCursor = { tool, phase:'start', tip:{x, y} };
+      ghostGroup.destroyChildren(); uiLayer.batchDraw();
+      if (start) addShapeFromTool(tool, start, {x, y});
+      drawRemoteCursor(); syncDrawWin();
     }
   } else if (remoteCursor.tool==='cut-rect'){
     if (remoteCursor.phase==='start'){
@@ -4189,7 +4388,7 @@ let eraserPendingGate = null; // même principe que remoteToolPendingGate, pour 
 stage.on('mousedown touchstart', (e)=>{
   if (isPinching) return;
   if (e.evt && e.evt.touches && e.evt.touches.length>1) return;
-  if (isRealTouch(e) && (activeTool==='cut-rect' || activeTool==='cut-point')) return; // gérés par le curseur déporté générique ci-dessus
+  if (isRealTouch(e) && (activeTool==='cut-rect' || activeTool==='cut-point' || isDrawTool(activeTool))) return; // gérés par le curseur déporté générique ci-dessus
   if (e.evt && e.evt.cancelable) e.evt.preventDefault();
   if (pendingCutPolygon) return; // une découpe est déjà en attente de validation
 
@@ -4209,6 +4408,7 @@ stage.on('mousedown touchstart', (e)=>{
   // Souris (précise, pas besoin de déport) : comportement direct inchangé.
   const rawPos = stagePointer();
   if (!rawPos) return;
+  if (isDrawTool(activeTool)){ drawStart = { x:rawPos.x, y:rawPos.y }; return; } // v2.1-168 : souris = glisser du 1er au 2e point
   if (activeTool==='cut-rect'){
     const targetNode = cutTargetNodeAt(rawPos);
     if (!targetNode){ toast('Cliquez sur un plan pour le découper.'); return; }
@@ -4244,7 +4444,7 @@ function startEraseAt(rawPos, origin){
 stage.on('mousemove touchmove', (e)=>{
   if (isPinching) return;
   if (e.evt && e.evt.touches && e.evt.touches.length>1) return;
-  if (isRealTouch(e) && (activeTool==='cut-rect' || activeTool==='cut-point')) return;
+  if (isRealTouch(e) && (activeTool==='cut-rect' || activeTool==='cut-point' || isDrawTool(activeTool))) return;
   if (isRealTouch(e) && eraserPendingGate && !eraserPendingGate.resolved){
     const t = e.evt.touches && e.evt.touches[0];
     if (!t) return;
@@ -4281,10 +4481,17 @@ stage.on('mousemove touchmove', (e)=>{
   const pos = stagePointer();
   if (!pos) return;
   if (activeTool==='cut-rect' && cutRectStart){ drawCutPreview(pos); }
+  else if (isDrawTool(activeTool) && drawStart){ drawShapePreview(pos); }
   // gomme : l'aperçu du trait est mis à jour par updateGhost (v2.1-97), rien à effacer pendant le glissement
 });
 stage.on('mouseup touchend touchcancel', (e)=>{
-  if (isRealTouch(e) && (activeTool==='cut-rect' || activeTool==='cut-point')) return;
+  if (isRealTouch(e) && (activeTool==='cut-rect' || activeTool==='cut-point' || isDrawTool(activeTool))) return;
+  if (isDrawTool(activeTool) && drawStart){ // v2.1-168 : fin du glisser à la souris
+    const p = stagePointer(), st = drawStart; drawStart = null;
+    ghostGroup.destroyChildren(); uiLayer.batchDraw();
+    if (p) addShapeFromTool(activeTool, st, p);
+    return;
+  }
   if (isRealTouch(e) && eraserPendingGate){
     const wasPanning = eraserPendingGate.panning;
     clearTimeout(eraserPendingGate.timer);
@@ -4992,7 +5199,7 @@ function setTool(name){
   hideBubble(); // une bulle de message ne survit pas à un changement d'outil
   activeTool = (activeTool===name) ? null : name;
   if (activeTool === null && name !== '__none__' && activeTileId === 'pastille') activeTool = DEFAULT_TOOL;
-  remoteAnchor = null; cutPoints=[]; cutRectStart=null; isErasing=false;
+  remoteAnchor = null; cutPoints=[]; cutRectStart=null; isErasing=false; drawStart=null;
   remoteCursorDragActive = false; remoteCursorDragOnHandle = false;
   if (remoteToolPendingGate){ clearTimeout(remoteToolPendingGate.timer); remoteToolPendingGate = null; } // v2.1-166
   if (remoteCursorRAF){ cancelAnimationFrame(remoteCursorRAF); remoteCursorRAF = null; }
@@ -5002,8 +5209,12 @@ function setTool(name){
   // un simple glisser du cercle blanc suffit ensuite à l'amener au bon endroit.
   if (activeTool==='cut-rect' && isTouchCapableDevice()){ remoteCursor = { tool:'cut-rect', phase:'start', tip: viewportCenterStagePos() }; }
   else if (activeTool==='cut-point' && isTouchCapableDevice()){ remoteCursor = { tool:'cut-point', tip: viewportCenterStagePos() }; }
+  else if (isDrawTool(activeTool) && isTouchCapableDevice()){ remoteCursor = { tool:activeTool, phase:'start', tip: viewportCenterStagePos() }; } // v2.1-168
   else { remoteCursor = null; }
   drawRemoteCursor();
+  if (!isDrawTool(activeTool)){ ghostGroup.destroyChildren(); }
+  shapeNodes.forEach(n=>n.listening(!isDrawTool(activeTool))); updateShapeHandles(); // v2.1-168
+  if (typeof syncDrawWin === 'function') syncDrawWin();
   hideCutConfirm();
   document.querySelectorAll('.tb-icon, .pop-tool-btn').forEach(b=>b.classList.remove('active'));
   // Ce nettoyage retire aussi la surbrillance d'icônes qui ne sont pas des outils (orientation,
@@ -5533,6 +5744,7 @@ function closeOtherWindows(keep){
   if (keep !== 'sizeAll'){ const w = document.getElementById('sizeAllWin'); if (w.classList.contains('show')){ w.classList.remove('show'); refreshRotFine(rotatablePlan()); } }
   if (keep !== 'settings') closeSelectionSettings();
   if (keep !== 'ctrl') closeCtrlWin();
+  if (keep !== 'draw') closeDrawWin();
   if (keep !== 'nudge' && nudgeOpen){ nudgeOpen = false; syncPastilleDrawer(); }
 }
 // v2.1-158 : contrôle des séries de numéros. Pour chaque lettre (code du poste), toutes pages confondues : numéros posés,
@@ -5594,6 +5806,75 @@ function openCtrlWin(){
   if (rotFineEl) rotFineEl.style.display = 'none';
 }
 document.getElementById('ctrlClose').addEventListener('click', closeCtrlWin);
+
+// v2.1-168 : fenêtre « Dessin ». Outil actif = un des 4 tracés ; style (couleur, épaisseur, pointillé, remplissage) pour les NOUVEAUX dessins et,
+// quand un dessin est sélectionné, pour ce dessin (la fenêtre reflète alors son style).
+const DRAW_COLORS = ['#D6493E','#F59E0B','#2E9E6B','#0E6FA8','#7A5AD8','#000000','#ffffff'];
+(function(){
+  const box = document.getElementById('drawColors');
+  DRAW_COLORS.forEach(c=>{ const b = document.createElement('button'); b.type = 'button'; b.dataset.c = c; b.style.background = c; b.title = c; box.insertBefore(b, document.getElementById('drawColor')); });
+})();
+function syncDrawWin(){
+  const win = document.getElementById('drawWin');
+  win.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active', b.dataset.tool === activeTool));
+  win.querySelectorAll('[data-c]').forEach(b=>b.classList.toggle('active', b.dataset.c.toLowerCase() === drawStyle.color.toLowerCase()));
+  win.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('active', +b.dataset.w === drawStyle.width));
+  document.getElementById('drawDash').classList.toggle('active', drawStyle.dash);
+  document.getElementById('drawFill').classList.toggle('active', drawStyle.fill);
+  document.getElementById('drawColor').value = drawStyle.color;
+  document.getElementById('btnDraw').classList.toggle('active', win.classList.contains('show'));
+  // Consigne affichée DANS la fenêtre (les bulles s'afficheraient au même endroit et la cacheraient)
+  let hint = '';
+  if (!isDrawTool(activeTool)) hint = selectedShape() ? 'Dessin sélectionné : réglages ci-dessous, poignées pour le modifier.' : 'Touchez un dessin pour le modifier, ou un outil pour tracer.';
+  else if (!isTouchCapableDevice()) hint = 'Glissez sur le plan pour tracer.';
+  else hint = drawStart ? '2e point : placez le curseur puis tapotez le cercle.' : '1er point : placez le curseur puis tapotez le cercle.';
+  document.getElementById('drawHint').textContent = hint;
+}
+function openDrawWin(){
+  closeOtherWindows('draw'); closeAllPopovers(); closeAllTileDrawers();
+  onTileChosen('plan');
+  document.getElementById('drawWin').classList.add('show');
+  if (!isDrawTool(activeTool)) setTool('draw-rect');
+  if (rotFineEl) rotFineEl.style.display = 'none';
+  syncDrawWin();
+}
+function closeDrawWin(){
+  const win = document.getElementById('drawWin');
+  if (!win.classList.contains('show')) return;
+  win.classList.remove('show');
+  if (isDrawTool(activeTool)) setTool(activeTool); // quitte l'outil de tracé
+  if (typeof rotatablePlan === 'function') refreshRotFine(rotatablePlan());
+  syncDrawWin();
+}
+// Applique le style choisi au dessin sélectionné (le cas échéant) : une seule entrée d'historique par réglage.
+function applyDrawStyle(){
+  const sh = selectedShape();
+  if (sh && !sh.locked){ sh.color = drawStyle.color; sh.width = drawStyle.width; sh.dash = drawStyle.dash; sh.fill = drawStyle.fill; pushHistory(); render(); }
+  else if (isDrawTool(activeTool) && remoteCursor) drawRemoteCursor(); // la couleur du curseur suit
+  syncDrawWin();
+}
+// Un dessin sélectionné : la fenêtre (si ouverte) affiche son style.
+function syncDrawWinFromSelection(){
+  const win = document.getElementById('drawWin'); if (!win || !win.classList.contains('show')) return;
+  const sh = selectedShape();
+  if (sh){ drawStyle.color = sh.color; drawStyle.width = sh.width; drawStyle.dash = !!sh.dash; drawStyle.fill = !!sh.fill; }
+  syncDrawWin();
+}
+document.getElementById('btnDraw').addEventListener('click', ()=>{
+  if (document.getElementById('drawWin').classList.contains('show')) closeDrawWin(); else openDrawWin();
+});
+document.getElementById('drawClose').addEventListener('click', closeDrawWin);
+document.querySelectorAll('#drawWin [data-tool]').forEach(b=>b.addEventListener('click', ()=>{
+  selectNode(null, null); // on trace : pas de dessin sélectionné
+  setTool(b.dataset.tool); syncDrawWin();
+}));
+document.querySelectorAll('#drawWin [data-c]').forEach(b=>b.addEventListener('click', ()=>{ drawStyle.color = b.dataset.c; applyDrawStyle(); }));
+document.getElementById('drawColor').addEventListener('input', (e)=>{ drawStyle.color = e.target.value; syncDrawWin(); });
+document.getElementById('drawColor').addEventListener('change', applyDrawStyle);
+document.querySelectorAll('#drawWin [data-w]').forEach(b=>b.addEventListener('click', ()=>{ drawStyle.width = +b.dataset.w; applyDrawStyle(); }));
+document.getElementById('drawDash').addEventListener('click', ()=>{ drawStyle.dash = !drawStyle.dash; applyDrawStyle(); });
+document.getElementById('drawFill').addEventListener('click', ()=>{ drawStyle.fill = !drawStyle.fill; applyDrawStyle(); });
+
 document.getElementById('btnCtrl').addEventListener('click', ()=>{ if (document.getElementById('ctrlWin').classList.contains('show')) closeCtrlWin(); else openCtrlWin(); });
 function bindPopover(triggerId, popId){
   const trigger = document.getElementById(triggerId);
@@ -5724,7 +6005,7 @@ function layoutHeader(){
 // Une seule tuile est mise en avant à la fois (jamais deux en même temps) : en priorité
 // celle dont le tiroir est ouvert, sinon celle qui correspond à l'outil actuellement actif.
 const TILE_TOOL_CATEGORIES = {
-  plan: ['pipette','paint-bucket','eraser','cut-rect','cut-point'],
+  plan: ['pipette','paint-bucket','eraser','cut-rect','cut-point', ...DRAW_TOOLS],
   pastille: ['place-classic','place-remote'],
   // La tuile "Texte" n'a volontairement aucun outil associé ici : ajouter un texte/logo
   // est une action immédiate (pas un mode persistant comme les autres outils), donc rien
@@ -6254,6 +6535,7 @@ function waitForLogoImages(){
 function withCleanStage(fn){
   const wasSelected = selectedId;
   selectedId = null; transformer.nodes([]);
+  updateShapeHandles(); // v2.1-168 : jamais de poignées dans l'image exportée
   updateLockIndicator(); // masque aussi les icônes de rotation et le cadenas : jamais dans l'image exportée
   setGridVisible(false); ghostGroup.visible(false); uiLayer.batchDraw();
   const result = fn();
@@ -6569,7 +6851,7 @@ const SHORT_ICON_LABELS = {
   'Supprimer la page courante':'Suppr.','Nouveau projet':'Nouveau',
   'Orientation portrait':'Portrait','Orientation paysage':'Paysage','Zoom arrière':'Zoom −','Zoom avant':'Zoom +',
   "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Déplacement fin de la pastille':'Ajust. fin','Taille de tous les éléments d\'un poste':'Tailles','Contrôle des numéros':'Séries','Page récapitulative des postes':'Récap.','Mode d\'affichage : jour / nuit':'Jour','Ouvrir un projet':'Ouvrir',
-  'Importer un plan':'Importer','Découpe rectangulaire':'Découpe □','Découpe point par point':'Découpe pts',
+  'Importer un plan':'Importer','Découpe rectangulaire':'Découpe □','Découpe point par point':'Découpe pts','Dessin':'Dessin',
   'Outils image : pipette, pot de peinture, gomme, réglages':'Outils image','Pot de peinture intelligent':'Pot peinture',
   'Gomme carrée':'Gomme','Placement classique':'Classique','Placement déporté':'Déporté',
   'Ajouter / retirer un poste':'Postes','Ajouter un texte':'Texte','Logo entreprise':'Logo Cie','Insérer/retirer la légende':'Légende'
@@ -6607,7 +6889,7 @@ function applyDrawerAlpha(){
 applyDrawerAlpha();
 // v2.1-127 : « Tout verrouiller » (page affichée) — bascule : s'il reste un élément déverrouillé on verrouille tout,
 // sinon on déverrouille tout. Annulable (un seul pushHistory).
-function pageLockables(){ return [...model.plans, ...model.pastilles, ...model.textes, ...model.logos, model.legend].filter(Boolean); }
+function pageLockables(){ return [...model.plans, ...model.pastilles, ...model.textes, ...model.logos, ...(model.shapes||[]), model.legend].filter(Boolean); }
 function updateLockAllButton(){
   const btn = document.getElementById('btnLockAll'); if (!btn) return;
   const anyOpen = pageLockables().some(o=>!o.locked);
