@@ -290,7 +290,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       model.shapes = []; render();
       const win = document.getElementById('drawWin');
       const noClose = !document.getElementById('drawClose') && !!document.getElementById('drawSelect');
-      openDrawWin(); const a = isDrawTool(activeTool); document.getElementById('drawSelect').click(); const b = activeTool === null && win.classList.contains('show'); closeDrawWin();
+      openDrawWin(); const a = isDrawTool(activeTool); document.getElementById('drawSelect').click(); const b = activeTool === SELECT_TOOL && win.classList.contains('show'); closeDrawWin();
       return migr && four && exact && rot && fixed && two && row2 && noClose && a && b;
     }), 'dessins : poignées pile sur les angles, redimensionnement angle opposé fixe, rotation, ancien format, bouton Sélection sans croix');
     // v2.1-173 : accroche d'angle des lignes / flèches = celle de la rotation d'un plan (ROT_SNAP_DEG autour de 0/90/180/270°)
@@ -301,6 +301,25 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       const near = (a,b)=>Math.abs(a-b) < 0.01;
       return near(h0.rotation, 0) && near(v90.rotation, 90) && Math.abs(free.rotation - 8) < 0.01 && near(diag.rotation, 45) && near(Math.abs(back.rotation), 180) && near(h0.width, Math.hypot(200, 200*Math.tan(3*Math.PI/180)));
     }), 'lignes / flèches : accroche à 0/90/180/270° à moins de 4° comme la rotation d\'un plan');
+    // v2.1-174 : outil Sélection = curseur déporté rouge ; un tap du cercle sélectionne le dessin sous la pointe (ou désélectionne)
+    ok(await pg.evaluate(()=>{
+      closeOtherWindows(''); resetRemoteGesture();
+      model.shapes = [
+        { id:'sa', kind:'rect', x:200, y:400, width:200, height:150, rotation:0, color:'#0E6FA8', sw:4, dash:false, fill:false, locked:false },
+        { id:'sb', kind:'line', x:150, y:300, width:250, height:0, rotation:0, color:'#000000', sw:3, dash:false, fill:false, locked:false },
+        { id:'sc', kind:'ellipse', x:100, y:100, width:120, height:80, rotation:30, color:'#D6493E', sw:3, dash:false, fill:true, locked:false } ];
+      render();
+      const hits = shapeAtPoint({ x:300, y:400 }) && shapeAtPoint({ x:300, y:400 }).id === 'sa' && shapeAtPoint({ x:300, y:475 }) === null && shapeAtPoint({ x:250, y:302 }).id === 'sb' && shapeAtPoint({ x:500, y:650 }) === null;
+      onTileChosen('plan'); openDrawWin(); document.getElementById('drawSelect').click();
+      const tool = activeTool === SELECT_TOOL && document.getElementById('drawSelect').classList.contains('active');
+      remoteCursor = { tool:SELECT_TOOL, phase:'start', tip:{ x:300, y:400 } }; confirmRemoteCursor();
+      const sel1 = selectedId === 'sa' && !!remoteCursor && rotIconsGroup.visible();
+      remoteCursor.tip = { x:250, y:302 }; confirmRemoteCursor(); const sel2 = selectedId === 'sb';
+      remoteCursor.tip = { x:520, y:700 }; confirmRemoteCursor(); const none = selectedId === null;
+      const red = remoteCursorColor() === '#E02424';
+      closeDrawWin(); model.shapes = []; render();
+      return hits && tool && sel1 && sel2 && none && red;
+    }), 'sélection de dessin : curseur rouge, tap du cercle sélectionne le dessin visé ou désélectionne');
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

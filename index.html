@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-173 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-174 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -616,7 +616,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-173</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-174</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -884,7 +884,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-173 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-174 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1701,6 +1701,9 @@ const shapeNodes = new Map();
 const DRAW_TOOLS = ['draw-rect','draw-ellipse','draw-line','draw-arrow'];
 const DRAW_KIND = { 'draw-rect':'rect', 'draw-ellipse':'ellipse', 'draw-line':'line', 'draw-arrow':'arrow' };
 function isDrawTool(t){ return DRAW_TOOLS.includes(t); }
+// v2.1-174 : outil « Sélection » du dessin : curseur déporté ROUGE (même curseur que le tracé et les ciseaux) ; tapoter son cercle sélectionne le dessin sous la pointe.
+const SELECT_TOOL = 'draw-select';
+const SHAPE_CURSOR_TOOLS = [...DRAW_TOOLS, SELECT_TOOL];
 let drawStart = null; // premier point validé (feuille) d'un dessin en cours
 const drawStyle = { color:'#000000', width:3, dash:false, fill:false };
 const legendLayerGroup = new Konva.Group();
@@ -2200,6 +2203,32 @@ function updateShapeHandles(skip){
   });
   shapeHandles.visible(true); shapeHandles.moveToTop();
   uiLayer.batchDraw();
+}
+// v2.1-174 : dessin le plus au-dessus sous un point (coordonnées feuille). Tolérance = épaisseur du trait ou 14 px écran ; l'intérieur
+// compte si le dessin est rempli.
+function shapeAtPoint(pt){
+  const tol = Math.max(14/zoom, 2);
+  for (let i = (model.shapes||[]).length - 1; i >= 0; i--){
+    const sh = model.shapes[i];
+    const r = -(sh.rotation||0)*Math.PI/180, c = Math.cos(r), s = Math.sin(r);
+    const dx = pt.x - sh.x, dy = pt.y - sh.y;
+    const lx = dx*c - dy*s, ly = dx*s + dy*c; // point dans le repère du dessin
+    const t = tol + shapeStroke(sh)/2;
+    if (sh.kind === 'line' || sh.kind === 'arrow'){
+      const px = Math.max(0, Math.min(sh.width, lx));
+      if (Math.hypot(lx-px, ly) <= t) return sh;
+    } else if (sh.kind === 'rect'){
+      const inside = lx >= 0 && lx <= sh.width && ly >= 0 && ly <= sh.height;
+      const nearEdge = lx >= -t && lx <= sh.width+t && ly >= -t && ly <= sh.height+t && !(lx > t && lx < sh.width-t && ly > t && ly < sh.height-t);
+      if ((sh.fill && inside) || nearEdge) return sh;
+    } else if (sh.kind === 'ellipse'){
+      const a = sh.width/2, b = sh.height/2, ex = (lx-a), ey = (ly-b);
+      const d = Math.hypot(ex/Math.max(a,1), ey/Math.max(b,1)); // 1 = sur l'ellipse
+      const edge = Math.abs(d-1) * Math.min(Math.max(a,1), Math.max(b,1)) <= t;
+      if ((sh.fill && d <= 1) || edge) return sh;
+    }
+  }
+  return null;
 }
 // Création d'un dessin à partir des 2 points validés.
 function addShapeFromTool(tool, p1, p2){
@@ -2847,7 +2876,7 @@ function rotatablePlan(){
 // v2.1-172 : objet tournable = plan sélectionné OU dessin sélectionné (même géométrie : coin haut-gauche + width / height / rotation).
 function rotatableObj(){
   const pl = rotatablePlan(); if (pl) return pl;
-  if (!selectedId || activeTool !== null) return null;
+  if (!selectedId || (activeTool !== null && activeTool !== SELECT_TOOL)) return null;
   const sh = selectedShape();
   return (sh && !sh.locked) ? sh : null;
 }
@@ -3630,7 +3659,7 @@ stage.on('mousemove touchmove', (e)=>{
   // En placement/tracé déporté au doigt (pastille, gomme, découpe), c'est le curseur dédié
   // (drawRemoteCursor / previews spécifiques) qui sert d'aperçu ; l'ancien aperçu fantôme
   // resterait collé sous le doigt et ferait doublon avec le point réellement visé.
-  if (['place-remote','eraser','cut-rect','cut-point',...DRAW_TOOLS].includes(activeTool) && isRealTouch(e)) return;
+  if (['place-remote','eraser','cut-rect','cut-point',...SHAPE_CURSOR_TOOLS].includes(activeTool) && isRealTouch(e)) return;
   if (e.evt && e.evt.cancelable) e.evt.preventDefault();
   const pos = stagePointer();
   if (!pos) return;
@@ -3882,7 +3911,7 @@ function resetRemoteGesture(){
   pendingRemoteCursorPos = null;
   remoteAnchor = null; drawStart = null;
   if (remoteCursor && remoteCursor.tool === 'pastille'){ remoteCursor = null; drawRemoteCursor(); }
-  else if (remoteCursor && isDrawTool(remoteCursor.tool)){ remoteCursor.phase = 'start'; drawRemoteCursor(); }
+  else if (remoteCursor && (isDrawTool(remoteCursor.tool) || remoteCursor.tool === SELECT_TOOL)){ remoteCursor.phase = 'start'; drawRemoteCursor(); }
 }
 let lastRemoteConfirmAt = 0;
 function scheduleRemoteCursorMove(pos){
@@ -3907,7 +3936,7 @@ function scheduleRemoteCursorMove(pos){
 // un appui long resté sans effet (voir remoteToolPendingGate ci-dessous).
 function createRemoteCursorForTool(tool, pos){
   if (tool==='place-remote'){ remoteCursor = { tool:'pastille', phase:'anchor', tip: remoteTipFromHandlePos(pos) }; return true; }
-  if (isDrawTool(tool)){ remoteCursor = { tool, phase:'start', tip: remoteTipFromHandlePos(pos) }; return true; } // v2.1-168 : un dessin n'exige pas de plan
+  if (isDrawTool(tool) || tool === SELECT_TOOL){ remoteCursor = { tool, phase:'start', tip: remoteTipFromHandlePos(pos) }; return true; } // v2.1-168 : un dessin n'exige pas de plan
   const targetNode = cutTargetNodeAt(pos);
   if (!targetNode){ toast('Touchez un plan pour le découper.'); return false; }
   cutTargetPlanId = targetNode.id();
@@ -3920,7 +3949,7 @@ function createRemoteCursorForTool(tool, pos){
 // long resté immobile bascule en déplacement du plan dans toutes les directions.
 let remoteToolPendingGate = null; // {startX,startY,resolved,panning,lastX,lastY,timer}
 stage.on('touchstart', (e)=>{
-  if (!['place-remote','cut-rect','cut-point',...DRAW_TOOLS].includes(activeTool)) return;
+  if (!['place-remote','cut-rect','cut-point',...SHAPE_CURSOR_TOOLS].includes(activeTool)) return;
   const touches = e.evt.touches;
   if (touches && touches.length > 1){
     // v2.1-166 : 2e doigt = pincement : le geste d'un doigt en attente est abandonné (avant, le relâchement du 1er doigt créait un curseur
@@ -3967,7 +3996,7 @@ stage.on('touchstart', (e)=>{
   }
 });
 stage.on('touchmove', (e)=>{
-  if (!['place-remote','cut-rect','cut-point',...DRAW_TOOLS].includes(activeTool)) return;
+  if (!['place-remote','cut-rect','cut-point',...SHAPE_CURSOR_TOOLS].includes(activeTool)) return;
   const touches = e.evt.touches;
   const t = touches && touches[0];
   if (remoteToolPendingGate && !remoteToolPendingGate.resolved){
@@ -4008,7 +4037,7 @@ stage.on('touchmove', (e)=>{
   scheduleRemoteCursorMove(pos); // regroupé sur requestAnimationFrame pour rester fluide
 });
 stage.on('touchend touchcancel', (e)=>{
-  if (!['place-remote','cut-rect','cut-point',...DRAW_TOOLS].includes(activeTool)) return;
+  if (!['place-remote','cut-rect','cut-point',...SHAPE_CURSOR_TOOLS].includes(activeTool)) return;
   if (remoteToolPendingGate){
     const wasPanning = remoteToolPendingGate.panning;
     clearTimeout(remoteToolPendingGate.timer);
@@ -4195,6 +4224,7 @@ function remoteCursorColor(){
     if (remoteCursor.tool==='eraser') return '#C0392B';
     if (remoteCursor.tool==='cut-rect' || remoteCursor.tool==='cut-point') return '#0E6FA8';
     if (isDrawTool(remoteCursor.tool)) return drawStyle.color;
+    if (remoteCursor.tool === SELECT_TOOL) return '#E02424'; // rouge : se distingue du curseur de tracé (couleur du trait) et des ciseaux (bleu)
   }
   return '#0E6FA8';
 }
@@ -4310,6 +4340,11 @@ function confirmRemoteCursor(){
       drawRemoteCursor();
       toast('Pastille placée. Touchez le plan pour le point réel suivant.');
     }
+  } else if (remoteCursor.tool === SELECT_TOOL){
+    // v2.1-174 : sélection précise : le dessin le plus au-dessus sous la pointe, sinon désélection ; le curseur reste en place
+    const hit = shapeAtPoint({ x, y });
+    if (hit) selectNode(shapeNodes.get(hit.id), hit.id); else selectNode(null, null);
+    drawRemoteCursor(); syncDrawWin();
   } else if (isDrawTool(remoteCursor.tool)){
     // v2.1-168 : dessin — 1er point validé, puis 2e point = création ; le curseur reste en place pour enchaîner un autre dessin
     if (remoteCursor.phase==='start'){
@@ -5320,7 +5355,7 @@ function setTool(name){
   // un simple glisser du cercle blanc suffit ensuite à l'amener au bon endroit.
   if (activeTool==='cut-rect' && isTouchCapableDevice()){ remoteCursor = { tool:'cut-rect', phase:'start', tip: viewportCenterStagePos() }; }
   else if (activeTool==='cut-point' && isTouchCapableDevice()){ remoteCursor = { tool:'cut-point', tip: viewportCenterStagePos() }; }
-  else if (isDrawTool(activeTool) && isTouchCapableDevice()){ remoteCursor = { tool:activeTool, phase:'start', tip: viewportCenterStagePos() }; } // v2.1-168
+  else if ((isDrawTool(activeTool) || activeTool === SELECT_TOOL) && isTouchCapableDevice()){ remoteCursor = { tool:activeTool, phase:'start', tip: viewportCenterStagePos() }; } // v2.1-168 / 174
   else { remoteCursor = null; }
   drawRemoteCursor();
   if (!isDrawTool(activeTool)){ ghostGroup.destroyChildren(); }
@@ -5945,7 +5980,7 @@ document.getElementById('ctrlClose').addEventListener('click', closeCtrlWin);
 function syncDrawWin(){
   const win = document.getElementById('drawWin');
   win.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active', b.dataset.tool === activeTool));
-  document.getElementById('drawSelect').classList.toggle('active', !isDrawTool(activeTool));
+  document.getElementById('drawSelect').classList.toggle('active', activeTool === SELECT_TOOL);
   win.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('active', +b.dataset.w === drawStyle.width));
   document.getElementById('drawDash').classList.toggle('active', drawStyle.dash);
   document.getElementById('drawFill').classList.toggle('active', drawStyle.fill);
@@ -5953,7 +5988,8 @@ function syncDrawWin(){
   document.getElementById('btnDraw').classList.toggle('active', win.classList.contains('show'));
   // Consigne affichée DANS la fenêtre (les bulles s'afficheraient au même endroit et la cacheraient)
   let hint = '';
-  if (!isDrawTool(activeTool)) hint = selectedShape() ? 'Dessin sélectionné : réglages ci-dessous, poignées pour le modifier.' : 'Touchez un dessin pour le modifier, ou un outil pour tracer.';
+  if (activeTool === SELECT_TOOL) hint = isTouchCapableDevice() ? 'Placez la pointe rouge sur un dessin puis tapotez le cercle.' : 'Cliquez un dessin pour le sélectionner.';
+  else if (!isDrawTool(activeTool)) hint = selectedShape() ? 'Dessin sélectionné : réglages ci-dessous, poignées pour le modifier.' : 'Touchez un dessin pour le modifier, ou un outil pour tracer.';
   else if (!isTouchCapableDevice()) hint = 'Glissez sur le plan pour tracer.';
   else hint = drawStart ? '2e point : placez le curseur puis tapotez le cercle.' : '1er point : placez le curseur puis tapotez le cercle.';
   document.getElementById('drawHint').textContent = hint;
@@ -5970,7 +6006,7 @@ function closeDrawWin(){
   const win = document.getElementById('drawWin');
   if (!win.classList.contains('show')) return;
   win.classList.remove('show');
-  if (isDrawTool(activeTool)) setTool(activeTool); // quitte l'outil de tracé
+  if (isDrawTool(activeTool) || activeTool === SELECT_TOOL) setTool(activeTool); // quitte l'outil de tracé / de sélection
   if (typeof rotatablePlan === 'function') refreshRotFine(rotatablePlan());
   syncDrawWin();
 }
@@ -5991,7 +6027,7 @@ function syncDrawWinFromSelection(){
 document.getElementById('btnDraw').addEventListener('click', ()=>{
   if (document.getElementById('drawWin').classList.contains('show')) closeDrawWin(); else openDrawWin();
 });
-document.getElementById('drawSelect').addEventListener('click', ()=>{ if (isDrawTool(activeTool)) setTool(activeTool); syncDrawWin(); }); // quitte l'outil de tracé : on peut toucher un dessin pour le sélectionner
+document.getElementById('drawSelect').addEventListener('click', ()=>{ if (activeTool !== SELECT_TOOL) setTool(SELECT_TOOL); syncDrawWin(); }); // v2.1-174 : curseur rouge de sélection : on peut toucher un dessin pour le sélectionner
 document.querySelectorAll('#drawWin [data-tool]').forEach(b=>b.addEventListener('click', ()=>{
   selectNode(null, null); // on trace : pas de dessin sélectionné
   setTool(b.dataset.tool); syncDrawWin();
@@ -6132,7 +6168,7 @@ function layoutHeader(){
 // Une seule tuile est mise en avant à la fois (jamais deux en même temps) : en priorité
 // celle dont le tiroir est ouvert, sinon celle qui correspond à l'outil actuellement actif.
 const TILE_TOOL_CATEGORIES = {
-  plan: ['pipette','paint-bucket','eraser','cut-rect','cut-point', ...DRAW_TOOLS],
+  plan: ['pipette','paint-bucket','eraser','cut-rect','cut-point', ...SHAPE_CURSOR_TOOLS],
   pastille: ['place-classic','place-remote'],
   // La tuile "Texte" n'a volontairement aucun outil associé ici : ajouter un texte/logo
   // est une action immédiate (pas un mode persistant comme les autres outils), donc rien

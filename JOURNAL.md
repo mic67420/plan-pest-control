@@ -1472,4 +1472,11 @@ v2.1-173 — Lignes et flèches : même accroche d'angle que la rotation d'un pl
   quand l'angle est à moins de ROT_SNAP_DEG (4°) d'un angle droit, longueur conservée ; appliqué au tracé (aperçu compris) et au glissement
   d'une extrémité (la poignée suit le point accroché). La rotation par les mains et le redimensionnement des rectangles / ellipses étaient déjà
   identiques à ceux d'un plan.
+
+v2.1-174 — Outil Sélection des dessins : curseur rouge
+  Demande : l'outil Sélection affiche le même curseur (cercle + pointe) que le tracé et les ciseaux, en rouge pour le distinguer.
+  Réalisation : outil 'draw-select' (curseur déporté rouge #E02424, au doigt) ; tapoter le cercle sélectionne le dessin sous la pointe
+  (shapeAtPoint : tolérance 14 px écran, intérieur compris si rempli, le plus au-dessus d'abord) ou désélectionne s'il n'y en a pas ; le curseur
+  reste pour enchaîner. Le toucher direct d'un dessin fonctionne toujours ; poignées et mains de rotation actives dans ce mode. À la souris :
+  clic direct sur le dessin.
 ```
