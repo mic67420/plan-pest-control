@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-174 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-175 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -483,7 +483,12 @@
   #drawWin #drawSelect.active svg path{ fill:#fff; }
   #drawWin input[type=color]{ flex:1 1 0; min-width:0; height:42px; border:none; border-radius:10px; padding:4px; background:#fff7e6; }
   #drawWin .dw-w{ display:block; width:60%; background:#1c2230; border-radius:2px; }
-  #drawWin button.active .dw-w{ background:#fff; }
+  /* v2.1-175 : les OUTILS (1re rangée) s'allument en plein sombre ; les RÉGLAGES (2e rangée : épaisseur, pointillé, remplissage) s'indiquent par un simple
+     cadre sombre, pour ne plus ressembler à un outil resté actif. En mode Sélection sans dessin choisi, les réglages sont estompés (ils ne
+     s'appliquent à rien) et sans cadre. */
+  #drawWin .dw-row:not(.dw-tools) button.active{ background:#fff7e6; color:#1c2230; box-shadow:inset 0 0 0 3px #1c2230; }
+  #drawWin.no-target .dw-row:not(.dw-tools){ opacity:.45; }
+  #drawWin.no-target .dw-row:not(.dw-tools) button.active{ box-shadow:none; }
   #drawWin .dw-dash{ letter-spacing:1px; font-weight:700; }
   #drawWin .dw-fill{ width:22px; height:16px; border:2.5px solid currentColor; border-radius:3px; background:repeating-linear-gradient(45deg, currentColor 0 2px, transparent 2px 6px); opacity:.9; }
   #ctrlWin{ position:fixed; left:50%; top:calc(var(--topbar-h, 96px) + 8px); transform:translateX(-50%); z-index:790; display:none; flex-direction:column; gap:8px;
@@ -616,7 +621,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-174</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-175</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -884,7 +889,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-174 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-175 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1705,7 +1710,7 @@ function isDrawTool(t){ return DRAW_TOOLS.includes(t); }
 const SELECT_TOOL = 'draw-select';
 const SHAPE_CURSOR_TOOLS = [...DRAW_TOOLS, SELECT_TOOL];
 let drawStart = null; // premier point validé (feuille) d'un dessin en cours
-const drawStyle = { color:'#000000', width:3, dash:false, fill:false };
+const drawStyle = { color:'#000000', width:4, dash:false, fill:false };
 const legendLayerGroup = new Konva.Group();
 // v2.1-91 : les textes en dernier = toujours au premier plan (au-dessus des logos et de la légende).
 contentLayer.add(recapGroup, shapesLayerGroup, linesLayerGroup, pastillesLayerGroup, logosLayerGroup, legendLayerGroup, textesLayerGroup);
@@ -5981,6 +5986,7 @@ function syncDrawWin(){
   const win = document.getElementById('drawWin');
   win.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active', b.dataset.tool === activeTool));
   document.getElementById('drawSelect').classList.toggle('active', activeTool === SELECT_TOOL);
+  win.classList.toggle('no-target', !isDrawTool(activeTool) && !selectedShape()); // réglages sans effet : estompés
   win.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('active', +b.dataset.w === drawStyle.width));
   document.getElementById('drawDash').classList.toggle('active', drawStyle.dash);
   document.getElementById('drawFill').classList.toggle('active', drawStyle.fill);

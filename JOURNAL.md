@@ -1479,4 +1479,10 @@ v2.1-174 — Outil Sélection des dessins : curseur rouge
   (shapeAtPoint : tolérance 14 px écran, intérieur compris si rempli, le plus au-dessus d'abord) ou désélectionne s'il n'y en a pas ; le curseur
   reste pour enchaîner. Le toucher direct d'un dessin fonctionne toujours ; poignées et mains de rotation actives dans ce mode. À la souris :
   clic direct sur le dessin.
+
+v2.1-175 — Fenêtre Dessin : un seul bouton allumé à la fois
+  Cause : en mode Sélection, les boutons de RÉGLAGE (épaisseur, pointillé, remplissage) restaient en plein sombre comme un outil, d'où l'impression
+  d'un outil encore actif ; l'épaisseur par défaut (3) ne correspondait à aucun bouton.
+  Correctif : outils (1re rangée) = plein sombre ; réglages (2e rangée) = simple cadre sombre ; en mode Sélection sans dessin choisi les réglages
+  sont estompés et sans cadre (ils ne s'appliquent à rien) ; épaisseur par défaut 4 (= « Moyen »).
 ```
