@@ -268,6 +268,31 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); if (x){ if (keep) x.shape = keep; else delete x.shape; } }); render();
       return drawn && sw && saved;
     }), 'forme du poste : 6 formes dessinées, choisies dans le crayon et propagées à toutes les pages');
+    // v2.1-172 : dessins : poignées sur les angles, redimensionnement (angle opposé fixe, même tourné), rotation comme un plan, ancien format, bouton Sélection
+    ok(await pg.evaluate(async()=>{
+      closeOtherWindows(''); resetRemoteGesture(); model.shapes = [{ id:'old1', kind:'rect', x1:150, y1:300, x2:350, y2:450, color:'#0E6FA8', width:4, dash:false, fill:true, locked:false }]; render();
+      const sh = model.shapes[0];
+      const migr = sh.x === 150 && sh.y === 300 && sh.width === 200 && sh.height === 150 && sh.rotation === 0 && sh.sw === 4 && sh.x1 === undefined;
+      onTileChosen('plan'); selectNode(shapeNodes.get(sh.id), sh.id);
+      const four = shapeHandles.getChildren().filter(h=>h.visible()).length === 4;
+      const exact = shapeCornersLocal(sh).every((c,k)=>{ const w = shapeToWorld(sh, c[0], c[1]), h = shapeHandles.getChildren()[k]; return Math.abs(h.x()-w.x) < 0.01 && Math.abs(h.y()-w.y) < 0.01; });
+      // rotation (même moteur que le plan) : 30° autour du centre
+      const c0 = planCenter(sh); sh.rotation = 30; const cx = shapeToWorld(sh, sh.width/2, sh.height/2); // un coin haut-gauche inchangé = centre qui bouge : on vérifie surtout que rotatableObj voit le dessin
+      const rot = rotatableObj() === sh && rotIconsGroup.visible();
+      // redimensionnement : on tire l'angle 2 de (+30,+20), l'angle 0 doit rester fixe à l'écran
+      const before = shapeToWorld(sh, 0, 0), h2 = shapeHandles.getChildren()[2], w2 = shapeToWorld(sh, sh.width, sh.height);
+      h2.fire('dragstart', { evt:{} }); h2.position({ x:w2.x+30, y:w2.y+20 }); h2.fire('dragmove', { evt:{} }); h2.fire('dragend', { evt:{} });
+      const after = shapeToWorld(sh, 0, 0), fixed = Math.abs(before.x-after.x) < 0.5 && Math.abs(before.y-after.y) < 0.5 && sh.width > 200;
+      const line = { id:'ln1', kind:'arrow', x:100, y:500, width:150, height:0, rotation:20, color:'#000000', sw:3, dash:false, fill:false, locked:false }; model.shapes.push(line); render(); selectNode(shapeNodes.get('ln1'), 'ln1');
+      const two = shapeHandles.getChildren().filter(h=>h.visible()).length === 2;
+      const lbl = lockBadge.row; // rangée de 2 icônes au-dessus (badgeState.row.n === 2)
+      const row2 = badgeState.row && badgeState.row.n === 2;
+      model.shapes = []; render();
+      const win = document.getElementById('drawWin');
+      const noClose = !document.getElementById('drawClose') && !!document.getElementById('drawSelect');
+      openDrawWin(); const a = isDrawTool(activeTool); document.getElementById('drawSelect').click(); const b = activeTool === null && win.classList.contains('show'); closeDrawWin();
+      return migr && four && exact && rot && fixed && two && row2 && noClose && a && b;
+    }), 'dessins : poignées pile sur les angles, redimensionnement angle opposé fixe, rotation, ancien format, bouton Sélection sans croix');
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

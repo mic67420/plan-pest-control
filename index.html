@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-171 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-172 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -480,7 +480,7 @@
   #drawWin button{ flex:1 1 0; min-width:0; height:42px; border:none; border-radius:10px; background:#fff7e6; color:#1c2230; display:flex; align-items:center; justify-content:center; font:inherit; font-size:16px; padding:0; }
   #drawWin button.active{ background:#1c2230; color:#fff; }
   #drawWin button.active svg *{ stroke:#fff; } #drawWin button.active svg path[fill="#000"]{ fill:#fff; }
-  #drawWin .dw-x{ flex:0 0 42px; }
+  #drawWin #drawSelect.active svg path{ fill:#fff; }
   #drawWin input[type=color]{ flex:1 1 0; min-width:0; height:42px; border:none; border-radius:10px; padding:4px; background:#fff7e6; }
   #drawWin .dw-w{ display:block; width:60%; background:#1c2230; border-radius:2px; }
   #drawWin button.active .dw-w{ background:#fff; }
@@ -616,7 +616,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-171</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-172</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -860,11 +860,11 @@
 <div id="drawWin">
   <div id="drawHint" class="dw-hint"></div>
   <div class="dw-row dw-tools">
+    <button type="button" id="drawSelect" title="Sélectionner un dessin (déplacer, redimensionner, tourner)"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M5 3l14 8-6 1.6L10.4 19z" fill="#000" stroke="#000" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
     <button type="button" data-tool="draw-rect" title="Rectangle"><svg viewBox="0 0 24 24" width="26" height="26"><rect x="3" y="6" width="18" height="12" rx="1" fill="none" stroke="#000" stroke-width="2.4"/></svg></button>
     <button type="button" data-tool="draw-ellipse" title="Cercle / ellipse"><svg viewBox="0 0 24 24" width="26" height="26"><ellipse cx="12" cy="12" rx="9" ry="6.5" fill="none" stroke="#000" stroke-width="2.4"/></svg></button>
     <button type="button" data-tool="draw-line" title="Ligne"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M4 19L20 5" stroke="#000" stroke-width="2.4" stroke-linecap="round"/></svg></button>
     <button type="button" data-tool="draw-arrow" title="Flèche"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M4 19L19 6" stroke="#000" stroke-width="2.4" stroke-linecap="round"/><path d="M20 4l.5 8-3.2-2.6-4-1.3z" fill="#000"/></svg></button>
-    <button type="button" id="drawClose" class="dw-x" title="Fermer" aria-label="Fermer">✕</button>
   </div>
   <div class="dw-row">
     <button type="button" data-w="2" title="Fin"><span class="dw-w" style="height:2px"></span></button>
@@ -884,7 +884,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-171 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-172 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2029,33 +2029,69 @@ let pastilleNodes = new Map();
 let textNodes = new Map();
 
 /* ---------------------------- Dessins simples (v2.1-168) ---------------------------------
-   Rectangle, ellipse, ligne, flèche : deux points (coins ou extrémités) + style (couleur, épaisseur, pointillé, remplissage).
-   Tracé au doigt comme les ciseaux (curseur déporté : on valide le 1er point puis le 2e) ; à la souris : glisser. Une fois posé,
-   un dessin se déplace en glissant le corps, se redimensionne avec ses 2 poignées, se verrouille et se supprime comme un logo. */
+   Rectangle, ellipse, ligne, flèche. v2.1-172 : MÊME convention géométrique qu'un plan : (x, y) = coin haut-gauche, width, height, rotation
+   en degrés autour de ce coin ; une ligne / flèche est un « rectangle » de hauteur 0 (longueur = width, angle = rotation). Ainsi la
+   rotation à 4 mains du plan (aimant 0/90/180/270°, autour du centre) s'applique telle quelle aux dessins.
+   Tracé au doigt comme les ciseaux (curseur déporté : 1er point puis 2e point) ; à la souris : glisser. Une fois posé, un dessin se
+   déplace en glissant, se redimensionne par ses poignées placées pile sur ses angles (4 pour rectangle / ellipse, 2 extrémités pour une
+   ligne), tourne, se verrouille et se supprime comme un logo. */
 function shapeRgba(hex, a){
   const m = /^#([0-9a-f]{6})$/i.exec(hex || '');
   const n = m ? parseInt(m[1], 16) : 0xD6493E;
   return 'rgba('+(n>>16)+','+((n>>8)&255)+','+(n&255)+','+a+')';
 }
-function shapeDash(sh){ return sh.dash ? [sh.width*2.5, sh.width*2] : []; }
+// Épaisseur de trait et dessin utilisent des noms séparés : sh.sw = épaisseur du trait (avant v2.1-172 : sh.width, devenu la largeur).
+function shapeStroke(sh){ return sh.sw || 3; }
+function shapeDashArr(sh){ const w = shapeStroke(sh); return sh.dash ? [w*2.5, w*2] : []; }
+// Anciens dessins (v2.1-168 à 171 : x1,y1,x2,y2 + width = épaisseur) -> convention d'un plan.
+function normalizeShape(sh){
+  if (sh.x1 === undefined) return sh;
+  const sw = sh.width || 3;
+  if (sh.kind === 'line' || sh.kind === 'arrow'){
+    const dx = sh.x2-sh.x1, dy = sh.y2-sh.y1;
+    sh.x = sh.x1; sh.y = sh.y1; sh.width = Math.hypot(dx, dy); sh.height = 0; sh.rotation = Math.atan2(dy, dx)*180/Math.PI;
+  } else {
+    sh.x = Math.min(sh.x1, sh.x2); sh.y = Math.min(sh.y1, sh.y2); sh.width = Math.abs(sh.x2-sh.x1); sh.height = Math.abs(sh.y2-sh.y1); sh.rotation = 0;
+  }
+  sh.sw = sw;
+  delete sh.x1; delete sh.y1; delete sh.x2; delete sh.y2;
+  return sh;
+}
+// Deux points -> géométrie d'un dessin.
+function shapeGeomFromPoints(kind, p1, p2){
+  if (kind === 'line' || kind === 'arrow'){
+    const dx = p2.x-p1.x, dy = p2.y-p1.y;
+    return { x:p1.x, y:p1.y, width:Math.hypot(dx, dy), height:0, rotation:Math.atan2(dy, dx)*180/Math.PI };
+  }
+  return { x:Math.min(p1.x,p2.x), y:Math.min(p1.y,p2.y), width:Math.abs(p2.x-p1.x), height:Math.abs(p2.y-p1.y), rotation:0 };
+}
+function shapeCornersLocal(sh){
+  return (sh.kind === 'line' || sh.kind === 'arrow') ? [[0,0],[sh.width,0]] : [[0,0],[sh.width,0],[sh.width,sh.height],[0,sh.height]];
+}
+// Point local -> coordonnées feuille (rotation autour du coin haut-gauche, comme un plan).
+function shapeToWorld(g, lx, ly){
+  const r = (g.rotation||0)*Math.PI/180, c = Math.cos(r), s = Math.sin(r);
+  return { x: g.x + lx*c - ly*s, y: g.y + lx*s + ly*c };
+}
 function applyShapeGeometry(body, sh){
-  const x = Math.min(sh.x1,sh.x2), y = Math.min(sh.y1,sh.y2), w = Math.abs(sh.x2-sh.x1), h = Math.abs(sh.y2-sh.y1);
-  if (sh.kind==='rect') body.setAttrs({ x, y, width:w, height:h });
-  else if (sh.kind==='ellipse') body.setAttrs({ x:x+w/2, y:y+h/2, radiusX:Math.max(w/2,0.5), radiusY:Math.max(h/2,0.5) });
-  else body.points([sh.x1, sh.y1, sh.x2, sh.y2]);
+  const w = sh.width, h = sh.height;
+  if (sh.kind==='rect') body.setAttrs({ x:0, y:0, width:w, height:h });
+  else if (sh.kind==='ellipse') body.setAttrs({ x:w/2, y:h/2, radiusX:Math.max(w/2,0.5), radiusY:Math.max(h/2,0.5) });
+  else body.points([0, 0, w, 0]);
 }
 // hit=true : copie invisible, trait plein et épais (zone de toucher confortable même pour un pointillé fin) ; hit=false : le dessin visible.
 function makeShapeBody(sh, hit){
+  const sw = shapeStroke(sh);
   const common = hit
-    ? { stroke:'transparent', strokeWidth:Math.max(sh.width, 26/zoom), fill: sh.fill ? 'transparent' : undefined, listening:true }
-    : { stroke:sh.color, strokeWidth:sh.width, dash:shapeDash(sh), lineCap:'round', lineJoin:'round', fill: sh.fill ? shapeRgba(sh.color, 0.25) : undefined, listening:false };
+    ? { stroke:'transparent', strokeWidth:Math.max(sw, 26/zoom), fill: sh.fill ? 'transparent' : undefined, listening:true }
+    : { stroke:sh.color, strokeWidth:sw, dash:shapeDashArr(sh), lineCap:'round', lineJoin:'round', fill: sh.fill ? shapeRgba(sh.color, 0.25) : undefined, listening:false };
   common.perfectDrawEnabled = false;
   let body;
   if (sh.kind==='rect') body = new Konva.Rect(common);
   else if (sh.kind==='ellipse') body = new Konva.Ellipse(Object.assign({ radiusX:1, radiusY:1 }, common));
   else if (sh.kind==='arrow'){
-    const L = 10 + sh.width*2.2;
-    body = new Konva.Arrow(Object.assign({ points:[0,0,0,0], pointerLength:L, pointerWidth:L, fill: hit ? 'transparent' : sh.color }, common, { fill: hit ? 'transparent' : sh.color }));
+    const L = 10 + sw*2.2;
+    body = new Konva.Arrow(Object.assign({ points:[0,0,0,0], pointerLength:L, pointerWidth:L }, common, { fill: hit ? 'transparent' : sh.color }));
   }
   else body = new Konva.Line(Object.assign({ points:[0,0,0,0] }, common));
   applyShapeGeometry(body, sh);
@@ -2063,15 +2099,17 @@ function makeShapeBody(sh, hit){
 }
 function updateShapeBodies(node, sh){
   const [vis, hit] = node.getChildren();
-  const L = 10 + sh.width*2.2;
-  vis.setAttrs({ stroke:sh.color, strokeWidth:sh.width, dash:shapeDash(sh) });
-  hit.setAttrs({ strokeWidth:Math.max(sh.width, 26/zoom) });
+  const sw = shapeStroke(sh), L = 10 + sw*2.2;
+  node.setAttrs({ x:sh.x, y:sh.y, rotation:sh.rotation||0 });
+  vis.setAttrs({ stroke:sh.color, strokeWidth:sw, dash:shapeDashArr(sh) });
+  hit.setAttrs({ strokeWidth:Math.max(sw, 26/zoom) });
   if (sh.kind==='arrow'){ vis.setAttrs({ fill:sh.color, pointerLength:L, pointerWidth:L }); hit.setAttrs({ pointerLength:L, pointerWidth:L }); }
   else if (sh.kind!=='line'){ vis.fill(sh.fill ? shapeRgba(sh.color, 0.25) : null); hit.fill(sh.fill ? 'transparent' : null); }
   applyShapeGeometry(vis, sh); applyShapeGeometry(hit, sh);
 }
 function renderShapes(){
   if (!model.shapes) model.shapes = [];
+  model.shapes.forEach(normalizeShape);
   const seen = new Set();
   const drawing = isDrawTool(activeTool);
   model.shapes.forEach((sh, orderIdx)=>{
@@ -2081,12 +2119,10 @@ function renderShapes(){
       node = new Konva.Group({ id:sh.id, name:'shape', draggable:true });
       node.add(makeShapeBody(sh, false), makeShapeBody(sh, true));
       node.on('click tap', ()=>{ if (isDrawTool(activeTool)) return; selectNode(node, sh.id); });
-      node.on('dragmove', ()=>updateShapeHandles());
+      node.on('dragmove', ()=>{ updateShapeHandles(); updateRotateIcons(); });
       node.on('dragend', ()=>{
         const ss = model.shapes.find(x=>x.id===sh.id); if (!ss) return;
-        const dx = node.x(), dy = node.y();
-        ss.x1 += dx; ss.x2 += dx; ss.y1 += dy; ss.y2 += dy;
-        node.position({ x:0, y:0 });
+        ss.x = node.x(); ss.y = node.y(); // le groupe EST le coin haut-gauche : rien d'autre à recalculer
         pushHistory(); render();
       });
       shapeNodes.set(sh.id, node);
@@ -2099,43 +2135,66 @@ function renderShapes(){
   });
   for (const [id, node] of shapeNodes){ if (!seen.has(id)){ node.destroy(); shapeNodes.delete(id); } }
 }
-// Poignées des 2 points du dessin sélectionné (petits points, zone de saisie de 32 px) : glisser = redimensionner / orienter.
+// Poignées sur les ANGLES du dessin sélectionné (4 pour rectangle / ellipse : les coins de sa boîte, même tournée ; 2 extrémités pour une
+// ligne / flèche). Petits points, zone de saisie de 32 px. Glisser une poignée = redimensionner, l'angle opposé reste fixe à l'écran.
 const shapeHandles = new Konva.Group({ visible:false });
 uiLayer.add(shapeHandles);
 (function(){
-  [1,2].forEach(k=>{
+  [0,1,2,3].forEach(k=>{
     const h = new Konva.Group({ draggable:true, name:'shape-handle' });
     h.add(new Konva.Circle({ radius:16, fill:'rgba(0,0,0,0.001)' }));
     h.add(new Konva.Circle({ radius:6, fill:'#ffffff', stroke:'#0E6FA8', strokeWidth:2, listening:false }));
+    h.on('dragstart', ()=>{
+      const sh = selectedShape(), node = sh && shapeNodes.get(sh.id); if (!sh || !node) return;
+      const n = shapeCornersLocal(sh).length, o = shapeCornersLocal(sh)[(k + n/2) % n]; // angle opposé (rect / ellipse) ou autre extrémité (ligne)
+      h._fixed = shapeToWorld(sh, o[0], o[1]);
+    });
     h.on('dragmove', ()=>{
-      const sh = model.shapes.find(x=>x.id===selectedId), node = sh && shapeNodes.get(sh.id); if (!sh || !node) return;
-      sh['x'+k] = h.x(); sh['y'+k] = h.y();
+      const sh = selectedShape(), node = sh && shapeNodes.get(sh.id); if (!sh || !node || !h._fixed) return;
+      const wd = { x:h.x(), y:h.y() }, wo = h._fixed;
+      if (sh.kind === 'line' || sh.kind === 'arrow'){
+        const p1 = k === 0 ? wd : wo, p2 = k === 0 ? wo : wd;
+        Object.assign(sh, shapeGeomFromPoints(sh.kind, p1, p2));
+      } else {
+        const r = (sh.rotation||0)*Math.PI/180, c = Math.cos(r), s = Math.sin(r);
+        const dx = wd.x-wo.x, dy = wd.y-wo.y;
+        const w = dx*c + dy*s, hh = -dx*s + dy*c; // composantes dans les axes du dessin
+        sh.width = Math.max(4, Math.abs(w)); sh.height = Math.max(4, Math.abs(hh));
+        const ox = (w < 0 ? -sh.width : 0), oy = (hh < 0 ? -sh.height : 0);
+        sh.x = wo.x + ox*c - oy*s; sh.y = wo.y + ox*s + oy*c;
+      }
       updateShapeBodies(node, sh);
+      updateShapeHandles(h);
+      updateRotateIcons();
       updateLockIndicator();
       contentLayer.batchDraw();
     });
-    h.on('dragend', ()=>{ pushHistory(); render(); });
+    h.on('dragend', ()=>{ h._fixed = null; pushHistory(); render(); });
     shapeHandles.add(h);
   });
 })();
 function selectedShape(){ return selectedId ? (model.shapes||[]).find(x=>x.id===selectedId) || null : null; }
-function updateShapeHandles(){
+function updateShapeHandles(skip){
   const sh = selectedShape(), node = sh && shapeNodes.get(sh.id);
   if (!sh || !node || sh.locked || isDrawTool(activeTool)){ if (shapeHandles.visible()){ shapeHandles.visible(false); uiLayer.batchDraw(); } return; }
-  const off = { x:node.x(), y:node.y() }; // pendant le glissement du dessin, les poignées le suivent
-  const [h1, h2] = shapeHandles.getChildren();
-  h1.position({ x:sh.x1+off.x, y:sh.y1+off.y }); h2.position({ x:sh.x2+off.x, y:sh.y2+off.y });
-  [h1, h2].forEach(h=>h.scale({ x:1/zoom, y:1/zoom }));
+  const g = { x:node.x(), y:node.y(), rotation:node.rotation() }; // pendant le glissement du dessin, les poignées le suivent
+  const corners = shapeCornersLocal(sh);
+  shapeHandles.getChildren().forEach((h, k)=>{
+    if (k >= corners.length){ h.visible(false); return; }
+    h.visible(true);
+    if (h !== skip) h.position(shapeToWorld(g, corners[k][0], corners[k][1]));
+    h.scale({ x:1/zoom, y:1/zoom });
+  });
   shapeHandles.visible(true); shapeHandles.moveToTop();
   uiLayer.batchDraw();
 }
 // Création d'un dessin à partir des 2 points validés.
 function addShapeFromTool(tool, p1, p2){
   const kind = DRAW_KIND[tool]; if (!kind) return null;
-  const len = Math.hypot(p2.x-p1.x, p2.y-p1.y);
-  const w = Math.abs(p2.x-p1.x), h = Math.abs(p2.y-p1.y);
-  if (kind==='line' || kind==='arrow' ? len < 6 : (w < 6 || h < 6)){ document.getElementById('drawHint').textContent = 'Tracé trop petit, réessayez.'; return null; }
-  const sh = { id: nextId('shape-'), kind, x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y, color:drawStyle.color, width:drawStyle.width, dash:drawStyle.dash, fill:drawStyle.fill, locked:false };
+  const g = shapeGeomFromPoints(kind, p1, p2);
+  const tooSmall = (kind==='line' || kind==='arrow') ? g.width < 6 : (g.width < 6 || g.height < 6);
+  if (tooSmall){ document.getElementById('drawHint').textContent = 'Tracé trop petit, réessayez.'; return null; }
+  const sh = Object.assign({ id: nextId('shape-'), kind, color:drawStyle.color, sw:drawStyle.width, dash:drawStyle.dash, fill:drawStyle.fill, locked:false }, g);
   model.shapes.push(sh);
   pushHistory(); render();
   return sh;
@@ -2144,8 +2203,10 @@ function addShapeFromTool(tool, p1, p2){
 function drawShapePreview(tip){
   ghostGroup.destroyChildren();
   if (isDrawTool(activeTool) && drawStart){
-    const sh = { kind:DRAW_KIND[activeTool], x1:drawStart.x, y1:drawStart.y, x2:tip.x, y2:tip.y, color:drawStyle.color, width:drawStyle.width, dash:drawStyle.dash, fill:drawStyle.fill };
-    ghostGroup.add(makeShapeBody(sh, false));
+    const kind = DRAW_KIND[activeTool];
+    const sh = Object.assign({ kind, color:drawStyle.color, sw:drawStyle.width, dash:drawStyle.dash, fill:drawStyle.fill }, shapeGeomFromPoints(kind, drawStart, tip));
+    const body = makeShapeBody(sh, false);
+    const grp = new Konva.Group({ x:sh.x, y:sh.y, rotation:sh.rotation, listening:false }); grp.add(body); ghostGroup.add(grp);
     ghostGroup.add(new Konva.Circle({ x:drawStart.x, y:drawStart.y, radius:4/zoom, fill:drawStyle.color, stroke:'#fff', strokeWidth:1/zoom, listening:false }));
   }
   uiLayer.batchDraw();
@@ -2770,6 +2831,13 @@ function rotatablePlan(){
   if (activeTool!==null) return null;
   return pl;
 }
+// v2.1-172 : objet tournable = plan sélectionné OU dessin sélectionné (même géométrie : coin haut-gauche + width / height / rotation).
+function rotatableObj(){
+  const pl = rotatablePlan(); if (pl) return pl;
+  if (!selectedId || activeTool !== null) return null;
+  const sh = selectedShape();
+  return (sh && !sh.locked) ? sh : null;
+}
 function planCenter(pl){
   const rad = (pl.rotation||0)*Math.PI/180, cos = Math.cos(rad), sin = Math.sin(rad);
   return { x: pl.x + (pl.width/2)*cos - (pl.height/2)*sin, y: pl.y + (pl.width/2)*sin + (pl.height/2)*cos };
@@ -2806,8 +2874,8 @@ function ensureRotIcons(){
 // au zoom et à chaque image d'une rotation, pour que les icônes suivent toujours le cadre.
 function updateRotateIcons(livePl){
   ensureRotIcons();
-  let pl = livePl || rotatablePlan();
-  refreshRotFine(pl);
+  let pl = livePl || rotatableObj();
+  refreshRotFine(pl && findPlanById(pl.id) ? pl : null); // le pavé − / + ne concerne que les plans
   if (!pl){
     if (rotIconsGroup.visible()){ rotIconsGroup.visible(false); uiLayer.batchDraw(); }
     return;
@@ -2815,9 +2883,10 @@ function updateRotateIcons(livePl){
   if (!livePl){
     // Lecture sur le node affiché : suit le plan PENDANT un déplacement ou un redimensionnement,
     // avant même que le modèle ne soit mis à jour (en fin de geste).
-    const node = planImageNodes.get(pl.id);
+    const node = planImageNodes.get(pl.id), shNode = shapeNodes.get(pl.id);
     if (node) pl = { ...pl, x:node.x(), y:node.y(), rotation:node.rotation(),
                      width:node.width()*node.scaleX(), height:node.height()*node.scaleY() };
+    else if (shNode) pl = { ...pl, x:shNode.x(), y:shNode.y(), rotation:shNode.rotation() }; // dessin : largeur / hauteur = celles du modèle
   }
   rotIconsGroup.visible(true);
   const sc = 1/zoom, d = (ROT_ICON_PX/2 + ROT_ICON_GAP_PX)/zoom; // taille constante à l'écran quel que soit le zoom
@@ -2913,7 +2982,7 @@ function pointerClient(e){
 function startPlanRotation(e, iconIndex){
   if (isPinching) return;
   if (e.evt.touches && e.evt.touches.length > 1) return;
-  const pl = rotatablePlan(); if (!pl) return;
+  const pl = rotatableObj(); if (!pl) return;
   e.cancelBubble = true;
   if (e.evt.cancelable) e.evt.preventDefault();
   const c = pointerClient(e.evt);
@@ -2956,7 +3025,7 @@ function applyPlanRotationFrame(){
     // Cadre bleu, points et cadenas masqués pendant la rotation (moins à redessiner à chaque
     // image) ; ils réapparaissent au relâchement (voir onPlanRotateEnd).
     st.uiHidden = true;
-    transformer.visible(false);
+    transformer.visible(false); shapeHandles.visible(false);
     if (lockIndicatorGroup) lockIndicatorGroup.visible(false);
   }
   const pos = { x:(st.cx-st.rect.left)/zoom, y:(st.cy-st.rect.top)/zoom };
@@ -2971,8 +3040,9 @@ function applyPlanRotationFrame(){
   st.rot = rot;
   st.x = st.center.x - ((pl.width/2)*cos - (pl.height/2)*sin);
   st.y = st.center.y - ((pl.width/2)*sin + (pl.height/2)*cos);
-  const node = planImageNodes.get(pl.id);
+  const node = planImageNodes.get(pl.id), shNode = shapeNodes.get(pl.id);
   if (node){ node.position({x:st.x, y:st.y}); node.rotation(rot); planLayer.batchDraw(); }
+  else if (shNode){ shNode.position({x:st.x, y:st.y}); shNode.rotation(rot); contentLayer.batchDraw(); }
   updateRotateIcons({ ...pl, x:st.x, y:st.y, rotation:rot });
 }
 function onPlanRotateEnd(){
@@ -2990,7 +3060,7 @@ function onPlanRotateEnd(){
   if (st.uiHidden) transformer.visible(true); // le cadre bleu réapparaît (render() le recale ensuite)
   // Empêche le "clic" qui suit la fin du geste de désélectionner le plan.
   planRotate.justEnded = true; setTimeout(()=>{ planRotate.justEnded = false; }, 350);
-  const pl = findPlanById(st.pl.id);
+  const pl = findPlanById(st.pl.id) || (model.shapes||[]).find(x=>x.id===st.pl.id);
   if (st.rot != null && pl){ pl.rotation = ((st.rot%360)+360)%360; pl.x = st.x; pl.y = st.y; pushHistory(); render(); }
   else updateRotateIcons(); // simple clic sans mouvement : l'icône repasse en main ouverte
 }
@@ -3032,7 +3102,16 @@ function placeBadges(){
     // v2.1-142 : pastille sélectionnée = 4 icônes en LIGNE au-dessus d'elle (cadenas, renommer, supprimer, réglages)
     const cx = host.left - wrap.left + badgeState.row.x*zoom;
     const topY = host.top - wrap.top + badgeState.row.y*zoom - badgeState.row.r*zoom - 40;
-    const y = Math.max(2, topY), x0 = cx - 64; // 4 icônes de 26 px, écart 8 px = 128 px de large, CENTRÉES sur la pastille
+    const y = Math.max(2, topY);
+    if (badgeState.row.n === 2){
+      // v2.1-172 : dessin sélectionné = cadenas + croix en rangée AU-DESSUS de la boîte (plus haut que l'icône de rotation du haut) : placés au coin
+      // ils recouvraient l'icône de rotation de droite sur les petits dessins et la rendaient intouchable.
+      const x2 = cx - 30;
+      [badgeLockEl, badgeDelEl].forEach((el, i)=>{ el.style.display = 'flex'; el.style.transform = 'translate('+(x2+i*34)+'px,'+y+'px)'; });
+      badgeRenEl.style.display = 'none'; badgeSetEl.style.display = 'none'; badgeCutEl.style.display = 'none';
+      return;
+    }
+    const x0 = cx - 64; // 4 icônes de 26 px, écart 8 px = 128 px de large, CENTRÉES sur la pastille
     // v2.1-145 : les deux rouges (cadenas, supprimer) à gauche, les deux bleues (renommer, réglages) à droite
     [badgeLockEl, badgeDelEl, badgeRenEl, badgeSetEl].forEach((el, i)=>{ el.style.display = 'flex'; el.style.transform = 'translate('+(x0+i*34)+'px,'+y+'px)'; });
     badgeCutEl.style.display = 'none';
@@ -3162,6 +3241,10 @@ function updateLockIndicator(duringRotation){
     const a = 300*Math.PI/180;
     lockBadge.g.position({ x: node.x() + d*Math.sin(a), y: node.y() - d*Math.cos(a) });
     lockBadge.row.set({ x:node.x(), y:node.y(), r:pastille.radius }); // les 4 icônes se rangent en ligne au-dessus de la pastille (placeBadges)
+  } else if (shapeNodes.has(selectedId)){
+    // v2.1-172 : dessin : rangée de 2 icônes centrée au-dessus de sa boîte (voir placeBadges), r = 20 px écran de plus pour passer au-dessus de la main de rotation
+    lockBadge.g.position({ x: box.x + box.width/2, y: box.y });
+    lockBadge.row.set({ x:box.x + box.width/2, y:box.y, r:20/zoom, n:2 });
   } else {
     lockBadge.g.position({ x: box.x + box.width + off, y: box.y - off });
     lockBadge.row.set(null);
@@ -5849,6 +5932,7 @@ document.getElementById('ctrlClose').addEventListener('click', closeCtrlWin);
 function syncDrawWin(){
   const win = document.getElementById('drawWin');
   win.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active', b.dataset.tool === activeTool));
+  document.getElementById('drawSelect').classList.toggle('active', !isDrawTool(activeTool));
   win.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('active', +b.dataset.w === drawStyle.width));
   document.getElementById('drawDash').classList.toggle('active', drawStyle.dash);
   document.getElementById('drawFill').classList.toggle('active', drawStyle.fill);
@@ -5880,7 +5964,7 @@ function closeDrawWin(){
 // Applique le style choisi au dessin sélectionné (le cas échéant) : une seule entrée d'historique par réglage.
 function applyDrawStyle(){
   const sh = selectedShape();
-  if (sh && !sh.locked){ sh.color = drawStyle.color; sh.width = drawStyle.width; sh.dash = drawStyle.dash; sh.fill = drawStyle.fill; pushHistory(); render(); }
+  if (sh && !sh.locked){ sh.color = drawStyle.color; sh.sw = drawStyle.width; sh.dash = drawStyle.dash; sh.fill = drawStyle.fill; pushHistory(); render(); }
   else if (isDrawTool(activeTool) && remoteCursor) drawRemoteCursor(); // la couleur du curseur suit
   syncDrawWin();
 }
@@ -5888,13 +5972,13 @@ function applyDrawStyle(){
 function syncDrawWinFromSelection(){
   const win = document.getElementById('drawWin'); if (!win || !win.classList.contains('show')) return;
   const sh = selectedShape();
-  if (sh){ drawStyle.color = sh.color; drawStyle.width = sh.width; drawStyle.dash = !!sh.dash; drawStyle.fill = !!sh.fill; }
+  if (sh){ drawStyle.color = sh.color; drawStyle.width = shapeStroke(sh); drawStyle.dash = !!sh.dash; drawStyle.fill = !!sh.fill; }
   syncDrawWin();
 }
 document.getElementById('btnDraw').addEventListener('click', ()=>{
   if (document.getElementById('drawWin').classList.contains('show')) closeDrawWin(); else openDrawWin();
 });
-document.getElementById('drawClose').addEventListener('click', closeDrawWin);
+document.getElementById('drawSelect').addEventListener('click', ()=>{ if (isDrawTool(activeTool)) setTool(activeTool); syncDrawWin(); }); // quitte l'outil de tracé : on peut toucher un dessin pour le sélectionner
 document.querySelectorAll('#drawWin [data-tool]').forEach(b=>b.addEventListener('click', ()=>{
   selectNode(null, null); // on trace : pas de dessin sélectionné
   setTool(b.dataset.tool); syncDrawWin();

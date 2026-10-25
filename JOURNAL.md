@@ -1456,4 +1456,14 @@ v2.1-171 — Crayon du poste, niveau 2 : forme de la pastille
   Code, Nom, Forme, Couleur, Police, Numéro, Taille. La forme (type.shape) est propagée à toutes les pages et dessinée par buildPastilleGroup
   (Konva : Circle / Rect / RegularPolygon / Star), la légende, le récapitulatif, les listes (shapeSwatchHTML) et l'aperçu en direct.
   Numéro plus petit dans les formes étroites (triangle, losange) pour rester à l'intérieur. Anciens postes sans forme = rond.
+
+v2.1-172 — Dessins : sélection précise, poignées sur les angles, rotation comme un plan
+  Demande : icône pour sélectionner précisément une forme ; croix de la fenêtre inutile (toucher « Plan » la ferme) ; poignées pile sur les
+  angles ; rotation identique au plan.
+  Réalisation : bouton « Sélection » (flèche) en tête de la fenêtre Dessin (quitte l'outil de tracé, on touche une forme) ; croix retirée.
+  Les dessins adoptent la géométrie des plans (x, y = coin haut-gauche, width, height, rotation autour du coin ; ligne / flèche = hauteur 0) :
+  la rotation à 4 mains avec aimant 0/90/180/270° s'applique telle quelle (rotatableObj). Poignées : 4 angles de la boîte pour rectangle /
+  ellipse (même tournée), 2 extrémités pour ligne / flèche ; l'angle opposé reste fixe à l'écran pendant le glissement. Cadenas + croix en
+  rangée au-dessus du dessin (au coin, ils recouvraient la main de rotation de droite des petits dessins). Anciens dessins (x1,y1,x2,y2)
+  convertis automatiquement ; épaisseur du trait = sh.sw.
 ```
