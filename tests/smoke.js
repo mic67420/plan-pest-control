@@ -429,6 +429,14 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       ok(await pg.evaluate(async()=>{ const n=libTypes().length; library={version:1,trades:{}}; await libLoad(); return n>=3 && libTypes().length===n; }), 'bibliothèque : conservée sur l\'appareil (rechargement)');
       await pg.evaluate(()=>{ library={version:1,trades:{}}; libPersist(); restoreDoc(window.__snap); }); await pg.waitForTimeout(500);
     }
+    // aperçu de pose d'un poste image (v2.1-183) : image semi-transparente centrée, pas un cercle
+    {
+      await pg.evaluate(async()=>{ const c=document.createElement('canvas');c.width=40;c.height=80;const x=c.getContext('2d');x.fillStyle='#c00';x.fillRect(0,0,40,80);const u=c.toDataURL();
+        pages.forEach(pg=>pg.deviceTypes.push({id:'type-ghost',code:'GH',name:'Fantôme',color:'#c00',shape:'circle',image:u,imageRatio:0.5,defaultRadius:30}));
+        selectedTypeId='type-ghost'; typeImageOf(u); await typeImageOf(u).promise; activeTool='place-classic'; updateGhost({x:200,y:200}); });
+      ok(await pg.evaluate(()=>{ const n=ghostGroup.children[0]; return n && n.className==='Image' && Math.abs(n.opacity()-0.55)<0.01 && Math.abs(n.x()+n.width()/2-snapToGrid(200))<0.6 && Math.abs(n.y()+n.height()/2-snapToGrid(200))<0.6 && n.height()>n.width(); }), 'aperçu de pose d\'un poste image : image semi-transparente centrée (pas un cercle)');
+      await pg.evaluate(()=>{ ghostGroup.destroyChildren(); pages.forEach(pg=>{ pg.deviceTypes=pg.deviceTypes.filter(t=>t.id!=='type-ghost'); }); selectedTypeId=model.deviceTypes[0].id; activeTool=null; });
+    }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

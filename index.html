@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-182 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-183 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -645,7 +645,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-182</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-183</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -915,7 +915,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-182 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-183 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -3902,6 +3902,15 @@ function cutPreviewActive(){
   if (isDrawTool(activeTool) && drawStart) return true; // v2.1-168 : tracé d'un dessin en cours (souris ou doigt)
   return !!pendingCutPolygon || !!(remoteCursor && ((remoteCursor.tool==='cut-rect' && remoteCursor.phase==='end' && cutRectStart) || (remoteCursor.tool==='cut-point' && cutPoints.length>0)));
 }
+// v2.1-183 : aperçu de pose d'un poste « image » (extincteur…) : l'image elle-même en semi-transparence, centrée sur le point visé, à la taille
+// réelle de la pastille — au lieu d'un cercle de la taille du poste, qui masquait le plan et visait mal. Un seul nœud image léger (l'image est
+// déjà en mémoire, typeImageOf) ; aucun recalcul pendant le déplacement. Retourne null pour un poste sans image (cercle habituel).
+function imageGhostRect(type, r){
+  if (!type || !type.image) return null;
+  const e = typeImageOf(type.image), box = 2*r;
+  const ratio = (e.img.naturalWidth && e.img.naturalHeight) ? e.img.naturalWidth/e.img.naturalHeight : (type.imageRatio || 1);
+  return { img:e.img, w: ratio >= 1 ? box : box*ratio, h: ratio >= 1 ? box/ratio : box };
+}
 function updateGhost(pos){
   if (cutPreviewActive()) return; // v2.1-145 : ne pas effacer les pointillés d'une découpe en attente de validation
   // Aucun aperçu à montrer et rien à effacer (aucun outil de pose/gomme actif) : on ne
@@ -3916,11 +3925,12 @@ function updateGhost(pos){
     const type = model.deviceTypes.find(t=>t.id===selectedTypeId);
     if (type && pos){
       const r = effectiveNextRadius(); // même taille que la pastille qui sera réellement posée
-      const c = new Konva.Circle({x:snapToGrid(pos.x),y:snapToGrid(pos.y),radius:r, fill:type.color, opacity:0.55, stroke:'#000', strokeWidth:1.5});
+      const ig = imageGhostRect(type, r);
+      const c = ig ? new Konva.Image({ image:ig.img, x:snapToGrid(pos.x)-ig.w/2, y:snapToGrid(pos.y)-ig.h/2, width:ig.w, height:ig.h, opacity:0.55, listening:false, perfectDrawEnabled:false })
+                   : new Konva.Circle({x:snapToGrid(pos.x),y:snapToGrid(pos.y),radius:r, fill:type.color, opacity:0.55, stroke:'#000', strokeWidth:1.5});
       // v2.1-87 : placement déporté à la souris, 2e clic en attente : trait en direct depuis le point réel.
       if (activeTool==='place-remote' && remoteAnchor){
         const gx = snapToGrid(pos.x), gy = snapToGrid(pos.y); // même calage que la pastille posée
-        c.position({x:gx, y:gy});
         ghostGroup.add(new Konva.Line({points:[remoteAnchor.x, remoteAnchor.y, gx, gy], stroke:type.color, strokeWidth:2,
           shadowColor:'rgba(0,0,0,0.25)', shadowBlur:2, shadowOffset:{x:0,y:1}, listening:false}));
         ghostGroup.add(new Konva.Circle({x:remoteAnchor.x, y:remoteAnchor.y, radius:4.5, fill:type.color, stroke:'#fff', strokeWidth:1.5, listening:false}));
@@ -4513,6 +4523,7 @@ let remoteCursorNodes = null;
 function ensureRemoteCursorNodes(){
   if (remoteCursorNodes) return remoteCursorNodes;
   const previewCircle = new Konva.Circle({ listening:false, visible:false });
+  const previewImage = new Konva.Image({ listening:false, visible:false, perfectDrawEnabled:false }); // v2.1-183 : aperçu d'un poste image
   // v2.1-87 : trait provisoire point réel -> pastille (en dessous de tout le reste) + repère du point réel.
   const previewLine = new Konva.Line({ listening:false, visible:false, strokeWidth:2, lineCap:'round' });
   const anchorDot = new Konva.Circle({ listening:false, visible:false });
@@ -4520,8 +4531,8 @@ function ensureRemoteCursorNodes(){
   const tipDot = new Konva.Circle({ listening:false });
   const handleCircle = new Konva.Circle({ name:'remote-cursor-handle', fill:'#ffffff' });
   const handleDot = new Konva.Circle({ listening:false });
-  remoteCursorGroup.add(previewLine, anchorDot, previewCircle, arrow, tipDot, handleCircle, handleDot);
-  remoteCursorNodes = { previewLine, anchorDot, previewCircle, arrow, tipDot, handleCircle, handleDot };
+  remoteCursorGroup.add(previewLine, anchorDot, previewCircle, previewImage, arrow, tipDot, handleCircle, handleDot);
+  remoteCursorNodes = { previewLine, anchorDot, previewCircle, previewImage, arrow, tipDot, handleCircle, handleDot };
   return remoteCursorNodes;
 }
 // Convertit la position brute du doigt (= centre du cercle) en position de la pointe visée,
@@ -4571,9 +4582,16 @@ function drawRemoteCursor(){
     nodes.previewLine.visible(false); nodes.anchorDot.visible(false);
   }
   if (remoteCursor.tool==='pastille' && remoteCursor.phase==='pastille'){
-    nodes.previewCircle.setAttrs({ x:sx, y:sy, radius:effectiveNextRadius(), fill:color, opacity:0.35, stroke:color, strokeWidth:1.5, visible:true });
+    const ig = imageGhostRect(model.deviceTypes.find(t=>t.id===selectedTypeId), effectiveNextRadius());
+    if (ig){ // poste image : l'image en semi-transparence, centrée sur la pointe (v2.1-183)
+      nodes.previewImage.setAttrs({ image:ig.img, x:sx-ig.w/2, y:sy-ig.h/2, width:ig.w, height:ig.h, opacity:0.55, visible:true });
+      nodes.previewCircle.visible(false);
+    } else {
+      nodes.previewCircle.setAttrs({ x:sx, y:sy, radius:effectiveNextRadius(), fill:color, opacity:0.35, stroke:color, strokeWidth:1.5, visible:true });
+      nodes.previewImage.visible(false);
+    }
   } else {
-    nodes.previewCircle.visible(false);
+    nodes.previewCircle.visible(false); nodes.previewImage.visible(false);
   }
   // Aperçu du carré de la gomme, centré sur la pointe visée (et non sous le doigt)
   if (remoteCursor.tool==='eraser'){

@@ -1544,4 +1544,10 @@ v2.1-182 — Bibliothèque de postes partagée entre documents (+ préparation m
   les anciens postes), export / import .ppclib.json. Postes créés = id unique type-lib-… (plus nextId, qui repartait de 1 à chaque document).
   Métiers : liste de postes par défaut déplacée dans TRADES['pest-control'] (defaultTypes / requiredTypes), currentTradeId ; mode d'emploi « ajouter un métier »
   dans CLAUDE.md §4 ter. Aucun autre métier ajouté.
+
+v2.1-183 — Aperçu de pose : un poste « image » montre son image, plus un cercle
+  Cause : l'aperçu avant de poser (souris : aperçu fantôme ; doigt : curseur déporté) était toujours un cercle de la taille du poste (ex. 40) : il masquait
+  le plan et ne montrait pas où tomberait le centre de l'extincteur.
+  Correctif : pour un poste avec image, l'aperçu est l'image elle-même en semi-transparence (55 %), à la taille réelle de la pastille, centrée sur le point
+  visé (imageGhostRect). Un seul nœud image léger, image déjà en mémoire (typeImageOf) : aucun surcoût pendant le déplacement. Postes sans image : cercle inchangé.
 ```
