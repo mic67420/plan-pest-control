@@ -1485,4 +1485,12 @@ v2.1-175 — Fenêtre Dessin : un seul bouton allumé à la fois
   d'un outil encore actif ; l'épaisseur par défaut (3) ne correspondait à aucun bouton.
   Correctif : outils (1re rangée) = plein sombre ; réglages (2e rangée) = simple cadre sombre ; en mode Sélection sans dessin choisi les réglages
   sont estompés et sans cadre (ils ne s'appliquent à rien) ; épaisseur par défaut 4 (= « Moyen »).
+
+v2.1-176 — Crayon du poste : aperçu = forme réelle, couleur par la forme, triangle
+  Retours de Mic : 1) dans un triangle, un code de 2 lettres touchait les côtés ; 2) la forme étoile s'affichait en rond dans l'aperçu ;
+  3) le rectangle de couleur est inutile : la forme du poste doit servir de réglage ; 4) le curseur Taille doit faire varier la forme de la ligne Couleur.
+  Correctifs : étiquette d'un triangle plus petite (x0,62) et descendue (0,3 r) sur la pastille ; aperçu du crayon dessiné en SVG avec la forme réelle
+  (shapeSvgInner, partagé avec les listes) ; le sélecteur de couleur transparent recouvre la forme (toucher la forme = changer la couleur) ;
+  taille de la forme de 24 à 64 px selon le curseur (rayon 6 à 40), ligne à hauteur fixe pour éviter les sauts ; numéro dans l'aperçu (lettres plus bas
+  dans le triangle).
 ```

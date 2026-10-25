@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-175 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-176 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -144,10 +144,16 @@
   #popAddType .tf-shapes button{ flex:1 1 0; min-width:0; height:42px; border:2px solid #c9ced8; border-radius:10px; background:#fff; padding:0; display:flex; align-items:center; justify-content:center; }
   #popAddType .tf-shapes button.active{ border-color:var(--accent); box-shadow:0 0 0 2px var(--accent) inset; background:#eaf3fb; }
   #popAddType .tf-ctl{ display:flex; align-items:center; gap:10px; height:42px; }
-  #popAddType .tf-ctl input[type=color]{ width:52px; height:42px; padding:2px; border:1px solid #c9ced8; border-radius:8px; background:#fff; flex:none; }
+  #popAddType .tf-ctl input[type=color]{ width:52px; height:42px; padding:2px; border:1px solid #c9ced8; border-radius:8px; background:#fff; flex:none; } /* (Police) */
   #popAddType .tf-ctl input[type=range]{ flex:1 1 auto; min-width:0; height:30px; accent-color:var(--accent); }
   #popAddType .tf-ctl .mono{ width:24px; text-align:right; font-size:13px; font-weight:600; color:#1c2230; }
-  #popAddType .type-preview{ width:42px; height:42px; border-radius:50%; border:3px solid #000; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex:none; overflow:hidden; }
+  /* v2.1-176 : la forme réelle du poste EST le réglage de couleur (le sélecteur transparent la recouvre) ; sa taille suit le curseur « Taille » */
+  #popAddType .tf-preview{ height:68px; }
+  #popAddType .type-preview{ position:relative; width:64px; height:64px; flex:none; display:flex; align-items:center; justify-content:center; }
+  #popAddType .type-preview #pvShape{ display:flex; align-items:center; justify-content:center; pointer-events:none; }
+  #popAddType .type-preview input[type=color]{ position:absolute; inset:0; width:100%; height:100%; opacity:0; padding:0; border:none; cursor:pointer; }
+  #popAddType .tf-hint{ font-size:11.5px; color:#5c6478; line-height:1.25; }
+  body.night-mode #popAddType .tf-hint{ color:#9aa4b6; }
   #popAddType .chip{ display:flex; align-items:center; gap:8px; height:42px; padding:0 12px; border:1px solid #c9ced8; border-radius:8px; background:#fff; color:#1c2230; font-size:13.5px; cursor:pointer; box-sizing:border-box; }
   #popAddType .chip input{ width:20px; height:20px; margin:0; flex:none; }
   #popAddType .tf-wide{ grid-column:1 / -1; }
@@ -621,7 +627,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-175</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-176</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -762,7 +768,7 @@
         <div class="tf"><label for="newTypeCode">Code</label><input type="text" id="newTypeCode" placeholder="ex : R"></div>
         <div class="tf"><label for="newTypeName">Nom</label><input type="text" id="newTypeName" placeholder="Nom du dispositif"></div>
         <div class="tf"><label>Forme</label><div class="tf-ctl tf-shapes" id="newTypeShapes"></div></div>
-        <div class="tf"><label for="currentColorPicker">Couleur</label><div class="tf-ctl"><input type="color" id="currentColorPicker" value="#0E6FA8"><span id="typePreview" class="type-preview" title="Aperçu de la pastille">E</span></div></div>
+        <div class="tf"><label>Couleur</label><div class="tf-ctl tf-preview"><span class="type-preview" title="Touchez la forme pour changer la couleur"><span id="pvShape"></span><input type="color" id="currentColorPicker" value="#0E6FA8" aria-label="Couleur du poste"></span><span class="tf-hint">Touchez la forme pour changer la couleur</span></div></div>
         <div class="tf"><label for="newTypeTextColor">Police</label><div class="tf-ctl"><input type="color" id="newTypeTextColor" value="#ffffff" title="Couleur du numéro dans la pastille"><label class="chip"><input type="checkbox" id="newTypeTextAuto" checked><span>Auto</span></label></div></div>
         <div class="tf"><label>Numéro</label><label class="chip"><input type="checkbox" id="newTypeNoNumber"><span>Sans numéro</span></label></div>
         <div class="tf"><label for="newTypeRadius">Taille</label><div class="tf-ctl"><input type="range" id="newTypeRadius" min="6" max="40" value="16"><span id="newTypeRadiusLabel" class="mono">16</span></div></div>
@@ -889,7 +895,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-175 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-176 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2790,9 +2796,9 @@ function buildPastilleGroup(type, r, labelText){
   if (shape === 'triangle') base.y(r*0.12);
   const labelStr = String(labelText);
   const label = new Konva.Text({
-    text:labelStr, fontSize:fontSizeForLabel(labelStr, r * (shape==='triangle' ? 0.7 : shape==='diamond' ? 0.82 : 1)), // formes étroites : numéro plus petit pour rester à l'intérieur
+    text:labelStr, fontSize:fontSizeForLabel(labelStr, r * (shape==='triangle' ? 0.62 : shape==='diamond' ? 0.82 : 1)), // formes étroites : numéro plus petit pour rester à l'intérieur
     fontStyle:'700', fontFamily:APP_FONT,
-    fill:labelColorFor(type), width:r*2, height:r*2, offsetX:r, offsetY:r - (shape==='triangle' ? r*0.18 : 0), align:'center', verticalAlign:'middle',
+    fill:labelColorFor(type), width:r*2, height:r*2, offsetX:r, offsetY:r - (shape==='triangle' ? r*0.3 : 0), align:'center', verticalAlign:'middle',
     // wrap:'none' est essentiel ici : par défaut Konva peut replier un texte trop large sur
     // plusieurs lignes (y compris en coupant un mot lettre par lettre s'il ne tient pas sur
     // une ligne), et seule la ligne du milieu restait visible dans la hauteur de la pastille
@@ -5498,20 +5504,23 @@ function starPolygonPoints(numPoints, cx, cy, outerR, innerR){
   }
   return pts.join(' ');
 }
+// v2.1-176 : dessin SVG d'une forme de pastille (échantillons des listes ET aperçu du crayon) ; label optionnel (centré, plus bas dans un triangle).
+function shapeSvgInner(shape, size, col, sw){
+  const c = size/2;
+  const st = `fill="${col}" stroke="#000" stroke-width="${sw}" stroke-linejoin="round"`;
+  switch (shape){
+    case 'burst': return `<polygon points="${starPolygonPoints(10, c, c, size*0.48, size*0.34)}" ${st}/>`;
+    case 'square': return `<rect x="${size*0.1}" y="${size*0.1}" width="${size*0.8}" height="${size*0.8}" ${st}/>`;
+    case 'rounded': return `<rect x="${size*0.1}" y="${size*0.1}" width="${size*0.8}" height="${size*0.8}" rx="${size*0.22}" ${st}/>`;
+    case 'diamond': return `<polygon points="${c},${size*0.04} ${size*0.96},${c} ${c},${size*0.96} ${size*0.04},${c}" ${st}/>`;
+    case 'triangle': return `<polygon points="${c},${size*0.08} ${size*0.95},${size*0.9} ${size*0.05},${size*0.9}" ${st}/>`;
+    default: return `<circle cx="${c}" cy="${c}" r="${size*0.42}" ${st}/>`;
+  }
+}
 function shapeSwatchHTML(type, size){
   size = size||20;
-  const c = size/2, col = type.color || '#0E6FA8', sw = size >= 30 ? 2 : 1.5;
-  const st = `fill="${col}" stroke="#000" stroke-width="${sw}" stroke-linejoin="round"`;
-  let el;
-  switch (type.shape){
-    case 'burst': el = `<polygon points="${starPolygonPoints(10, c, c, size*0.48, size*0.34)}" ${st}/>`; break;
-    case 'square': el = `<rect x="${size*0.1}" y="${size*0.1}" width="${size*0.8}" height="${size*0.8}" ${st}/>`; break;
-    case 'rounded': el = `<rect x="${size*0.1}" y="${size*0.1}" width="${size*0.8}" height="${size*0.8}" rx="${size*0.22}" ${st}/>`; break;
-    case 'diamond': el = `<polygon points="${c},${size*0.04} ${size*0.96},${c} ${c},${size*0.96} ${size*0.04},${c}" ${st}/>`; break;
-    case 'triangle': el = `<polygon points="${c},${size*0.08} ${size*0.95},${size*0.9} ${size*0.05},${size*0.9}" ${st}/>`; break;
-    default: el = `<circle cx="${c}" cy="${c}" r="${size*0.42}" ${st}/>`;
-  }
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${el}</svg>`;
+  const sw = size >= 30 ? 2 : 1.5;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${shapeSvgInner(type.shape, size, type.color || '#0E6FA8', sw)}</svg>`;
 }
 let lastTypeListSig = null; // évite de reconstruire le HTML de la liste si rien n'a changé (appelé à chaque rendu)
 // v2.1-149 : taille d'un poste = taille par défaut de ses pastilles (et celle des pastilles déjà posées sur la page affichée).
@@ -5629,14 +5638,19 @@ const TYPE_SHAPES = [['circle','Rond'],['square','Carré'],['rounded','Carré ar
 })();
 function syncShapeUI(){ document.querySelectorAll('#newTypeShapes button').forEach(b=>b.classList.toggle('active', b.dataset.shape === newTypeShape)); }
 function updateTypePreview(){
-  const pv = document.getElementById('typePreview'); if (!pv) return;
+  const pv = document.getElementById('pvShape'); if (!pv) return;
   const col = document.getElementById('currentColorPicker').value;
   const auto = document.getElementById('newTypeTextAuto').checked;
-  pv.style.background = col;
-  pv.style.borderRadius = '50%'; pv.style.clipPath = ({ square:'none', rounded:'none', diamond:'polygon(50% 0,100% 50%,50% 100%,0 50%)', triangle:'polygon(50% 4%,100% 92%,0 92%)' })[newTypeShape] || 'none';
-  pv.style.borderRadius = newTypeShape === 'square' ? '0' : newTypeShape === 'rounded' ? '24%' : (newTypeShape === 'circle' || newTypeShape === 'burst') ? '50%' : '0';
-  pv.style.color = auto ? autoTextColor(col) : document.getElementById('newTypeTextColor').value;
-  pv.textContent = document.getElementById('newTypeNoNumber').checked ? '' : ((document.getElementById('newTypeCode').value || 'E').slice(0,3));
+  const tcol = auto ? autoTextColor(col) : document.getElementById('newTypeTextColor').value;
+  // v2.1-176 : la forme réelle (étoile comprise) ; sa taille suit le curseur « Taille » (24 à 64 px pour un rayon de 6 à 40)
+  const r = parseInt(document.getElementById('newTypeRadius').value, 10) || 16;
+  const size = Math.round(24 + (Math.max(6, Math.min(40, r)) - 6) * (40/34));
+  const label = document.getElementById('newTypeNoNumber').checked ? '' : ((document.getElementById('newTypeCode').value || 'E').slice(0,3));
+  const n = label.length;
+  const fs = size * (newTypeShape === 'triangle' ? (n > 1 ? 0.23 : 0.3) : newTypeShape === 'diamond' ? (n > 1 ? 0.25 : 0.32) : (n > 2 ? 0.26 : n > 1 ? 0.32 : 0.4));
+  const ty = size * (newTypeShape === 'triangle' ? 0.68 : 0.5);
+  pv.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${shapeSvgInner(newTypeShape, size, col, Math.max(2, size*0.06))}`
+    + (label ? `<text x="${size/2}" y="${ty}" text-anchor="middle" dominant-baseline="central" font-family="${APP_FONT}" font-weight="700" font-size="${fs}" fill="${tcol}">${escapeAttr(label)}</text>` : '') + '</svg>';
 }
 // Carte « poste » : toujours centrée juste sous les tuiles (ne cache plus les icônes du tiroir).
 function positionTypeCard(){
@@ -5754,6 +5768,7 @@ document.getElementById('btnAddType').addEventListener('click', ()=>{
 });
 document.getElementById('newTypeRadius').addEventListener('input', (e)=>{
   document.getElementById('newTypeRadiusLabel').textContent = e.target.value;
+  updateTypePreview();
 });
 document.getElementById('currentColorPicker').addEventListener('input', (e)=>{
   // Ce sélecteur sert à choisir la couleur d'un NOUVEAU poste (ou d'un poste en cours de

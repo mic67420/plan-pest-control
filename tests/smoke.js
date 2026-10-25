@@ -320,6 +320,19 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       closeDrawWin(); model.shapes = []; render();
       return hits && tool && sel1 && sel2 && none && red;
     }), 'sélection de dessin : curseur rouge, tap du cercle sélectionne le dessin visé ou désélectionne');
+    // v2.1-176 : aperçu du crayon = la forme réelle (étoile comprise), taille liée au curseur, la forme sert de sélecteur de couleur
+    ok(await pg.evaluate(()=>{
+      const t = model.deviceTypes[2]; startEditType(t.id);
+      document.querySelector('#newTypeShapes [data-shape="burst"]').click();
+      const star = /<polygon/.test(document.getElementById('pvShape').innerHTML) && !/<circle/.test(document.getElementById('pvShape').innerHTML);
+      const w = ()=>parseFloat(document.querySelector('#pvShape svg').getAttribute('width'));
+      const r = document.getElementById('newTypeRadius'); r.value = 8; r.dispatchEvent(new Event('input')); const small = w(); r.value = 40; r.dispatchEvent(new Event('input')); const big = w();
+      const picker = document.querySelector('.type-preview #currentColorPicker') !== null && getComputedStyle(document.getElementById('currentColorPicker')).opacity === '0';
+      document.querySelector('#newTypeShapes [data-shape="triangle"]').click(); document.getElementById('newTypeCode').value = 'NT'; document.getElementById('newTypeCode').dispatchEvent(new Event('input'));
+      const tri = /text-anchor/.test(document.getElementById('pvShape').innerHTML) && parseFloat(document.querySelector('#pvShape text').getAttribute('y')) > big*0.6*0.9;
+      closeAllPopovers(); editingTypeId = null;
+      return star && small < big && big - small > 20 && picker && tri;
+    }), 'crayon : aperçu = forme réelle (étoile), taille suit le curseur, la forme choisit la couleur, étiquette du triangle plus bas');
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');
