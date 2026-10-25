@@ -1424,4 +1424,11 @@ v2.1-166 — Placement déporté : bugs intermittents corrigés
   4. Changer de page / annuler / rétablir / ouvrir / nouveau projet au milieu d'un placement gardait le point réel et le curseur d'une
      autre page -> resetRemoteGesture() abandonne le placement. 5. Changement d'outil : le geste en attente est aussi abandonné.
   Non reproduit (scénarios sans anomalie) : appui long + glisser, bord de feuille, zoom pendant le curseur, grille, 60 parcours aléatoires.
+
+v2.1-167 — Icônes : contours noirs purs et plus épais
+  Cause : les contours des 59 icônes étaient d'un bleu nuit très fin (#222331, #25212D…) qui paraissait gris à l'écran ; Annuler / Rétablir
+  inactifs étaient en plus à 35 % d'opacité.
+  Correctif : règle CSS unique sur tous les svg.icon (tuiles, tiroirs, menus) : remplissages et traits sombres -> #000 avec un trait de
+  0,7 px à l'écran (vector-effect non-scaling-stroke, même épaisseur quelle que soit la taille du dessin) ; Annuler / Rétablir inactifs
+  35 % -> 55 %. Les couleurs vives des icônes ne changent pas. Contrôlé en jour et en nuit sur les 6 tiroirs.
 ```

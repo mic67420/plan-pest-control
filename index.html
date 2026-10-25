@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-166 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-167 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -318,7 +318,7 @@
   }
   body.mobile-mode #mobileTileBar .mtile-split button .icon{ width:22px; height:22px; }
   body.mobile-mode #mobileTileBar .mtile-split button:active{ background:var(--accent-soft); }
-  body.mobile-mode #mobileTileBar .mtile-split button:disabled{ opacity:.35; cursor:default; }
+  body.mobile-mode #mobileTileBar .mtile-split button:disabled{ opacity:.55; cursor:default; } /* v2.1-167 : inactif mais lisible (.35 -> .55) */
   /* "en cours d'utilisation" : soit le tiroir de cette tuile est ouvert, soit (si aucun
      tiroir n'est ouvert) un outil de sa catégorie est actuellement sélectionné. Une seule
      tuile à la fois peut être active (voir updateMobileTileActiveState). */
@@ -357,6 +357,10 @@
   /* v2.1-139 : cadenas à deux dessins (fermé / ouvert) : la classe is-open du bouton choisit lequel s'affiche */
   .pop-btn .pop-ico{display:inline-block;vertical-align:middle;margin-right:10px;}
   .pop-tool-btn .icon{flex:none;}
+  /* v2.1-167 : TOUS les contours d'icônes (tuiles, tiroirs, menus) en noir pur et un peu plus épais (largeur constante à l'écran, quelle que
+     soit la taille du dessin d'origine) : les contours bleu nuit fin paraissaient gris. */
+  svg.icon [fill="#222331"], svg.icon [fill="#25212D"], svg.icon [fill="#25284F"], svg.icon [fill="#1F1A35"]{ fill:#000; stroke:#000; stroke-width:.7px; vector-effect:non-scaling-stroke; stroke-linejoin:round; }
+  svg.icon [stroke="#25212D"], svg.icon [stroke="#222331"], svg.icon [stroke="#08425f"]{ stroke:#000; }
   .tb-icon .lock-open{display:none;}
   /* v2.1-163 : point orange discret = le fichier .json n'est pas à jour */
   #btnSave.file-stale, #mobileTileBar .mtile.file-stale{ position:relative; }
@@ -592,7 +596,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-166</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-167</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -840,7 +844,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-166 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-167 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
