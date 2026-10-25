@@ -1441,4 +1441,8 @@ v2.1-168 — Dessins simples (rectangle, ellipse, ligne, flèche)
   se redimensionne par ses 2 poignées (jamais exportées), se verrouille et se supprime comme un logo ; ses réglages suivent la fenêtre.
   Calque sous les lignes de raccord et les pastilles, exporté sur toutes les pages (PDF / PPTX / PNG / impression).
   Pendant un tracé, les dessins existants ne captent pas le doigt (on peut tracer par-dessus).
+
+v2.1-169 — Fenêtre Dessin plus basse
+  Demande : gagner en hauteur. Correctif : la rangée de couleurs présélectionnées est supprimée ; le sélecteur de couleur rejoint la rangée
+  épaisseur / pointillé / remplissage. La fenêtre passe de 4 à 3 lignes (consigne, outils, réglages).
 ```

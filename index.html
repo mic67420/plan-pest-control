@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-168 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-169 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -476,9 +476,7 @@
   #drawWin button.active{ background:#1c2230; color:#fff; }
   #drawWin button.active svg *{ stroke:#fff; } #drawWin button.active svg path[fill="#000"]{ fill:#fff; }
   #drawWin .dw-x{ flex:0 0 42px; }
-  #drawWin .dw-colors button{ height:34px; border:3px solid #fff7e6; }
-  #drawWin .dw-colors button.active{ border-color:#1c2230; }
-  #drawWin .dw-colors input[type=color]{ flex:0 0 42px; height:34px; border:none; border-radius:10px; padding:0; background:#fff7e6; }
+  #drawWin input[type=color]{ flex:1 1 0; min-width:0; height:42px; border:none; border-radius:10px; padding:4px; background:#fff7e6; }
   #drawWin .dw-w{ display:block; width:60%; background:#1c2230; border-radius:2px; }
   #drawWin button.active .dw-w{ background:#fff; }
   #drawWin .dw-dash{ letter-spacing:1px; font-weight:700; }
@@ -613,7 +611,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-168</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-169</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -862,13 +860,13 @@
     <button type="button" data-tool="draw-arrow" title="Flèche"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M4 19L19 6" stroke="#000" stroke-width="2.4" stroke-linecap="round"/><path d="M20 4l.5 8-3.2-2.6-4-1.3z" fill="#000"/></svg></button>
     <button type="button" id="drawClose" class="dw-x" title="Fermer" aria-label="Fermer">✕</button>
   </div>
-  <div class="dw-row dw-colors" id="drawColors"><input type="color" id="drawColor" value="#D6493E" title="Autre couleur"></div>
   <div class="dw-row">
     <button type="button" data-w="2" title="Fin"><span class="dw-w" style="height:2px"></span></button>
     <button type="button" data-w="4" title="Moyen"><span class="dw-w" style="height:4px"></span></button>
     <button type="button" data-w="8" title="Épais"><span class="dw-w" style="height:8px"></span></button>
     <button type="button" id="drawDash" title="Trait plein / pointillé"><span class="dw-dash">╌╌</span></button>
     <button type="button" id="drawFill" title="Sans remplissage / remplissage semi-transparent"><span class="dw-fill"></span></button>
+    <input type="color" id="drawColor" value="#D6493E" title="Couleur du trait">
   </div>
 </div>
 <div id="ctrlWin">
@@ -880,7 +878,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-168 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-169 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -5809,15 +5807,9 @@ document.getElementById('ctrlClose').addEventListener('click', closeCtrlWin);
 
 // v2.1-168 : fenêtre « Dessin ». Outil actif = un des 4 tracés ; style (couleur, épaisseur, pointillé, remplissage) pour les NOUVEAUX dessins et,
 // quand un dessin est sélectionné, pour ce dessin (la fenêtre reflète alors son style).
-const DRAW_COLORS = ['#D6493E','#F59E0B','#2E9E6B','#0E6FA8','#7A5AD8','#000000','#ffffff'];
-(function(){
-  const box = document.getElementById('drawColors');
-  DRAW_COLORS.forEach(c=>{ const b = document.createElement('button'); b.type = 'button'; b.dataset.c = c; b.style.background = c; b.title = c; box.insertBefore(b, document.getElementById('drawColor')); });
-})();
 function syncDrawWin(){
   const win = document.getElementById('drawWin');
   win.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active', b.dataset.tool === activeTool));
-  win.querySelectorAll('[data-c]').forEach(b=>b.classList.toggle('active', b.dataset.c.toLowerCase() === drawStyle.color.toLowerCase()));
   win.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('active', +b.dataset.w === drawStyle.width));
   document.getElementById('drawDash').classList.toggle('active', drawStyle.dash);
   document.getElementById('drawFill').classList.toggle('active', drawStyle.fill);
@@ -5868,7 +5860,6 @@ document.querySelectorAll('#drawWin [data-tool]').forEach(b=>b.addEventListener(
   selectNode(null, null); // on trace : pas de dessin sélectionné
   setTool(b.dataset.tool); syncDrawWin();
 }));
-document.querySelectorAll('#drawWin [data-c]').forEach(b=>b.addEventListener('click', ()=>{ drawStyle.color = b.dataset.c; applyDrawStyle(); }));
 document.getElementById('drawColor').addEventListener('input', (e)=>{ drawStyle.color = e.target.value; syncDrawWin(); });
 document.getElementById('drawColor').addEventListener('change', applyDrawStyle);
 document.querySelectorAll('#drawWin [data-w]').forEach(b=>b.addEventListener('click', ()=>{ drawStyle.width = +b.dataset.w; applyDrawStyle(); }));
