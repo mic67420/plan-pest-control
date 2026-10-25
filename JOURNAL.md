@@ -1550,4 +1550,11 @@ v2.1-183 — Aperçu de pose : un poste « image » montre son image, plus un ce
   le plan et ne montrait pas où tomberait le centre de l'extincteur.
   Correctif : pour un poste avec image, l'aperçu est l'image elle-même en semi-transparence (55 %), à la taille réelle de la pastille, centrée sur le point
   visé (imageGhostRect). Un seul nœud image léger, image déjà en mémoire (typeImageOf) : aucun surcoût pendant le déplacement. Postes sans image : cercle inchangé.
+
+v2.1-184 — Image d'un poste : détourage automatique du fond (uni ou damier) + baguette magique
+  Cause : « Détourer le blanc » ne reconnaissait que le blanc plein ; les images dont le « fond transparent » est en réalité un damier gris / blanc enregistré
+  en pixels (JPEG, capture) ou un fond coloré gardaient leur fond.
+  Correctif : prepareTypeImage repère les 1 à 3 couleurs dominantes du pourtour (blanc, uni, damier) et les efface depuis les bords (détourage proposé
+  d'office si presque tout le pourtour est ainsi) ; marges transparentes rognées (le centre de l'image = le centre de l'objet). Nouveau bouton « Retoucher… » :
+  fenêtre baguette magique (touche = efface la zone de couleur proche reliée, tolérance réglable, case « toute l'image », zoom, annuler / recommencer, fond en damier).
 ```

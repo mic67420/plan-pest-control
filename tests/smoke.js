@@ -375,12 +375,12 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
         const blob = await new Promise(r=>c.toBlob(r, 'image/jpeg', 0.9)); await applyTypeImageFile(new File([blob], 'extincteur.jpg', { type:'image/jpeg' }));
       });
       return await pg.evaluate(async()=>{
-        const im = await loadImage(newTypeImage); const small = Math.max(im.naturalWidth, im.naturalHeight) <= 384 && Math.abs(newTypeImageRatio - 2) < 0.02;
+        const im = await loadImage(newTypeImage); const small = Math.max(im.naturalWidth, im.naturalHeight) <= 384 && Math.abs(newTypeImageRatio - 1) < 0.02; // v2.1-184 : marges transparentes rognées -> le disque seul (ratio 1)
         const px = async(url)=>{ const i = await loadImage(url), c = document.createElement('canvas'); c.width = i.naturalWidth; c.height = i.naturalHeight; const x = c.getContext('2d'); x.drawImage(i,0,0); return x.getImageData(0,0,1,1).data[3]; };
         const cut = document.getElementById('newTypeCutWhite').checked && (await px(newTypeImage)) === 0;            // fond blanc détouré d'office
         const t = model.deviceTypes[3]; const rowShown = document.getElementById('rowTypeImage').style.display !== 'none';
         document.getElementById('btnAddType').click();
-        const saved = pages.every(pg=>!!pg.deviceTypes.find(y=>y.id===t.id).image) && Math.abs(t.imageRatio - 2) < 0.02;
+        const saved = pages.every(pg=>!!pg.deviceTypes.find(y=>y.id===t.id).image) && Math.abs(t.imageRatio - 1) < 0.02;
         const p = { id:'pi1', typeId:t.id, label:'X1', x:100, y:100, radius:20, rotation:0 }; model.pastilles.push(p); render();
         const grp = pastilleNodes.get('pi1'); const body = grp && grp.findOne('.pastille-body');
         const drawn = !!body && body._isImage && body.find('Image').length === 1 && body.find('Text').length === 1;
@@ -436,6 +436,29 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
         selectedTypeId='type-ghost'; typeImageOf(u); await typeImageOf(u).promise; activeTool='place-classic'; updateGhost({x:200,y:200}); });
       ok(await pg.evaluate(()=>{ const n=ghostGroup.children[0]; return n && n.className==='Image' && Math.abs(n.opacity()-0.55)<0.01 && Math.abs(n.x()+n.width()/2-snapToGrid(200))<0.6 && Math.abs(n.y()+n.height()/2-snapToGrid(200))<0.6 && n.height()>n.width(); }), 'aperçu de pose d\'un poste image : image semi-transparente centrée (pas un cercle)');
       await pg.evaluate(()=>{ ghostGroup.destroyChildren(); pages.forEach(pg=>{ pg.deviceTypes=pg.deviceTypes.filter(t=>t.id!=='type-ghost'); }); selectedTypeId=model.deviceTypes[0].id; activeTool=null; });
+    }
+    // détourage de l'image d'un poste (v2.1-184) : damier gris/blanc effacé, objet gardé, rognage ; baguette magique
+    {
+      ok(await pg.evaluate(async()=>{
+        const c=document.createElement('canvas');c.width=100;c.height=100;const x=c.getContext('2d');
+        for(let i=0;i<10;i++)for(let j=0;j<10;j++){x.fillStyle=(i+j)%2?'#cccccc':'#ffffff';x.fillRect(i*10,j*10,10,10);}
+        x.fillStyle='#c00000';x.fillRect(30,20,40,60);
+        const out=await prepareTypeImage(c.toDataURL('image/jpeg',0.92),true), pr=await prepareTypeImage(c.toDataURL('image/jpeg',0.92),false);
+        const im=await loadImage(out.url); const k=document.createElement('canvas');k.width=im.naturalWidth;k.height=im.naturalHeight;const kx=k.getContext('2d');kx.drawImage(im,0,0);
+        return pr.bgLikely && Math.abs(out.ratio-40/60)<0.08 && im.naturalWidth<50 && kx.getImageData(Math.floor(k.width/2),Math.floor(k.height/2),1,1).data[3]===255;
+      }), 'détourage auto : fond en damier détecté, effacé et marges rognées');
+      ok(await pg.evaluate(async()=>{
+        const c=document.createElement('canvas');c.width=60;c.height=60;const x=c.getContext('2d');x.fillStyle='#2080e0';x.fillRect(0,0,60,60);x.fillStyle='#000';x.fillRect(20,20,20,20);
+        newTypeImage=c.toDataURL(); newTypeImageRatio=1; openTypeImageEditor(); await new Promise(r=>setTimeout(r,300));
+        const cv=document.querySelector('#typeImgEditor .tie-cv'), r=cv.getBoundingClientRect();
+        cv.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:r.left+2*r.width/60,clientY:r.top+2*r.height/60}));
+        await new Promise(r=>setTimeout(r,100));
+        const a=cv.getContext('2d').getImageData(1,1,1,1).data[3], b=cv.getContext('2d').getImageData(30,30,1,1).data[3];
+        document.querySelector('#typeImgEditor .tie-ok').click(); await new Promise(r=>setTimeout(r,200));
+        const im=await loadImage(newTypeImage);
+        return a===0 && b===255 && !document.getElementById('typeImgEditor') && im.naturalWidth===20 && Math.abs(newTypeImageRatio-1)<0.01;
+      }), 'baguette magique : touche le fond = transparent, objet gardé, Valider rogne et ferme');
+      await pg.evaluate(()=>{ newTypeImage=null; newTypeImageSrc=null; syncShapeUI(); });
     }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
