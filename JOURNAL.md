@@ -1523,4 +1523,10 @@ v2.1-179 — Image à la place de la forme d'un poste (extincteur, etc.)
   numéro dessous avec liseré blanc, zone de saisie complète, pas de cache bitmap ; légende et récapitulatif : image seule ; listes et aperçu du crayon
   affichent l'image ; sauvegarde automatique : images de postes écrites à part (comme plans et logos) ; export : attend le chargement des images ;
   choisir une forme retire l'image. Format conseillé : SVG ou PNG transparent ; un JPEG garde son fond sauf détourage du blanc.
+
+v2.1-180 — Image d'un poste : la fenêtre ne se ferme plus
+  Cause : « Image » ouvre le sélecteur de fichiers par un clic simulé sur un champ <input type=file> placé dans le <body> ; ce clic REMONTAIT jusqu'à document,
+  dont l'écouteur ferme menus et tiroirs : la fenêtre du poste se fermait dès le toucher d'« Image » (reproduit en test). De plus, au retour du sélecteur,
+  Android envoie un « resize » dont l'écouteur ferme aussi les menus (aucun champ de saisie n'a le focus).
+  Correctif : clic du champ fichier arrêté (stopPropagation) ; filePickerOpenUntil : pendant le choix du fichier (et 3 s après), le « resize » ne ferme rien.
 ```

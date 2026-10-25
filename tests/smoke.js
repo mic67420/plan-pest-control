@@ -392,6 +392,21 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
         return small && cut && rowShown && saved && drawn && legendOk && stored && removed;
       });
     })(), 'image de poste : import réduit, fond blanc détouré, pastille-image (numéro dessous), sauvegarde, retrait par une forme');
+    // v2.1-180 : toucher « Image » dans la fenêtre d'un NOUVEAU poste ne la ferme plus (le clic simulé du champ fichier remontait à document) ; un resize pendant le choix du fichier non plus
+    {
+      await pg.evaluate(()=>{ closeOtherWindows(''); resetRemoteGesture(); openTileDrawer('pastille', false); document.getElementById('deviceTypeDropdownBtn').click(); });
+      await pg.evaluate(()=>[...document.querySelectorAll('#deviceTypeDropdownList .dd-add')].find(e=>/Nouveau/.test(e.textContent)).click());
+      await pg.waitForTimeout(300);
+      const fc = pg.waitForEvent('filechooser', { timeout:4000 }).catch(()=>null);
+      await pg.evaluate(()=>document.querySelector('#newTypeShapes [data-shape="image"]').click());
+      const ch = await fc;
+      const st = ()=>pg.evaluate(()=>document.getElementById('popAddType').classList.contains('open') && !!document.querySelector('.tb-group.mobile-open'));
+      const a = !!ch && await st();
+      await pg.evaluate(()=>window.dispatchEvent(new Event('resize'))); await pg.waitForTimeout(400);
+      const b = await st();
+      await pg.evaluate(()=>{ filePickerOpenUntil = 0; closeAllPopovers(); closeAllTileDrawers(); });
+      ok(a && b, 'nouveau poste : « Image » ne ferme pas la fenêtre (ni au toucher, ni au retour du sélecteur de fichiers)');
+    }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

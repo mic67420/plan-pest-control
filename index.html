@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-179 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-180 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -627,7 +627,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-179</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-180</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -897,7 +897,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-179 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-180 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -5708,6 +5708,7 @@ function refreshTypeList(){
 }
 let editingTypeId = null;
 // Champ « Police » du formulaire de poste : en mode automatique, la couleur affichée suit le contraste calculé et est grisée.
+let filePickerOpenUntil = 0; // v2.1-180 : tant que ce délai court, un « resize » (retour du sélecteur de fichiers) ne ferme pas les fenêtres
 let newTypeShape = 'circle';
 // v2.1-179 : image du poste en cours d'édition dans le crayon. newTypeImageSrc = image réduite AVANT détourage (permet de décocher « Détourer »).
 let newTypeImage = null, newTypeImageSrc = null, newTypeImageRatio = 1;
@@ -5756,9 +5757,14 @@ const TYPE_SHAPES = [['circle','Rond'],['square','Carré'],['rounded','Carré ar
   });
   const bi = document.createElement('button'); bi.type = 'button'; bi.dataset.shape = 'image'; bi.title = 'Image (extincteur, logo…)'; bi.setAttribute('aria-label', 'Image');
   bi.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26"><rect x="3" y="4" width="18" height="16" rx="2" fill="#fff" stroke="#000" stroke-width="1.8"/><circle cx="9" cy="10" r="2" fill="#F59E0B" stroke="#000" stroke-width="1.2"/><path d="M4 18l5-5 3 3 3-4 5 6" fill="#9ad0ee" stroke="#000" stroke-width="1.4" stroke-linejoin="round"/></svg>';
-  bi.addEventListener('click', ()=>document.getElementById('fileInputTypeImage').click());
+  // v2.1-180 : le clic simulé du champ fichier REMONTAIT jusqu'à document (qui ferme menus et tiroirs) : la fenêtre du poste se fermait dès le toucher d'« Image »,
+  // avant même le choix du fichier. On l'arrête ; et pendant que le sélecteur de fichiers est ouvert, le « resize » du retour (Android) ne ferme plus rien non plus.
+  const fin = document.getElementById('fileInputTypeImage');
+  fin.addEventListener('click', (e)=>e.stopPropagation());
+  bi.addEventListener('click', (e)=>{ e.stopPropagation(); filePickerOpenUntil = Date.now() + 120000; fin.click(); });
   box.appendChild(bi);
-  document.getElementById('fileInputTypeImage').addEventListener('change', async (e)=>{ const f = e.target.files[0]; e.target.value = ''; if (f) await applyTypeImageFile(f); });
+  document.getElementById('fileInputTypeImage').addEventListener('change', async (e)=>{ filePickerOpenUntil = Date.now() + 3000; const f = e.target.files[0]; e.target.value = ''; if (f) await applyTypeImageFile(f); });
+  document.getElementById('fileInputTypeImage').addEventListener('cancel', ()=>{ filePickerOpenUntil = Date.now() + 3000; });
   document.getElementById('newTypeCutWhite').addEventListener('change', async (e)=>{
     if (!newTypeImageSrc) return;
     try{ const out = await prepareTypeImage(newTypeImageSrc, e.target.checked); newTypeImage = out.url; newTypeImageRatio = out.ratio; updateTypePreview(); } catch(err){ /* sans conséquence */ }
@@ -7272,7 +7278,7 @@ window.addEventListener('resize', ()=>{
     // l'utilisateur dès qu'il touchait un champ pour y taper. On ne ferme donc les popovers
     // que si le focus n'est pas dans un champ de saisie.
     const typing = document.activeElement && (document.activeElement.tagName==='INPUT' || document.activeElement.tagName==='TEXTAREA');
-    if (!typing) closeAllPopovers();
+    if (!typing && Date.now() > filePickerOpenUntil) closeAllPopovers();
     layoutHeader(); // met aussi à jour les bandes de défilement
     // Sur mobile, ouvrir le CLAVIER VIRTUEL (ex. pour taper un renommage) déclenche aussi
     // cet événement "resize" (la fenêtre visible rétrécit) : ce n'est pas une vraie rotation
