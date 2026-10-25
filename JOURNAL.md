@@ -1445,4 +1445,9 @@ v2.1-168 — Dessins simples (rectangle, ellipse, ligne, flèche)
 v2.1-169 — Fenêtre Dessin plus basse
   Demande : gagner en hauteur. Correctif : la rangée de couleurs présélectionnées est supprimée ; le sélecteur de couleur rejoint la rangée
   épaisseur / pointillé / remplissage. La fenêtre passe de 4 à 3 lignes (consigne, outils, réglages).
+
+v2.1-170 — Dessin : noir par défaut ; réglages du poste en lignes
+  Demande : couleur de dessin par défaut noire ; fenêtre du crayon (poste) avec un réglage par LIGNE (libellé à gauche, réglage à droite)
+  dans un ordre logique. Correctif : drawStyle.color = #000000 ; lignes Code, Nom, Couleur (+ aperçu), Police (+ Auto), Taille, Numéro ;
+  boutons Enregistrer / Retirer / Annuler en dessous.
 ```

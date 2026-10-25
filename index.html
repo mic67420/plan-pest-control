@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-169 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-170 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -134,9 +134,11 @@
   .popover.open{display:block;}
   /* v2.1-165 : fenêtre « poste » (ajout / crayon) : carte blanche sous les tuiles, 2 colonnes, champs grands, aperçu en direct */
   body.mobile-mode #popAddType{ left:50% !important; right:auto !important; transform:translateX(-50%); width:min(420px, calc(100vw - 16px)); max-width:none; padding:12px; z-index:1001; }
-  body.mobile-mode #popAddType.open{ display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; align-items:end; }
-  #popAddType .tf{ display:flex; flex-direction:column; gap:4px; min-width:0; }
-  #popAddType .tf > label:first-child{ font-size:11.5px; font-weight:600; color:#5c6478; }
+  body.mobile-mode #popAddType.open{ display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; align-items:center; }
+  /* v2.1-170 : réglages du poste EN LIGNES (libellé à gauche, réglage à droite), dans l'ordre : Code, Nom, Couleur, Police, Taille, Numéro */
+  #popAddType .tf{ grid-column:1 / -1; display:flex; flex-direction:row; align-items:center; gap:12px; min-width:0; }
+  #popAddType .tf > label:first-child{ flex:0 0 74px; font-size:13px; font-weight:600; color:#5c6478; }
+  #popAddType .tf > input[type=text], #popAddType .tf > .tf-ctl, #popAddType .tf > .chip{ flex:1 1 auto; min-width:0; }
   #popAddType .tf input[type=text]{ width:100%; box-sizing:border-box; height:42px; font-size:16px; padding:6px 10px; border:1px solid #c9ced8; border-radius:8px; background:#fff; color:#1c2230; }
   #popAddType .tf-ctl{ display:flex; align-items:center; gap:10px; height:42px; }
   #popAddType .tf-ctl input[type=color]{ width:52px; height:42px; padding:2px; border:1px solid #c9ced8; border-radius:8px; background:#fff; flex:none; }
@@ -611,7 +613,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-169</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-170</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -866,7 +868,7 @@
     <button type="button" data-w="8" title="Épais"><span class="dw-w" style="height:8px"></span></button>
     <button type="button" id="drawDash" title="Trait plein / pointillé"><span class="dw-dash">╌╌</span></button>
     <button type="button" id="drawFill" title="Sans remplissage / remplissage semi-transparent"><span class="dw-fill"></span></button>
-    <input type="color" id="drawColor" value="#D6493E" title="Couleur du trait">
+    <input type="color" id="drawColor" value="#000000" title="Couleur du trait">
   </div>
 </div>
 <div id="ctrlWin">
@@ -878,7 +880,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-169 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-170 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1696,7 +1698,7 @@ const DRAW_TOOLS = ['draw-rect','draw-ellipse','draw-line','draw-arrow'];
 const DRAW_KIND = { 'draw-rect':'rect', 'draw-ellipse':'ellipse', 'draw-line':'line', 'draw-arrow':'arrow' };
 function isDrawTool(t){ return DRAW_TOOLS.includes(t); }
 let drawStart = null; // premier point validé (feuille) d'un dessin en cours
-const drawStyle = { color:'#D6493E', width:3, dash:false, fill:false };
+const drawStyle = { color:'#000000', width:3, dash:false, fill:false };
 const legendLayerGroup = new Konva.Group();
 // v2.1-91 : les textes en dernier = toujours au premier plan (au-dessus des logos et de la légende).
 contentLayer.add(recapGroup, shapesLayerGroup, linesLayerGroup, pastillesLayerGroup, logosLayerGroup, legendLayerGroup, textesLayerGroup);
