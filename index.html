@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-177 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-178 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -627,7 +627,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-177</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-178</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -895,7 +895,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-177 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-178 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2177,6 +2177,7 @@ uiLayer.add(shapeOutline, shapeHandles);
     h.add(new Konva.Circle({ radius:16, fill:'rgba(0,0,0,0.001)' }));
     h.add(new Konva.Circle({ radius:6, fill:'#ffffff', stroke:'#0E6FA8', strokeWidth:2, listening:false }));
     h.on('dragstart', ()=>{
+      shapeHandleDragging = true;
       const sh = selectedShape(), node = sh && shapeNodes.get(sh.id); if (!sh || !node) return;
       const n = shapeCornersLocal(sh).length, o = shapeCornersLocal(sh)[(k + n/2) % n]; // angle opposé (rect / ellipse) ou autre extrémité (ligne)
       h._fixed = shapeToWorld(sh, o[0], o[1]);
@@ -2203,12 +2204,28 @@ uiLayer.add(shapeOutline, shapeHandles);
       updateLockIndicator();
       contentLayer.batchDraw();
     });
-    h.on('dragend', ()=>{ h._fixed = null; pushHistory(); render(); });
+    h.on('dragend', ()=>{ h._fixed = null; shapeHandleDragging = false; pushHistory(); render(); });
     shapeHandles.add(h);
   });
 })();
 function selectedShape(){ return selectedId ? (model.shapes||[]).find(x=>x.id===selectedId) || null : null; }
-function updateShapeHandles(skip){
+// v2.1-178 : GARDE-FOU. Le contour pointillé et les poignées étaient recalculés seulement par certains événements (rendu, glisser, rotation…) : un chemin
+// oublié (zoom, rotation en cours, changement de page, annulation…) les laissait à l'ancienne place ou à la mauvaise échelle (« l'encadré ne correspond pas
+// à la sélection »). Tant qu'un dessin est sélectionné, une vérification légère (toutes les 80 ms) compare la géométrie réelle du dessin à celle
+// affichée et redessine contour + poignées dès qu'elles diffèrent, quel que soit le chemin qui a changé le dessin.
+let shapeWatchTimer = 0, shapeWatchSig = '', shapeHandleDragging = false;
+function shapeSig(){
+  const sh = selectedShape(), node = sh && shapeNodes.get(sh.id);
+  if (!sh || !node) return '';
+  return [sh.id, node.x(), node.y(), node.rotation(), sh.width, sh.height, sh.locked ? 1 : 0, zoom, activeTool, (shapeOutline.visible() ? 1 : 0)].join('|');
+}
+function shapeWatchTick(){
+  shapeWatchTimer = 0;
+  const sig = shapeSig();
+  if (sig && !shapeHandleDragging && sig !== shapeWatchSig) updateShapeHandles(null, !!(planRotate && planRotate.active));
+  if (shapeSig()) shapeWatchTimer = setTimeout(shapeWatchTick, 80);
+}
+function updateShapeHandles(skip, outlineOnly){
   const sh = selectedShape(), node = sh && shapeNodes.get(sh.id);
   if (!sh || !node || isDrawTool(activeTool)){ if (shapeHandles.visible() || shapeOutline.visible()){ shapeHandles.visible(false); shapeOutline.visible(false); uiLayer.batchDraw(); } return; }
   if (sh.locked){ if (shapeHandles.visible()){ shapeHandles.visible(false); uiLayer.batchDraw(); } } // verrouillé : pas de poignées, mais le contour reste
@@ -2216,7 +2233,9 @@ function updateShapeHandles(skip){
   const corners = shapeCornersLocal(sh);
   shapeOutline.points(corners.flatMap(c=>{ const w = shapeToWorld(g, c[0], c[1]); return [w.x, w.y]; }));
   shapeOutline.setAttrs({ closed: corners.length > 2, strokeWidth: 1.5/zoom, dash:[6/zoom, 4/zoom], visible:true }); shapeOutline.moveToTop();
-  if (sh.locked){ uiLayer.batchDraw(); return; }
+  if (!shapeWatchTimer) shapeWatchTimer = setTimeout(shapeWatchTick, 80);
+  if (outlineOnly){ shapeWatchSig = shapeSig(); uiLayer.batchDraw(); return; } // pendant une rotation à la main : seul le contour suit en direct
+  if (sh.locked){ shapeWatchSig = shapeSig(); uiLayer.batchDraw(); return; }
   shapeHandles.getChildren().forEach((h, k)=>{
     if (k >= corners.length){ h.visible(false); return; }
     h.visible(true);
@@ -2224,6 +2243,7 @@ function updateShapeHandles(skip){
     h.scale({ x:1/zoom, y:1/zoom });
   });
   shapeHandles.visible(true); shapeHandles.moveToTop();
+  shapeWatchSig = shapeSig();
   uiLayer.batchDraw();
 }
 // v2.1-174 : dessin le plus au-dessus sous un point (coordonnées feuille). Tolérance = épaisseur du trait ou 14 px écran ; l'intérieur
@@ -6448,6 +6468,7 @@ function applyRenderRatio(){
 }
 function settleZoom(){
   applyRenderRatio();
+  updateShapeHandles(); // v2.1-178 : poignées et contour d'un dessin gardent leur taille écran
   if (!planRotate.active) updateLockIndicator(); // met à jour aussi les icônes de rotation : taille constante à l'écran
   if (selectedId){ // zone de saisie de la pastille sélectionnée : taille constante à l'écran
     const pp = model.pastilles.find(x=>x.id===selectedId), g = pp && pastilleNodes.get(pp.id);

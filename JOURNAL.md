@@ -1501,4 +1501,16 @@ v2.1-177 — Sélection de dessins superposés ; contour bleu de la sélection
   Correctif : shapeAtPoint() choisit le CONTOUR le plus proche de la pointe (à égalité le plus haut) ; l'intérieur d'un dessin rempli ne compte qu'en
   dernier recours ; le toucher direct d'un dessin utilise la même règle. Contour bleu pointillé de la boîte du dessin sélectionné (reste affiché s'il est
   verrouillé) : on voit toujours QUEL dessin est choisi, même blanc.
+
+v2.1-178 — Contour et poignées d'un dessin : recherche approfondie des décalages
+  Retour de Mic : « par moment le contour pointillé ne correspond pas du tout à la sélection » (non reproductible à la main).
+  Méthode : parcours aléatoires (45 actions x 8 graines : tracés, sélection au curseur rouge, rotation à la main avec mesures PENDANT le geste, glisser
+  des poignées, zoom, pages, annuler, verrou, style), contrôle du contour et des poignées à chaque étape, comparé avec la v2.1-177.
+  Bugs reproduits (v177 : 18 et 19 anomalies sur 2 graines ; v178 : 0) :
+  1. Pendant une rotation par les mains, le contour restait à l'ancienne place (écarts de 4 à 45 px) jusqu'au relâchement.
+  2. Après un zoom, poignées et contour gardaient l'ancienne échelle (poignées 2,4 fois trop grosses au lieu de 1,7 attendu).
+  Cause générale : contour et poignées n'étaient redessinés que par certains événements (rendu, glisser, fin de rotation) : tout chemin oublié les laissait périmés.
+  Correctif : (a) garde-fou — tant qu'un dessin est sélectionné, une vérification légère toutes les 80 ms compare la géométrie réelle (position, rotation,
+  taille, zoom, verrou, outil) à celle affichée et redessine si elle diffère ; (b) pendant une rotation, le contour suit en direct ; (c) redessin au zoom.
+  Observé, non corrigé (sans gravité) : en tirant une poignée AU-DELÀ de l'angle opposé (retournement), la poignée tirée reste sous le doigt jusqu'au relâchement.
 ```

@@ -347,6 +347,26 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       model.shapes = []; render();
       return onEdge && onEdge.id === 'dessous' && onBig && onBig.id === 'dessus' && inside && inside.id === 'dessus' && outline && !shapeOutline.visible();
     }), 'dessins superposés : le contour visé gagne, contour bleu de la sélection');
+    // v2.1-178 : garde-fou : le contour / les poignées d'un dessin suivent sa géométrie réelle même si un chemin « oublie » de les mettre à jour (rotation en cours, zoom)
+    ok(await pg.evaluate(async()=>{
+      closeOtherWindows(''); resetRemoteGesture(); onTileChosen('plan');
+      model.shapes = [{ id:'gf', kind:'rect', x:150, y:200, width:180, height:120, rotation:0, color:'#000000', sw:4, dash:false, fill:false, locked:false }]; render();
+      selectNode(shapeNodes.get('gf'), 'gf');
+      const node = shapeNodes.get('gf'), sh = model.shapes[0];
+      const want = ()=>shapeCornersLocal(sh).map(c=>shapeToWorld({ x:node.x(), y:node.y(), rotation:node.rotation() }, c[0], c[1]));
+      const ok0 = ()=>{ const pts = shapeOutline.points(); return want().every((w,k)=>Math.hypot(w.x-pts[2*k], w.y-pts[2*k+1]) < 0.5) && Math.abs(shapeHandles.getChildren()[0].scaleX() - 1/zoom) < 0.01; };
+      const a = ok0();
+      node.rotation(35); node.position({ x:200, y:260 });       // changement « par un chemin oublié » : aucun appel à updateShapeHandles
+      await new Promise(r=>setTimeout(r, 300));
+      const b = ok0();
+      const z0 = zoom; zoom = z0*1.7;                            // zoom changé sans notification
+      await new Promise(r=>setTimeout(r, 300));
+      const c = ok0(); zoom = z0;
+      selectNode(null, null); await new Promise(r=>setTimeout(r, 200));
+      const d = !shapeOutline.visible() && !shapeHandles.visible();
+      model.shapes = []; render();
+      return a && b && c && d;
+    }), 'dessin sélectionné : contour et poignées se resynchronisent seuls (rotation, zoom), disparaissent à la désélection');
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');
