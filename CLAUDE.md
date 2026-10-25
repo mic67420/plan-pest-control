@@ -32,7 +32,7 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
    en mode Plan.
 2. **Ne jamais déplacer de soi-même** un élément que l'utilisateur place à la main (logos, textes,
    légende, date). Aucun repositionnement automatique non demandé.
-3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-181**), à mettre à
+3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-182**), à mettre à
    jour aux 3 endroits : la balise `<title>`, la puce `.brand .ver` du bandeau, le commentaire
    d'en-tête du `<script>`.
    Attention : un remplacement global (`v2.1-69` → `v2.1-70` partout) modifie aussi les références
@@ -118,6 +118,20 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
   le ») : emplacements par défaut = `CORNER_PRESETS` (portrait / paysage, mesurés sur les documents de test de
   Mic, v2.1-96) ; verrouillés par défaut sur un nouveau projet ; copiés sur chaque nouvel étage depuis la
   page choisie ; marge au bord préservée lors du passage portrait ↔ paysage.
+
+## 4 ter. Objectif futur : plusieurs métiers dans UNE application (consigne de Mic, v2.1-182)
+
+Mic prévoit de déployer la même application pour d'autres corps de métier. **Pour l'instant : un seul métier (lutte antiparasitaire,
+« Pest control »), on ne rajoute rien d'autre** ; on prépare seulement le terrain.
+- Tout ce qui est propre à un métier est regroupé dans la constante `TRADES` (clé = identifiant du métier, ex. `'pest-control'`) :
+  `label`, `defaultTypes()` (liste de postes par défaut), `requiredTypes()` (postes toujours présents). `currentTradeId` = métier courant.
+- **Pour ajouter un métier plus tard** : 1) ajouter une entrée à `TRADES` ; 2) prévoir un choix du métier (au nouveau document) qui
+  fixe `currentTradeId` ; 3) mémoriser le métier dans le document (champ à ajouter au document et à `cloneDoc`) ; 4) vérifier les textes
+  propres au métier encore écrits en dur (légende, noms d'export, logo entreprise, `CORNER_PRESETS`). Le reste (bibliothèque, pages, exports) est commun.
+- **Bibliothèque de postes** (v2.1-182) : gardée sur l'appareil (IndexedDB, magasin `autosave`, clé `library`), structure
+  `library.trades[idMétier].types`. Un poste créé reçoit un id unique `type-lib-…` ; un poste d'origine modifié est repéré par son id ;
+  un ancien poste est relié par `libId`. Nouveau document = liste d'origine + bibliothèque (`applyLibraryToModel`) ; les documents existants
+  ne sont jamais modifiés d'office. Fenêtre en tuiles (`openLibraryWindow`), export / import `.ppclib.json`.
 
 ## 5. Approches ABANDONNÉES (ne pas les retenter)
 

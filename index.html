@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-181 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-182 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -132,6 +132,24 @@
     z-index:1000;padding:10px;display:none;
   }
   .popover.open{display:block;}
+  /* v2.1-182 : bibliothèque de postes = grille de tuiles (vignette, code, nom) */
+  #popLibrary{ left:50% !important; right:auto !important; transform:translateX(-50%); width:min(440px, calc(100vw - 16px)); max-width:none; min-width:0; padding:12px; z-index:1001; box-sizing:border-box; }
+  body.desk.mobile-mode #popLibrary{ left:50% !important; }
+  #popLibrary .lib-head{ font-weight:700; font-size:15px; margin-bottom:8px; } #popLibrary .lib-head span{ font-weight:500; font-size:12px; color:#5c6478; margin-left:6px; }
+  #popLibrary .lib-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px; }
+  #popLibrary .lib-tile{ position:relative; }
+  #popLibrary .lib-main{ width:100%; display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 4px 6px; border:2px solid #c9ced8; border-radius:12px; background:#fff; color:#1c2230; font:inherit; cursor:pointer; }
+  #popLibrary .lib-tile.in-doc .lib-main{ border-color:#4C9A6A; background:#eef8f1; }
+  #popLibrary .lib-img{ height:46px; display:flex; align-items:center; justify-content:center; }
+  #popLibrary .lib-main b{ font-size:14px; } #popLibrary .lib-nm{ font-size:10.5px; line-height:1.2; text-align:center; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; color:#5c6478; }
+  #popLibrary .lib-ok{ font-size:10px; color:#2f7a4d; font-weight:600; }
+  #popLibrary .lib-x{ position:absolute; top:-5px; right:-5px; z-index:1; width:24px; height:24px; border-radius:50%; border:1px solid #c9ced8; background:#fff; color:#D6493E; font-size:12px; padding:0; cursor:pointer; }
+  #popLibrary .lib-empty{ grid-column:1 / -1; font-size:13px; color:#5c6478; padding:8px 2px; }
+  #popLibrary .lib-foot{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  #popLibrary .lib-foot button{ flex:1 1 auto; min-height:44px; border:1px solid #c9ced8; border-radius:10px; background:#fff; color:#1c2230; font:inherit; font-weight:600; font-size:13px; cursor:pointer; }
+  body.night-mode #popLibrary .lib-main, body.night-mode #popLibrary .lib-foot button, body.night-mode #popLibrary .lib-x{ background:#1b2230; color:#e9edf4; border-color:#394258; }
+  body.night-mode #popLibrary .lib-tile.in-doc .lib-main{ background:#1d3a2b; border-color:#4C9A6A; }
+  body.night-mode #popLibrary .lib-nm, body.night-mode #popLibrary .lib-head span{ color:#9aa4b6; }
   /* v2.1-165 : fenêtre « poste » (ajout / crayon) : carte blanche sous les tuiles, 2 colonnes, champs grands, aperçu en direct */
   body.mobile-mode #popAddType{ left:50% !important; right:auto !important; transform:translateX(-50%); width:min(420px, calc(100vw - 16px)); max-width:none; padding:12px; z-index:1001; }
   body.mobile-mode #popAddType.open{ display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; align-items:center; }
@@ -627,7 +645,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-181</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-182</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -897,7 +915,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-181 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-182 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -937,6 +955,35 @@ const GRID_STEP = 5; // v2.1-92 : carreaux divisés par 2 (était 20) ; v2.1-142
 const HISTORY_LIMIT = 20;
 
 /* ---------------------------- Etat applicatif --------------------------- */
+// v2.1-182 : MÉTIERS. L'application est prévue pour d'autres corps de métier (même éditeur, autres postes). Tout ce qui est propre
+// à un métier est regroupé ICI : ajouter un métier = ajouter une entrée à TRADES (label, liste de postes par défaut, postes
+// obligatoires). Le reste (bibliothèque de postes, légende, export…) ne dépend pas du métier. Pour l'instant : un seul métier.
+const TRADES = {
+  'pest-control': {
+    label: 'Lutte antiparasitaire',
+    // Liste fournie par l'utilisateur (v2.1-53), dans cet ordre. Les identifiants des postes déjà existants sont conservés
+    // (type-E, type-nt, type-R…) pour rester compatibles avec les documents déjà enregistrés ; souris/rat gardent leurs id
+    // fixes car ensureDefaultDeviceTypes() les réinjecte d'après ces id.
+    defaultTypes(){ return [
+    { id: 'type-E',  code: 'E',  name: 'Poste d\'appâtage ext. NON TOXIQUE (Placebo)', color: '#93C96E', shape: 'circle' },
+    { id: 'type-nt', code: 'NT', name: 'Poste d\'appâtage int. NON TOXIQUE (Placebo)', color: '#4C7A2E', shape: 'circle' },
+    { id: 'type-R',  code: 'R',  name: 'Poste d\'appâtage int. Rodenticide', color: '#E31C1C', shape: 'circle' },
+    { id: 'type-Rext', code: 'E', name: 'Poste d\'appâtage ext. Rodenticide', color: '#E31C1C', shape: 'circle' },
+    { id: 'type-T',  code: 'T',  name: 'Gel tracker', color: '#D802DB', shape: 'burst' },
+    { id: 'type-B',  code: 'B',  name: 'Piège à blatte', color: '#8B4A2B', shape: 'circle' },
+    { id: 'type-D',  code: 'D',  name: 'Destructeur d\'insectes volants', color: '#1A8CC8', shape: 'circle' },
+    { id: 'type-P',  code: 'P',  name: 'Piège à entonnoir pyrale', color: '#E8A80C', shape: 'circle' },
+    { id: 'type-G',  code: 'ST', name: 'Saturation Phéromone', color: '#DE6E22', shape: 'circle' },
+    { id: 'type-S',  code: 'S',  name: 'Exosex SPTAB phéromones pyrales', color: '#7A2FA0', shape: 'circle' },
+    { id: 'type-i',  code: 'iPS', name: 'Pièges à iPS (insectes des produits stockés)', color: '#F4A6A0', shape: 'circle' },
+    { id: 'type-souris', code: 'MU', name: 'Poste rongeur souris', color: '#E31C1C', shape: 'circle', noNumber: true, defaultRadius: 10 },
+    { id: 'type-rat', code: 'RA', name: 'Poste rongeurs rat', color: '#E31C1C', shape: 'circle', noNumber: true, defaultRadius: 20 },
+    ]; },
+    // postes toujours présents (réinjectés à chaque rendu s'ils manquent)
+    requiredTypes(){ return this.defaultTypes().filter(t=>t.id==='type-souris' || t.id==='type-rat'); },
+  },
+};
+let currentTradeId = 'pest-control';
 const MAX_PAGES = 11; // 1 page principale + jusqu'à 10 pages/étages blanches
 let pages = [createEmptyModel()];
 let currentPageIndex = 0;
@@ -1229,6 +1276,147 @@ window.addEventListener('beforeunload', (e)=>{
 });
 // Enregistre tout de suite les modifications en attente (avant de remplacer le document ouvert).
 function flushAutoSaveNow(){ clearTimeout(autoSaveTimer); return autoSaveDirty ? doAutoSave() : Promise.resolve(); }
+// ---------------------------- Bibliothèque de postes (v2.1-182) ----------------------------
+// Les postes (nom, couleur, forme, image, taille…) appartenaient au DOCUMENT : « Nouveau projet » repartait de la liste d'origine
+// et un poste créé (extincteur…) n'existait plus. La bibliothèque est gardée sur l'appareil (IndexedDB, hors documents) : tout poste
+// créé ou modifié y est enregistré, et chaque NOUVEAU document la reprend. Les documents existants ne sont jamais modifiés d'office.
+// Structure prévue pour plusieurs métiers : library.trades[idMétier].types (voir TRADES).
+// Identité : un poste de la bibliothèque est repéré par sa clé = id d'un poste d'origine (type-E…, donc « modifié ») ou libId
+// (poste créé : id unique 'type-lib-…', identique dans tous les documents ; ancien poste : libId ajouté au moment de l'enregistrement).
+const LIB_KEY = 'library';
+let library = { version:1, trades:{} };
+function libTypes(){ const t = library.trades[currentTradeId]; return t ? t.types : []; }
+function libNewId(){ return 'type-lib-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+function libIsDefaultId(id){ return TRADES[currentTradeId].defaultTypes().some(d=>d.id===id); }
+function libKeyOf(t){ return t.libId || (libIsDefaultId(t.id) ? t.id : null); }
+const LIB_FIELDS = ['code','name','color','shape','noNumber','textColor','image','imageRatio','defaultRadius'];
+function libSameAsDefault(t){
+  const d = TRADES[currentTradeId].defaultTypes().find(x=>x.id===t.id);
+  return !!d && LIB_FIELDS.every(f=>(t[f]||'') === (d[f]||''));
+}
+let libSaveTimer = null;
+function libPersist(){
+  clearTimeout(libSaveTimer);
+  libSaveTimer = setTimeout(async ()=>{
+    try{
+      const db = await openIDB();
+      await new Promise((res, rej)=>{ const tx = db.transaction(IDB_STORE, 'readwrite'); tx.objectStore(IDB_STORE).put(JSON.parse(JSON.stringify(library)), LIB_KEY); tx.oncomplete = res; tx.onerror = ()=>rej(tx.error); });
+    }catch(e){ /* sans conséquence : la bibliothèque sera réenregistrée à la prochaine modification */ }
+  }, 400);
+}
+async function libLoad(){
+  try{
+    const db = await openIDB();
+    const v = await new Promise((res, rej)=>{ const r = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(LIB_KEY); r.onsuccess = ()=>res(r.result); r.onerror = ()=>rej(r.error); });
+    if (v && v.trades) library = v;
+  }catch(e){ /* pas de bibliothèque : on repart de la liste d'origine */ }
+}
+// Enregistre (ou met à jour) un poste dans la bibliothèque. Un poste d'origine redevenu identique à l'original en est retiré.
+function libUpsert(t){
+  const key = libKeyOf(t); if (!key) return false;
+  if (!library.trades[currentTradeId]) library.trades[currentTradeId] = { types: [] };
+  const list = library.trades[currentTradeId].types, i = list.findIndex(x=>x.id===key);
+  if (libSameAsDefault({ ...t, id:key })){ if (i >= 0) list.splice(i, 1); }
+  else { const c = { ...t, id:key }; delete c.libId; if (i >= 0) list[i] = c; else list.push(c); }
+  libPersist(); return true;
+}
+// Relie un poste du document à la bibliothèque (libId sur toutes les pages si ancien poste) puis l'enregistre.
+function libLink(typeId){
+  const t = model.deviceTypes.find(x=>x.id===typeId); if (!t) return false;
+  if (!libKeyOf(t)){ const k = libNewId(); pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===typeId); if (x) x.libId = k; }); }
+  return libUpsert(model.deviceTypes.find(x=>x.id===typeId));
+}
+let libSyncTimers = {};
+function libSyncSoon(typeId){ clearTimeout(libSyncTimers[typeId]); libSyncTimers[typeId] = setTimeout(()=>libLink(typeId), 700); }
+// Nouveau document : la liste d'origine, complétée / remplacée par les postes de la bibliothèque.
+function applyLibraryToModel(m){
+  libTypes().forEach(lt=>{
+    const i = m.deviceTypes.findIndex(x=>x.id===lt.id), c = { ...lt };
+    if (i >= 0) m.deviceTypes[i] = c; else m.deviceTypes.push(c);
+  });
+}
+// Poste de la bibliothèque dans le document ouvert (toutes les pages), puis sélection.
+function libAddToDoc(lt){
+  const have = model.deviceTypes.find(x=>x.id===lt.id || x.libId===lt.id);
+  if (have){ selectedTypeId = have.id; toast('Ce poste est déjà dans le document.'); lastTypeListSig = null; refreshTypeList(); return false; }
+  pages.forEach(pg=>{ if (!pg.deviceTypes.some(x=>x.id===lt.id)) pg.deviceTypes.push({ ...lt }); });
+  selectedTypeId = lt.id; pushHistory(); render(); toast('Poste ajouté au document.');
+  return true;
+}
+function libSaveDocTypes(){
+  let n = 0; const before = libTypes().length;
+  model.deviceTypes.forEach(t=>{ if (libLink(t.id)) n++; });
+  return libTypes().length - before;
+}
+// Fenêtre « Bibliothèque » : une grille de tuiles (vignette + code + nom).
+let libPop = null;
+function libPopEl(){
+  if (libPop) return libPop;
+  const pop = document.createElement('div'); pop.className = 'popover'; pop.id = 'popLibrary';
+  pop.addEventListener('click', e=>e.stopPropagation());
+  document.body.appendChild(pop); libPop = pop; return pop;
+}
+function openLibraryWindow(){
+  const pop = libPopEl();
+  closeOtherWindows('popover'); closeAllPopovers();
+  renderLibrary();
+  pop.classList.add('open');
+  const bar = document.getElementById('mobileTileBar');
+  pop.style.top = (bar.getBoundingClientRect().bottom + 6) + 'px';
+  pop.style.maxHeight = 'calc(100vh - ' + (bar.getBoundingClientRect().bottom + 14) + 'px)'; pop.style.overflowY = 'auto';
+}
+function renderLibrary(){
+  const pop = libPopEl(), list = libTypes();
+  const tiles = list.map(lt=>{
+    const inDoc = model.deviceTypes.some(x=>x.id===lt.id || x.libId===lt.id);
+    return `<div class="lib-tile${inDoc?' in-doc':''}" data-id="${escapeAttr(lt.id)}" title="${escapeAttr(lt.code+' — '+lt.name)}">
+      <button type="button" class="lib-x" data-act="del" aria-label="Retirer de la bibliothèque">✕</button>
+      <button type="button" class="lib-main" data-act="add"><span class="lib-img">${shapeSwatchHTML(lt,46)}</span><b>${escapeAttr(lt.code)}</b><span class="lib-nm">${escapeAttr(lt.name)}</span>${inDoc?'<span class="lib-ok">✓ dans ce document</span>':''}</button></div>`;
+  }).join('');
+  pop.innerHTML = `<div class="lib-head">Bibliothèque de postes <span>${escapeAttr(TRADES[currentTradeId].label)}</span></div>
+    <div class="lib-grid">${tiles || '<div class="lib-empty">Aucun poste enregistré. Les postes que vous créez ou modifiez s\'y ajoutent automatiquement (et sont repris dans chaque nouveau document).</div>'}</div>
+    <div class="lib-foot"><button type="button" data-act="savedoc">Enregistrer les postes de ce document</button><button type="button" data-act="export">Exporter</button><button type="button" data-act="import">Importer</button></div>`;
+  pop.onclick = (e)=>{
+    e.stopPropagation();
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const act = b.dataset.act, tile = b.closest('.lib-tile'), lt = tile && libTypes().find(x=>x.id===tile.dataset.id);
+    if (act === 'add' && lt){ if (libAddToDoc(lt)){ closeAllPopovers(); } else renderLibrary(); }
+    else if (act === 'del' && lt){
+      if (!confirm('Retirer « '+lt.name+' » de la bibliothèque ? (Les documents qui l\'utilisent le gardent.)')) return;
+      library.trades[currentTradeId].types = libTypes().filter(x=>x.id!==lt.id); libPersist(); renderLibrary();
+    }
+    else if (act === 'savedoc'){ const n = libSaveDocTypes(); toast(n>0 ? n+' poste'+(n>1?'s':'')+' ajouté'+(n>1?'s':'')+' à la bibliothèque.' : 'Bibliothèque à jour.'); renderLibrary(); }
+    else if (act === 'export') libExport();
+    else if (act === 'import') libImportPick();
+  };
+}
+function libExport(){
+  const blob = new Blob([JSON.stringify({ app:'ppc-library', version:1, trades:library.trades }, null, 0)], { type:'application/json' });
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = 'bibliotheque-postes.ppclib.json'; a.click(); URL.revokeObjectURL(url);
+  toast('Bibliothèque exportée.');
+}
+function libImportPick(){
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.addEventListener('click', e=>e.stopPropagation()); // même piège que pour l'image d'un poste (v2.1-180)
+  filePickerOpenUntil = Date.now() + 60000;
+  inp.addEventListener('change', async ()=>{
+    filePickerOpenUntil = Date.now() + 3000;
+    const f = inp.files[0]; if (!f) return;
+    try{
+      const d = JSON.parse(await f.text());
+      if (!d || d.app !== 'ppc-library' || !d.trades) throw new Error('format');
+      let n = 0;
+      Object.keys(d.trades).forEach(tr=>{
+        if (!TRADES[tr]) return; // métier inconnu de cette version : ignoré
+        if (!library.trades[tr]) library.trades[tr] = { types: [] };
+        (d.trades[tr].types||[]).forEach(t=>{ const L = library.trades[tr].types, i = L.findIndex(x=>x.id===t.id); if (i>=0) L[i] = t; else L.push(t); n++; });
+      });
+      libPersist(); renderLibrary(); toast(n+' poste'+(n>1?'s':'')+' importé'+(n>1?'s':'')+'.');
+    }catch(e){ toast('Fichier de bibliothèque invalide.'); }
+  });
+  inp.click();
+}
 function newProject(){
   if (!confirm("Créer un nouveau projet ? Le projet actuel reste disponible dans Fichier > Documents (les 5 derniers).")) return;
   flushAutoSaveNow(); // le projet quitté est rangé dans « Mes documents » avant d'être remplacé
@@ -1237,6 +1425,7 @@ function newProject(){
   docId = newDocId(); changesSinceFile = 0;
   docName = null; // nouveau projet : le nom sera demandé au premier export (v2.1-79)
   pages = [createEmptyModel()];
+  applyLibraryToModel(pages[0]); // v2.1-182 : postes créés / modifiés repris dans le nouveau document
   currentPageIndex = 0;
   model = pages[0];
   idCounter = 1;
@@ -1332,25 +1521,7 @@ function createEmptyModel(){
     orientation: 'portrait',
     plans: [], // [{id,dataURL,originalDataURL,x,y,width,height,rotation,locked,brightness,contrast,saturation,hue}] — plusieurs plans possible
     shapes: [], // v2.1-168 : dessins simples [{id,kind:'rect'|'ellipse'|'line'|'arrow',x1,y1,x2,y2,color,width,dash,fill,locked}]s par page
-    deviceTypes: [
-      // Liste fournie par l'utilisateur (v2.1-53), dans cet ordre. Les identifiants des
-      // postes déjà existants sont conservés (type-E, type-nt, type-R…) pour rester
-      // compatibles avec les documents déjà enregistrés ; souris/rat gardent leurs id
-      // fixes car ensureDefaultDeviceTypes() les réinjecte d'après ces id.
-      { id: 'type-E',  code: 'E',  name: 'Poste d\'appâtage ext. NON TOXIQUE (Placebo)', color: '#93C96E', shape: 'circle' },
-      { id: 'type-nt', code: 'NT', name: 'Poste d\'appâtage int. NON TOXIQUE (Placebo)', color: '#4C7A2E', shape: 'circle' },
-      { id: 'type-R',  code: 'R',  name: 'Poste d\'appâtage int. Rodenticide', color: '#E31C1C', shape: 'circle' },
-      { id: 'type-Rext', code: 'E', name: 'Poste d\'appâtage ext. Rodenticide', color: '#E31C1C', shape: 'circle' },
-      { id: 'type-T',  code: 'T',  name: 'Gel tracker', color: '#D802DB', shape: 'burst' },
-      { id: 'type-B',  code: 'B',  name: 'Piège à blatte', color: '#8B4A2B', shape: 'circle' },
-      { id: 'type-D',  code: 'D',  name: 'Destructeur d\'insectes volants', color: '#1A8CC8', shape: 'circle' },
-      { id: 'type-P',  code: 'P',  name: 'Piège à entonnoir pyrale', color: '#E8A80C', shape: 'circle' },
-      { id: 'type-G',  code: 'ST', name: 'Saturation Phéromone', color: '#DE6E22', shape: 'circle' },
-      { id: 'type-S',  code: 'S',  name: 'Exosex SPTAB phéromones pyrales', color: '#7A2FA0', shape: 'circle' },
-      { id: 'type-i',  code: 'iPS', name: 'Pièges à iPS (insectes des produits stockés)', color: '#F4A6A0', shape: 'circle' },
-      { id: 'type-souris', code: 'MU', name: 'Poste rongeur souris', color: '#E31C1C', shape: 'circle', noNumber: true, defaultRadius: 10 },
-      { id: 'type-rat', code: 'RA', name: 'Poste rongeurs rat', color: '#E31C1C', shape: 'circle', noNumber: true, defaultRadius: 20 },
-    ],
+    deviceTypes: TRADES[currentTradeId].defaultTypes(), // v2.1-182 : liste de postes du métier courant (voir TRADES)
     pastilles: [], // {id,typeId,label,x,y,radius,rotation}
     anchors: [],   // {id,x,y} points réels pour placement déporté
     lines: [],     // {id,fromAnchorId,toPastilleId}
@@ -5628,6 +5799,7 @@ function typeSizeOf(t){ return Math.round((t && t.defaultRadius) || currentPasti
 function setTypeSize(typeId, r){
   r = Math.max(6, Math.min(60, Math.round(r)));
   pages.forEach(pg=>{ const t = pg.deviceTypes.find(x=>x.id===typeId); if (t) t.defaultRadius = r; });
+  libSyncSoon(typeId); // v2.1-182
   // v2.1-153 : la taille du poste ne concerne QUE les prochaines pastilles posées (les existantes : fenêtre « Tailles »)
   return r;
 }
@@ -5720,6 +5892,11 @@ function refreshTypeList(){
     positionTypeCard();
   });
   list.appendChild(addRow);
+  const libRow = document.createElement('div'); // v2.1-182 : bibliothèque partagée entre documents
+  libRow.className = 'dd-item dd-add';
+  libRow.innerHTML = '<span style="font-size:17px;line-height:1;width:20px;text-align:center;">▦</span><span class="nm" style="font-weight:600;">Bibliothèque de postes…</span>';
+  libRow.addEventListener('click', (e)=>{ e.stopPropagation(); openLibraryWindow(); });
+  list.appendChild(libRow);
   updateDropdownButton();
   syncColorPickerToSelectedType();
 }
@@ -5911,15 +6088,17 @@ document.getElementById('btnAddType').addEventListener('click', ()=>{
       const t = pg.deviceTypes.find(x=>x.id===editingTypeId);
       if (t){ t.code = code; t.name = name; t.color = color; t.noNumber = noNumber; t.defaultRadius = defaultRadius; t.shape = newTypeShape; if (newTypeImage){ t.image = newTypeImage; t.imageRatio = newTypeImageRatio; } else { delete t.image; delete t.imageRatio; } if (textColor) t.textColor = textColor; else delete t.textColor; }
     });
+    libLink(editingTypeId); // v2.1-182 : modification enregistrée dans la bibliothèque
     toast(pages.length>1 ? 'Poste modifié sur toutes les pages.' : 'Poste modifié.');
   } else {
-    const t = { id: nextId('type-'), code, name, color: currentColor, shape:newTypeShape, noNumber, defaultRadius };
+    const t = { id: libNewId(), code, name, color: currentColor, shape:newTypeShape, noNumber, defaultRadius };
     if (newTypeImage){ t.image = newTypeImage; t.imageRatio = newTypeImageRatio; }
     if (textColor) t.textColor = textColor;
     pages.forEach(pg=>{
       if (!pg.deviceTypes.some(x=>x.id===t.id)) pg.deviceTypes.push({...t});
     });
     selectedTypeId = t.id;
+    libLink(t.id); // v2.1-182 : nouveau poste enregistré dans la bibliothèque
   }
   editingTypeId = null;
   document.getElementById('btnAddType').textContent = '+ Ajouter ce poste';
@@ -7326,10 +7505,7 @@ function ensureDefaultDeviceTypes(){
   // Appelée à chaque rendu (donc très souvent) : on ne vérifie que la page AFFICHÉE plutôt
   // que de reboucler sur toutes les pages à chaque fois. Chaque page reçoit de toute façon
   // cette vérification dès qu'on l'affiche (switchToPage -> render()).
-  const defaults = [
-    { id: 'type-souris', code: 'MU', name: 'Poste rongeur souris', color: '#E31C1C', shape: 'circle', noNumber: true, defaultRadius: 10 },
-    { id: 'type-rat', code: 'RA', name: 'Poste rongeurs rat', color: '#E31C1C', shape: 'circle', noNumber: true, defaultRadius: 20 },
-  ];
+  const defaults = TRADES[currentTradeId].requiredTypes();
   defaults.forEach(d=>{
     if (!model.deviceTypes.some(t=>t.id===d.id)) model.deviceTypes.push({...d});
   });
@@ -7347,6 +7523,7 @@ function ensureDefaultDeviceTypes(){
       ]);
     }
   } catch(err){ /* sans conséquence : rendu avec la police de secours */ }
+  await libLoad(); // v2.1-182 : bibliothèque de postes
   const saved = await idbLoad();
   if (saved && Array.isArray(saved.pages) && saved.pages.length){
     pages = saved.pages;
@@ -7364,6 +7541,7 @@ function ensureDefaultDeviceTypes(){
     // v2.1-160 : rappel à l'ouverture si le fichier .json n'a pas été enregistré depuis plus de 3 jours (ou jamais, pour un document déjà fourni)
     updateFileDot();
   } else {
+    applyLibraryToModel(model); // premier lancement / document vide : postes de la bibliothèque
     await autoInsertCompanyLogo(); // logo entreprise déjà présent dès l'ouverture de l'application (page 1)
     await autoInsertClientLogoPlaceholder(); // idem pour le placeholder "logo Cie", en haut à droite
   }

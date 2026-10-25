@@ -410,6 +410,25 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     // contexte 2D remis à zéro (mémoire basse Android) : l'échelle de dessin est rétablie au dessin suivant (v2.1-181)
     await pg.evaluate(()=>{ [planLayer,contentLayer,uiLayer].forEach(l=>{ const c=l.getCanvas()._canvas; c.width=c.width; }); contentLayer.batchDraw(); }); await pg.waitForTimeout(300);
     ok(await pg.evaluate(()=>{ const c=contentLayer.getCanvas(); return Math.abs(c._canvas.getContext('2d').getTransform().a - c.pixelRatio) < 0.001; }), 'contexte 2D remis à zéro : échelle de dessin rétablie (pas de logos minuscules)');
+    // bibliothèque de postes (v2.1-181) : créé / modifié -> repris par « Nouveau projet », tuiles, ancien poste, rechargement
+    {
+      const snap = await pg.evaluate(()=>{ window.__snap = cloneDoc(); return true; });
+      await pg.evaluate(()=>{ library = { version:1, trades:{} }; document.getElementById('newTypeCode').value='EXT'; document.getElementById('newTypeName').value='Extincteur test'; document.getElementById('btnAddType').click(); });
+      ok(await pg.evaluate(()=>libTypes().some(x=>/^type-lib-/.test(x.id) && x.name==='Extincteur test') && model.deviceTypes.some(t=>/^type-lib-/.test(t.id) && t.name==='Extincteur test')), 'bibliothèque : un poste créé y est enregistré (id unique)');
+      await pg.evaluate(()=>{ const t=model.deviceTypes.find(x=>x.id==='type-E'); startEditType('type-E'); document.getElementById('newTypeName').value='Poste E modifié'; document.getElementById('btnAddType').click(); });
+      ok(await pg.evaluate(()=>libTypes().some(x=>x.id==='type-E' && x.name==='Poste E modifié')), 'bibliothèque : un poste d\'origine modifié y est enregistré');
+      await pg.evaluate(()=>newProject()); await pg.waitForTimeout(700);
+      ok(await pg.evaluate(()=>model.deviceTypes.some(t=>t.name==='Extincteur test') && model.deviceTypes.find(t=>t.id==='type-E').name==='Poste E modifié' && model.deviceTypes.filter(t=>t.id==='type-E').length===1), 'nouveau projet : reprend les postes créés et modifiés de la bibliothèque');
+      await pg.evaluate(()=>{ const i=model.deviceTypes.findIndex(t=>t.name==='Extincteur test'); pages.forEach(pg=>{ pg.deviceTypes.splice(pg.deviceTypes.findIndex(t=>t.name==='Extincteur test'),1); }); openLibraryWindow(); });
+      ok(await pg.evaluate(()=>document.querySelectorAll('#popLibrary .lib-tile').length>=2 && document.querySelector('#popLibrary').classList.contains('open')), 'bibliothèque : fenêtre en tuiles (tuiles)');
+      await pg.evaluate(()=>{ [...document.querySelectorAll('#popLibrary .lib-tile')].find(t=>/Extincteur/.test(t.title)).querySelector('.lib-main').click(); });
+      ok(await pg.evaluate(()=>model.deviceTypes.some(t=>t.name==='Extincteur test') && !document.querySelector('#popLibrary').classList.contains('open')), 'bibliothèque : toucher une tuile ajoute le poste au document et ferme la fenêtre');
+      await pg.evaluate(()=>{ pages.forEach(pg=>pg.deviceTypes.push({id:'type-77',code:'OLD',name:'Ancien poste',color:'#123456',shape:'circle'})); });
+      ok(await pg.evaluate(()=>{ const n=libSaveDocTypes(); return n>=1 && model.deviceTypes.find(t=>t.id==='type-77').libId && libTypes().some(x=>x.name==='Ancien poste'); }), 'bibliothèque : « Enregistrer les postes de ce document » rattrape un ancien poste');
+      await pg.waitForTimeout(700);
+      ok(await pg.evaluate(async()=>{ const n=libTypes().length; library={version:1,trades:{}}; await libLoad(); return n>=3 && libTypes().length===n; }), 'bibliothèque : conservée sur l\'appareil (rechargement)');
+      await pg.evaluate(()=>{ library={version:1,trades:{}}; libPersist(); restoreDoc(window.__snap); }); await pg.waitForTimeout(500);
+    }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

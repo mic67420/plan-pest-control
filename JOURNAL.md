@@ -1535,4 +1535,13 @@ v2.1-181 — « Nouveau document » : logos, légende et date minuscules et déc
   (redimensionnement, mémoire basse sur Android : « contextlost / contextrestored »), tout est dessiné à l'échelle 1 dans un canevas 2× plus grand :
   éléments à moitié de leur taille depuis le coin haut-gauche, donc hors de la feuille blanche (reproduit en test en remettant le contexte à zéro).
   Correctif : avant chaque dessin d'une couche (beforeDraw), l'échelle est vérifiée et rétablie si besoin ; à « contextrestored », la couche est redessinée.
+
+v2.1-182 — Bibliothèque de postes partagée entre documents (+ préparation multi-métiers)
+  Cause : les postes (extincteur créé en v2.1-180…) appartenaient au DOCUMENT ; « Nouveau projet » repartait de la liste d'origine, le poste « disparaissait ».
+  Correctif : bibliothèque sur l'appareil (IndexedDB, clé « library », par métier) ; tout poste créé ou modifié (nom, couleur, forme, image, taille) y est
+  enregistré ; chaque NOUVEAU document la reprend ; documents existants jamais modifiés d'office. Fenêtre « Bibliothèque de postes… » (bas de la liste des postes) :
+  grille de tuiles (vignette, code, nom), toucher = ajouter au document, ✕ = retirer de la bibliothèque, « Enregistrer les postes de ce document » (rattrape
+  les anciens postes), export / import .ppclib.json. Postes créés = id unique type-lib-… (plus nextId, qui repartait de 1 à chaque document).
+  Métiers : liste de postes par défaut déplacée dans TRADES['pest-control'] (defaultTypes / requiredTypes), currentTradeId ; mode d'emploi « ajouter un métier »
+  dans CLAUDE.md §4 ter. Aucun autre métier ajouté.
 ```
