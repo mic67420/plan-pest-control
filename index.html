@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-180 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-181 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -627,7 +627,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-180</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-181</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -897,7 +897,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-180 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-181 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1681,6 +1681,23 @@ const uiLayer = new Konva.Layer(); // transformer + aperçu fantôme (regroupés
 const cursorLayer = new Konva.Layer({ visible:false });
 stage.add(planLayer); stage.add(contentLayer); stage.add(gridLayer); stage.add(uiLayer); stage.add(cursorLayer);
 cursorLayer.getCanvas().setPixelRatio(1);
+// v2.1-181 : « Nouveau document » donnait parfois une feuille blanche avec logos, légende et date minuscules et décalés
+// (dessinés à moitié de leur taille depuis le coin haut-gauche du canevas). Cause : Konva ne règle l'échelle du contexte 2D
+// (= densité de dessin) qu'au redimensionnement du canevas ; si le navigateur remet ce contexte à zéro (redimensionnement,
+// mémoire basse sur Android : « contextlost / contextrestored »), tout est ensuite dessiné à l'échelle 1 dans un canevas
+// 2× plus grand. On vérifie donc l'échelle AVANT chaque dessin d'une couche (une simple lecture) et on la rétablit si besoin ;
+// à la restauration du contexte, on redessine la couche.
+[planLayer, contentLayer, gridLayer, uiLayer, cursorLayer].forEach(layer=>{
+  const cv = layer.getCanvas();
+  const fixScale = ()=>{
+    const ctx = cv._canvas.getContext('2d'), r = cv.pixelRatio || 1;
+    if (!ctx || !ctx.getTransform) return;
+    const t = ctx.getTransform();
+    if (Math.abs(t.a - r) > 0.001 || Math.abs(t.d - r) > 0.001 || Math.abs(t.b) > 0.001 || Math.abs(t.c) > 0.001 || Math.abs(t.e) > 0.001 || Math.abs(t.f) > 0.001) ctx.setTransform(r, 0, 0, r, 0, 0);
+  };
+  layer.on('beforeDraw', fixScale);
+  cv._canvas.addEventListener('contextrestored', ()=>{ fixScale(); layer.batchDraw(); });
+});
 // v2.1-104 : À CHAQUE événement tactile, Konva cherche l'élément sous le doigt (getIntersection) en LISANT un pixel
 // de chaque couche (getImageData) — une lecture GPU lente sur smartphone, répétée à chaque mouvement du doigt.
 // Comme sur un écran tactile natif, l'élément visé est celui du CONTACT INITIAL : on garde donc ce résultat pendant

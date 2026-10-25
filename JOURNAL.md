@@ -1529,4 +1529,10 @@ v2.1-180 — Image d'un poste : la fenêtre ne se ferme plus
   dont l'écouteur ferme menus et tiroirs : la fenêtre du poste se fermait dès le toucher d'« Image » (reproduit en test). De plus, au retour du sélecteur,
   Android envoie un « resize » dont l'écouteur ferme aussi les menus (aucun champ de saisie n'a le focus).
   Correctif : clic du champ fichier arrêté (stopPropagation) ; filePickerOpenUntil : pendant le choix du fichier (et 3 s après), le « resize » ne ferme rien.
+
+v2.1-181 — « Nouveau document » : logos, légende et date minuscules et décalés
+  Cause : Konva ne règle l'échelle du contexte 2D (densité de dessin) qu'au redimensionnement du canevas. Quand le navigateur remet ce contexte à zéro
+  (redimensionnement, mémoire basse sur Android : « contextlost / contextrestored »), tout est dessiné à l'échelle 1 dans un canevas 2× plus grand :
+  éléments à moitié de leur taille depuis le coin haut-gauche, donc hors de la feuille blanche (reproduit en test en remettant le contexte à zéro).
+  Correctif : avant chaque dessin d'une couche (beforeDraw), l'échelle est vérifiée et rétablie si besoin ; à « contextrestored », la couche est redessinée.
 ```

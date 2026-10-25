@@ -407,6 +407,9 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       await pg.evaluate(()=>{ filePickerOpenUntil = 0; closeAllPopovers(); closeAllTileDrawers(); });
       ok(a && b, 'nouveau poste : « Image » ne ferme pas la fenêtre (ni au toucher, ni au retour du sélecteur de fichiers)');
     }
+    // contexte 2D remis à zéro (mémoire basse Android) : l'échelle de dessin est rétablie au dessin suivant (v2.1-181)
+    await pg.evaluate(()=>{ [planLayer,contentLayer,uiLayer].forEach(l=>{ const c=l.getCanvas()._canvas; c.width=c.width; }); contentLayer.batchDraw(); }); await pg.waitForTimeout(300);
+    ok(await pg.evaluate(()=>{ const c=contentLayer.getCanvas(); return Math.abs(c._canvas.getContext('2d').getTransform().a - c.pixelRatio) < 0.001; }), 'contexte 2D remis à zéro : échelle de dessin rétablie (pas de logos minuscules)');
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');
