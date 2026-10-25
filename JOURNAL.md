@@ -1450,4 +1450,10 @@ v2.1-170 — Dessin : noir par défaut ; réglages du poste en lignes
   Demande : couleur de dessin par défaut noire ; fenêtre du crayon (poste) avec un réglage par LIGNE (libellé à gauche, réglage à droite)
   dans un ordre logique. Correctif : drawStyle.color = #000000 ; lignes Code, Nom, Couleur (+ aperçu), Police (+ Auto), Taille, Numéro ;
   boutons Enregistrer / Retirer / Annuler en dessous.
+
+v2.1-171 — Crayon du poste, niveau 2 : forme de la pastille
+  Réalisation : ligne « Forme » (6 boutons : rond, carré, carré arrondi, losange, triangle, étoile) dans la fenêtre du crayon, ordre des lignes
+  Code, Nom, Forme, Couleur, Police, Numéro, Taille. La forme (type.shape) est propagée à toutes les pages et dessinée par buildPastilleGroup
+  (Konva : Circle / Rect / RegularPolygon / Star), la légende, le récapitulatif, les listes (shapeSwatchHTML) et l'aperçu en direct.
+  Numéro plus petit dans les formes étroites (triangle, losange) pour rester à l'intérieur. Anciens postes sans forme = rond.
 ```

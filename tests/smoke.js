@@ -257,6 +257,17 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       return a && b && tiny && c && d && e && f && g && h;
     }), 'dessins : création des 4 formes, poignées, verrou, suppression, annuler, une page à part, anciens documents');
     ok(await pg.evaluate(()=>{ onTileChosen('plan'); openDrawWin(); const a = isDrawTool(activeTool) && document.getElementById('drawWin').classList.contains('show'); closeOtherWindows('sizeAll'); const b = !document.getElementById('drawWin').classList.contains('show') && !isDrawTool(activeTool); return a && b; }), 'fenêtre Dessin : ouvre l\'outil de tracé, se referme avec les autres fenêtres');
+    // v2.1-171 : forme du poste choisie dans le crayon (6 formes), propagée à toutes les pages, dessinée par la pastille et la pastille d'échantillon
+    ok(await pg.evaluate(()=>{
+      const t = model.deviceTypes[0], keep = t.shape;
+      const kinds = { circle:'Circle', square:'Rect', rounded:'Rect', diamond:'RegularPolygon', triangle:'RegularPolygon', burst:'Star' };
+      const drawn = Object.keys(kinds).every(k=>buildPastilleGroup({ color:'#1A8CC8', shape:k }, 16, 'A1').getChildren()[0].getClassName() === kinds[k]);
+      const sw = Object.keys(kinds).every(k=>/<svg/.test(shapeSwatchHTML({ color:'#1A8CC8', shape:k }, 20)));
+      startEditType(t.id); document.querySelector('#newTypeShapes [data-shape="rounded"]').click(); document.getElementById('btnAddType').click();
+      const saved = pages.every(pg=>pg.deviceTypes.find(x=>x.id===t.id).shape === 'rounded') && document.querySelectorAll('#newTypeShapes button').length === 6;
+      pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); if (x){ if (keep) x.shape = keep; else delete x.shape; } }); render();
+      return drawn && sw && saved;
+    }), 'forme du poste : 6 formes dessinées, choisies dans le crayon et propagées à toutes les pages');
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');
