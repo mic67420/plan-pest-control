@@ -264,7 +264,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       const drawn = Object.keys(kinds).every(k=>buildPastilleGroup({ color:'#1A8CC8', shape:k }, 16, 'A1').getChildren()[0].getClassName() === kinds[k]);
       const sw = Object.keys(kinds).every(k=>/<svg/.test(shapeSwatchHTML({ color:'#1A8CC8', shape:k }, 20)));
       startEditType(t.id); document.querySelector('#newTypeShapes [data-shape="rounded"]').click(); document.getElementById('btnAddType').click();
-      const saved = pages.every(pg=>pg.deviceTypes.find(x=>x.id===t.id).shape === 'rounded') && document.querySelectorAll('#newTypeShapes button').length === 6;
+      const saved = pages.every(pg=>pg.deviceTypes.find(x=>x.id===t.id).shape === 'rounded') && document.querySelectorAll('#newTypeShapes button').length === 7;
       pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); if (x){ if (keep) x.shape = keep; else delete x.shape; } }); render();
       return drawn && sw && saved;
     }), 'forme du poste : 6 formes dessinées, choisies dans le crayon et propagées à toutes les pages');
@@ -367,6 +367,31 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       model.shapes = []; render();
       return a && b && c && d;
     }), 'dessin sélectionné : contour et poignées se resynchronisent seuls (rotation, zoom), disparaissent à la désélection');
+    // v2.1-179 : image à la place de la forme d'un poste : import (tous formats via fileToImageDataURL), réduction, détourage du blanc, pastille-image, sauvegarde, retrait
+    ok(await (async()=>{
+      await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('pastille', false); startEditType(model.deviceTypes[3].id); });
+      await pg.evaluate(async()=>{ // image test : 800 x 400, fond blanc plein, disque vert au centre
+        const c = document.createElement('canvas'); c.width = 800; c.height = 400; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0,0,800,400); x.fillStyle = '#0a0'; x.beginPath(); x.arc(400,200,150,0,7); x.fill();
+        const blob = await new Promise(r=>c.toBlob(r, 'image/jpeg', 0.9)); await applyTypeImageFile(new File([blob], 'extincteur.jpg', { type:'image/jpeg' }));
+      });
+      return await pg.evaluate(async()=>{
+        const im = await loadImage(newTypeImage); const small = Math.max(im.naturalWidth, im.naturalHeight) <= 384 && Math.abs(newTypeImageRatio - 2) < 0.02;
+        const px = async(url)=>{ const i = await loadImage(url), c = document.createElement('canvas'); c.width = i.naturalWidth; c.height = i.naturalHeight; const x = c.getContext('2d'); x.drawImage(i,0,0); return x.getImageData(0,0,1,1).data[3]; };
+        const cut = document.getElementById('newTypeCutWhite').checked && (await px(newTypeImage)) === 0;            // fond blanc détouré d'office
+        const t = model.deviceTypes[3]; const rowShown = document.getElementById('rowTypeImage').style.display !== 'none';
+        document.getElementById('btnAddType').click();
+        const saved = pages.every(pg=>!!pg.deviceTypes.find(y=>y.id===t.id).image) && Math.abs(t.imageRatio - 2) < 0.02;
+        const p = { id:'pi1', typeId:t.id, label:'X1', x:100, y:100, radius:20, rotation:0 }; model.pastilles.push(p); render();
+        const grp = pastilleNodes.get('pi1'); const body = grp && grp.findOne('.pastille-body');
+        const drawn = !!body && body._isImage && body.find('Image').length === 1 && body.find('Text').length === 1;
+        const legendOk = typeof buildPastilleGroup(t, 10, t.code, { noLabel:true }).find === 'function' && buildPastilleGroup(t, 10, t.code, { noLabel:true }).find('Text').length === 0;
+        scheduleAutoSave(); clearTimeout(autoSaveTimer); await doAutoSave(); const snap = await idbLoad(); const stored = !!(snap && snap.pages[0].deviceTypes.find(y=>y.id===t.id).image);
+        startEditType(t.id); document.querySelector('#newTypeShapes [data-shape=\"circle\"]').click(); document.getElementById('btnAddType').click();
+        const removed = pages.every(pg=>!pg.deviceTypes.find(y=>y.id===t.id).image);
+        model.pastilles = model.pastilles.filter(q=>q.id !== 'pi1'); render();
+        return small && cut && rowShown && saved && drawn && legendOk && stored && removed;
+      });
+    })(), 'image de poste : import réduit, fond blanc détouré, pastille-image (numéro dessous), sauvegarde, retrait par une forme');
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

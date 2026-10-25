@@ -1513,4 +1513,14 @@ v2.1-178 — Contour et poignées d'un dessin : recherche approfondie des décal
   Correctif : (a) garde-fou — tant qu'un dessin est sélectionné, une vérification légère toutes les 80 ms compare la géométrie réelle (position, rotation,
   taille, zoom, verrou, outil) à celle affichée et redessine si elle diffère ; (b) pendant une rotation, le contour suit en direct ; (c) redessin au zoom.
   Observé, non corrigé (sans gravité) : en tirant une poignée AU-DELÀ de l'angle opposé (retournement), la poignée tirée reste sous le doigt jusqu'au relâchement.
+
+v2.1-179 — Image à la place de la forme d'un poste (extincteur, etc.)
+  Demande : dans la ligne « Forme » du crayon, importer une image (tous formats) redimensionnée automatiquement, avec une taille maximale réglable.
+  Choix de Mic : numéro SOUS l'image ; image détourée (SVG / PNG transparent idéal) ; taille = curseur Taille du crayon.
+  Réalisation : 7e bouton « Image » (import via fileToImageDataURL : PNG, JPEG, SVG, HEIC, WebP, AVIF, PDF…) ; image réduite à 384 px de côté (transparence
+  conservée) ; « Détourer le blanc » (remplissage depuis les bords, proposé d'office pour une image à fond blanc plein, décochable) ; type.image /
+  type.imageRatio propagés à toutes les pages ; pastille-image : image à ses proportions dans une boîte de côté 2 x rayon (plus grande dimension = Taille),
+  numéro dessous avec liseré blanc, zone de saisie complète, pas de cache bitmap ; légende et récapitulatif : image seule ; listes et aperçu du crayon
+  affichent l'image ; sauvegarde automatique : images de postes écrites à part (comme plans et logos) ; export : attend le chargement des images ;
+  choisir une forme retire l'image. Format conseillé : SVG ou PNG transparent ; un JPEG garde son fond sauf détourage du blanc.
 ```

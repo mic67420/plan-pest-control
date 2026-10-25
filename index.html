@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-178 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-179 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -87,7 +87,7 @@
   .tb-icon:disabled{opacity:.35;cursor:not-allowed;}
   .tb-icon:disabled:hover{background:transparent;}
   #zoomLabel{font-size:12px;color:#6a7386;width:40px;text-align:center;flex:none;}
-  #fileInputPlan,#fileInputLogoA,#fileInputLogoB,#fileInputProject{
+  #fileInputPlan,#fileInputLogoA,#fileInputLogoB,#fileInputProject,#fileInputTypeImage{
     position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;
   }
   /* Réglage de taille des pastilles (v2.1-68) : − | curseur | + sur une ligne, grosses cibles
@@ -627,7 +627,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-178</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-179</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -768,7 +768,8 @@
         <div class="tf"><label for="newTypeCode">Code</label><input type="text" id="newTypeCode" placeholder="ex : R"></div>
         <div class="tf"><label for="newTypeName">Nom</label><input type="text" id="newTypeName" placeholder="Nom du dispositif"></div>
         <div class="tf"><label>Forme</label><div class="tf-ctl tf-shapes" id="newTypeShapes"></div></div>
-        <div class="tf"><label>Couleur</label><div class="tf-ctl tf-preview"><span class="type-preview" title="Touchez la forme pour changer la couleur"><span id="pvShape"></span><input type="color" id="currentColorPicker" value="#0E6FA8" aria-label="Couleur du poste"></span><span class="tf-hint">Touchez la forme pour changer la couleur</span></div></div>
+        <div class="tf" id="rowTypeImage" style="display:none"><label>Image</label><div class="tf-ctl"><label class="chip" id="chipCutWhite"><input type="checkbox" id="newTypeCutWhite"><span>Détourer le blanc</span></label><button type="button" id="btnTypeImageRemove" class="chip" style="color:#D6493E">Retirer</button></div></div>
+        <div class="tf"><label>Couleur</label><div class="tf-ctl tf-preview"><span class="type-preview" title="Touchez la forme pour changer la couleur"><span id="pvShape"></span><input type="color" id="currentColorPicker" value="#0E6FA8" aria-label="Couleur du poste"></span><span class="tf-hint" id="pvHint">Touchez la forme pour changer la couleur</span></div></div>
         <div class="tf"><label for="newTypeTextColor">Police</label><div class="tf-ctl"><input type="color" id="newTypeTextColor" value="#ffffff" title="Couleur du numéro dans la pastille"><label class="chip"><input type="checkbox" id="newTypeTextAuto" checked><span>Auto</span></label></div></div>
         <div class="tf"><label>Numéro</label><label class="chip"><input type="checkbox" id="newTypeNoNumber"><span>Sans numéro</span></label></div>
         <div class="tf"><label for="newTypeRadius">Taille</label><div class="tf-ctl"><input type="range" id="newTypeRadius" min="6" max="40" value="16"><span id="newTypeRadiusLabel" class="mono">16</span></div></div>
@@ -843,6 +844,7 @@
 
 <input type="file" id="fileInputPlan" accept="image/*,.heic,.heif,.svg,.avif,.webp,application/pdf,.pdf">
 <input type="file" id="fileInputLogoA" accept="image/*,.heic,.heif,.svg,.avif,.webp">
+<input type="file" id="fileInputTypeImage" accept="image/*,.heic,.heif,.svg,.avif,.webp,application/pdf,.pdf">
 <input type="file" id="fileInputLogoB" accept="image/*,.heic,.heif,.svg,.avif,.webp">
 <input type="file" id="fileInputProject" accept="application/json">
 
@@ -895,7 +897,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-178 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-179 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1002,13 +1004,14 @@ function pagesWithImageRefs(srcPages, needed){
   return srcPages.map(pg=>Object.assign({}, pg, {
     plans: (pg.plans||[]).map(pl=>Object.assign({}, pl, { dataURL:ref(pl.dataURL), originalDataURL:ref(pl.originalDataURL) })),
     logos: (pg.logos||[]).map(lg=>Object.assign({}, lg, { dataURL:ref(lg.dataURL) })),
+    deviceTypes: (pg.deviceTypes||[]).map(t=>t.image ? Object.assign({}, t, { image:ref(t.image) }) : t), // v2.1-179 : image d'un poste
   }));
 }
 // Références {__img:clé} présentes dans un document léger.
 function imgRefsOf(snap){
   const keys = new Set();
   const scan = (v)=>{ if (v && typeof v === 'object' && v.__img) keys.add(v.__img); };
-  ((snap && snap.pages) || []).forEach(pg=>{ (pg.plans||[]).forEach(pl=>{ scan(pl.dataURL); scan(pl.originalDataURL); }); (pg.logos||[]).forEach(lg=>scan(lg.dataURL)); });
+  ((snap && snap.pages) || []).forEach(pg=>{ (pg.plans||[]).forEach(pl=>{ scan(pl.dataURL); scan(pl.originalDataURL); }); (pg.logos||[]).forEach(lg=>scan(lg.dataURL)); (pg.deviceTypes||[]).forEach(t=>scan(t.image)); });
   return keys;
 }
 // Un document mérite une place dans « Mes documents » seulement s'il contient quelque chose (un projet vide ne doit pas
@@ -1078,6 +1081,7 @@ async function idbHydrate(db, snap){
   snap.pages.forEach(pg=>{
     (pg.plans||[]).forEach(pl=>{ pl.dataURL = back(pl.dataURL); pl.originalDataURL = back(pl.originalDataURL); });
     (pg.logos||[]).forEach(lg=>{ lg.dataURL = back(lg.dataURL); });
+    (pg.deviceTypes||[]).forEach(t=>{ if (t.image) t.image = back(t.image); });
   });
   keys.forEach(k=>storedImgKeys.add(k)); // déjà en base : inutile de les réécrire
   return snap;
@@ -2315,7 +2319,7 @@ let bitmapCacheEnabled = true;
 const BITMAP_CACHE_MIN_RATIO = 2; // au moins la finesse de l'export (pixelRatio:2)
 function cachePastilleBody(group){
   const body = group.findOne('.pastille-body');
-  if (!body) return;
+  if (!body || body._isImage) return; // une image se dessine directement (pas de cache bitmap)
   body.clearCache();
   body.cache({ pixelRatio: Math.max(BITMAP_CACHE_MIN_RATIO, Konva.pixelRatio) });
 }
@@ -2369,7 +2373,7 @@ function renderRecapPage(){
   types.forEach((r, i)=>{
     const y = TOP + (i+1)*ROW_H;
     recapGroup.add(new Konva.Line({ points:[M, y, W-M, y], stroke:'#e3e6ec', strokeWidth:1 }));
-    const mini = buildPastilleGroup(r.t, 10, r.t.noNumber ? '' : r.t.code);
+    const mini = buildPastilleGroup(r.t, 10, r.t.noNumber ? '' : r.t.code, { noLabel:true });
     mini.position({ x:M+16, y:y+ROW_H/2 }); recapGroup.add(mini);
     cell(r.t.name, M+36, y, nameW-36, { align:'left', fontSize:14 });
     if (nP>1) r.counts.forEach((c,k)=>cell(c || '–', M+nameW+k*pgW, y, pgW, c ? {} : { fill:'#b4bac6' }));
@@ -2432,7 +2436,7 @@ function renderContent(){
       // Signature de tout ce qui influence l'APPARENCE de la pastille (pas sa position ni
       // sa rotation, mises à jour séparément sans reconstruction) : si rien de tout ça n'a
       // changé, on réutilise le node existant tel quel.
-      const sig = type.color+'|'+(type.shape||'circle')+'|'+p.label+'|'+p.radius+'|'+labelColorFor(type);
+      const sig = type.color+'|'+(type.shape||'circle')+'|'+p.label+'|'+p.radius+'|'+labelColorFor(type)+'|'+typeImgKey(type);
       let group = pastilleNodes.get(p.id);
       if (!group || group._sig !== sig){
         if (group) group.destroy();
@@ -2662,7 +2666,7 @@ function renderContent(){
     if (offPage){ lg.x = sheetWChk-legendWChk-40; lg.y = sheetHChk-legendHChk-40; }
     // Les couleurs de police et de fond font partie de la signature : les modifier doit
     // reconstruire la légende (sinon le changement ne s'afficherait pas).
-    const legendSig = JSON.stringify(types.map(t=>[t.id,t.color,t.shape,t.code,t.name,t.noNumber,t.defaultRadius,t.textColor||''])) + '|' + (lg.textColor||'') + '|' + (lg.bgColor||'') + '|c' + legendCols;
+    const legendSig = JSON.stringify(types.map(t=>[t.id,t.color,t.shape,t.code,t.name,t.noNumber,t.defaultRadius,t.textColor||'',typeImgKey(t)])) + '|' + (lg.textColor||'') + '|' + (lg.bgColor||'') + '|c' + legendCols;
     const legendFg = lg.textColor || null;
     const legendBg = (!lg.bgColor) ? '#ffffff' : (lg.bgColor==='transparent' ? 'rgba(0,0,0,0)' : lg.bgColor);
     const legendNoBg = lg.bgColor==='transparent';
@@ -2693,7 +2697,7 @@ function renderContent(){
         // (rat plus grand que souris) mais ça donnait des pastilles de légende inégales,
         // jugé moins lisible qu'une taille identique partout.
         const iconR = 10;
-        const mini = buildPastilleGroup(t, iconR, t.noNumber ? '' : t.code);
+        const mini = buildPastilleGroup(t, iconR, t.noNumber ? '' : t.code, { noLabel:true });
         mini.position({x:colX+PAD+12, y:rowY});
         group.add(mini);
         group.add(new Konva.Text({
@@ -2800,7 +2804,50 @@ function autoTextColor(hex){
   return (1.05)/(L+0.05) >= (L+0.05)/0.05 ? '#ffffff' : '#111111'; // contraste avec blanc vs avec noir
 }
 function labelColorFor(type){ return (type && type.textColor) ? type.textColor : autoTextColor(type && type.color); }
-function buildPastilleGroup(type, r, labelText){
+// v2.1-179 : pastille « image » (un poste peut avoir une image à la place de sa forme : extincteur, etc.). L'image garde ses proportions dans une boîte de côté 2 x rayon
+// (le curseur Taille = la plus grande dimension), le numéro est écrit SOUS l'image (liseré blanc pour rester lisible sur le plan).
+const typeImgCache = new Map(); // dataURL -> { img, promise } ; l'export attend ces promesses (waitForLogoImages)
+function typeImageOf(src){
+  let e = typeImgCache.get(src);
+  if (!e){
+    const img = new Image();
+    const promise = new Promise(res=>{ img.onload = ()=>res(true); img.onerror = ()=>res(false); });
+    img.src = src;
+    if (typeImgCache.size > 40) typeImgCache.clear();
+    e = { img, promise }; typeImgCache.set(src, e);
+  }
+  return e;
+}
+function typeImgKey(t){ return t && t.image ? t.image.length + ':' + t.image.slice(-24) : ''; }
+function buildImagePastille(type, r, labelText, opts){
+  const group = new Konva.Group();
+  const e = typeImageOf(type.image);
+  const box = 2*r;
+  const geom = (ratio)=>({ w: ratio >= 1 ? box : box*ratio, h: ratio >= 1 ? box/ratio : box });
+  let g = geom(type.imageRatio || 1);
+  const hit = new Konva.Rect({ x:-g.w/2, y:-g.h/2, width:g.w, height:g.h, fill:'transparent' }); // zone de saisie (même hors des pixels opaques de l'image)
+  const node = new Konva.Image({ image:e.img, x:-g.w/2, y:-g.h/2, width:g.w, height:g.h, listening:false, perfectDrawEnabled:false });
+  group.add(hit, node);
+  const lab = (labelText === undefined || labelText === null) ? '' : String(labelText);
+  let label = null;
+  if (lab && !(opts && opts.noLabel)){
+    const fs = Math.max(7, fontSizeForLabel(lab, r*1.1)*0.78);
+    label = new Konva.Text({ text:lab, fontSize:fs, fontStyle:'700', fontFamily:APP_FONT, fill:type.textColor || '#111111', stroke:'#ffffff', strokeWidth:fs*0.22, fillAfterStrokeEnabled:true, lineJoin:'round',
+      width:box*1.8, offsetX:box*0.9, x:0, y:g.h/2 + 1, align:'center', wrap:'none', listening:false, perfectDrawEnabled:false });
+    group.add(label);
+  }
+  e.promise.then(()=>{ // proportions réelles dès que l'image est chargée
+    const w0 = e.img.naturalWidth, h0 = e.img.naturalHeight; if (!w0 || !h0) return;
+    g = geom(w0/h0);
+    hit.setAttrs({ x:-g.w/2, y:-g.h/2, width:g.w, height:g.h }); node.setAttrs({ x:-g.w/2, y:-g.h/2, width:g.w, height:g.h });
+    if (label) label.y(g.h/2 + 1);
+    if (group.getLayer()) group.getLayer().batchDraw();
+  });
+  group._isImage = true;
+  return group;
+}
+function buildPastilleGroup(type, r, labelText, opts){
+  if (type.image) return buildImagePastille(type, r, labelText, opts);
   const group = new Konva.Group();
   const gradStops = [0, lighten(type.color,32), 0.55, type.color, 1, darken(type.color,18)];
   const commonFill = {
@@ -5554,6 +5601,7 @@ function shapeSvgInner(shape, size, col, sw){
 }
 function shapeSwatchHTML(type, size){
   size = size||20;
+  if (type.image) return `<img src="${type.image}" alt="" style="width:${size}px;height:${size}px;object-fit:contain;flex:none">`; // v2.1-179
   const sw = size >= 30 ? 2 : 1.5;
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${shapeSvgInner(type.shape, size, type.color || '#0E6FA8', sw)}</svg>`;
 }
@@ -5575,7 +5623,7 @@ function refreshTypeList(){
   // render() appelle cette fonction très souvent (chaque déplacement de pastille, chaque
   // valeur de curseur…) alors que la liste des postes, elle, ne change presque jamais :
   // reconstruire tout son HTML à chaque fois était un gaspillage inutile.
-  const sig = JSON.stringify(model.deviceTypes.map(t=>[t.id,t.code,t.name,t.color,t.shape,t.noNumber,t.textColor||''])) + '|' + selectedTypeId;
+  const sig = JSON.stringify(model.deviceTypes.map(t=>[t.id,t.code,t.name,t.color,t.shape,t.noNumber,t.textColor||'',typeImgKey(t)])) + '|' + selectedTypeId;
   // v2.1-151 : la taille n'est plus dans la signature (sinon la ligne était reconstruite pendant l'appui sur − / +, le bouton disparaissait
   // sous le doigt, le relâchement n'était jamais reçu et le compteur défilait jusqu'au bout) ; les nombres sont mis à jour sur place.
   if (sig === lastTypeListSig){
@@ -5645,7 +5693,7 @@ function refreshTypeList(){
     document.getElementById('newTypeCode').value = '';
     document.getElementById('newTypeName').value = '';
     document.getElementById('newTypeNoNumber').checked = false;
-  document.getElementById('newTypeTextAuto').checked = true; newTypeShape = 'circle'; syncShapeUI(); syncTextColorUI();
+  document.getElementById('newTypeTextAuto').checked = true; newTypeShape = 'circle'; newTypeImage = null; newTypeImageSrc = null; syncShapeUI(); syncTextColorUI();
     document.getElementById('newTypeRadius').value = 16;
     document.getElementById('newTypeRadiusLabel').textContent = '16';
     document.getElementById('btnAddType').textContent = '+ Ajouter ce poste';
@@ -5661,17 +5709,69 @@ function refreshTypeList(){
 let editingTypeId = null;
 // Champ « Police » du formulaire de poste : en mode automatique, la couleur affichée suit le contraste calculé et est grisée.
 let newTypeShape = 'circle';
+// v2.1-179 : image du poste en cours d'édition dans le crayon. newTypeImageSrc = image réduite AVANT détourage (permet de décocher « Détourer »).
+let newTypeImage = null, newTypeImageSrc = null, newTypeImageRatio = 1;
+const TYPE_IMAGE_MAX = 384; // côté max (px) de l'image enregistrée : net même à la taille maximale et à l'export, sans alourdir le document
+// Réduit l'image (côté max TYPE_IMAGE_MAX, transparence conservée) ; option : rend transparent le fond blanc relié aux bords (JPEG, capture d'écran…).
+async function prepareTypeImage(dataURL, cutWhite){
+  const img = await loadImage(dataURL);
+  const k = Math.min(1, TYPE_IMAGE_MAX / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.max(1, Math.round(img.naturalWidth*k)), h = Math.max(1, Math.round(img.naturalHeight*k));
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const cx = cv.getContext('2d', { willReadFrequently:true }); cx.drawImage(img, 0, 0, w, h);
+  const id = cx.getImageData(0, 0, w, h), d = id.data;
+  let opaque = true; for (let i = 3; i < d.length; i += 4){ if (d[i] < 250){ opaque = false; break; } }
+  const white = (i)=>d[i+3] > 0 && d[i] >= 232 && d[i+1] >= 232 && d[i+2] >= 232;
+  const cornerWhite = white(0) && white((w-1)*4) && white((h-1)*w*4) && white(((h-1)*w + (w-1))*4);
+  if (cutWhite){
+    const seen = new Uint8Array(w*h), stack = [];
+    const push = (x, y)=>{ if (x < 0 || y < 0 || x >= w || y >= h) return; const p = y*w + x; if (seen[p]) return; seen[p] = 1; if (white(p*4)) stack.push(p); };
+    for (let x = 0; x < w; x++){ push(x, 0); push(x, h-1); }
+    for (let y = 0; y < h; y++){ push(0, y); push(w-1, y); }
+    while (stack.length){ const p = stack.pop(), x = p % w, y = (p - x) / w; d[p*4+3] = 0; push(x+1, y); push(x-1, y); push(x, y+1); push(x, y-1); }
+    cx.putImageData(id, 0, 0);
+  }
+  return { url: cv.toDataURL('image/png'), ratio: w/h, opaque, cornerWhite };
+}
+async function applyTypeImageFile(file){
+  try{
+    const raw = await fileToImageDataURL(file, { pdfChoose:true });
+    const probe = await prepareTypeImage(raw, false);
+    newTypeImageSrc = raw; // l'original (jusqu'à 2000 px pour un SVG) est refait à la volée si on (dé)coche le détourage
+    const cut = probe.opaque && probe.cornerWhite; // image à fond blanc plein : détourage proposé d'office
+    const out = cut ? await prepareTypeImage(raw, true) : probe;
+    newTypeImage = out.url; newTypeImageRatio = out.ratio;
+    document.getElementById('newTypeCutWhite').checked = cut;
+    syncShapeUI(); updateTypePreview();
+  } catch(err){ toast('Image illisible : ' + (err && err.message ? err.message : 'format non pris en charge')); }
+}
 const TYPE_SHAPES = [['circle','Rond'],['square','Carré'],['rounded','Carré arrondi'],['diamond','Losange'],['triangle','Triangle'],['burst','Étoile']];
 (function(){
   const box = document.getElementById('newTypeShapes');
   TYPE_SHAPES.forEach(([k,label])=>{
     const b = document.createElement('button'); b.type = 'button'; b.dataset.shape = k; b.title = label; b.setAttribute('aria-label', label);
     b.innerHTML = shapeSwatchHTML({ color:'#cfd6e0', shape:k }, 26);
-    b.addEventListener('click', ()=>{ newTypeShape = k; syncShapeUI(); updateTypePreview(); });
+    b.addEventListener('click', ()=>{ newTypeShape = k; newTypeImage = null; newTypeImageSrc = null; syncShapeUI(); updateTypePreview(); }); // choisir une forme retire l'image
     box.appendChild(b);
   });
+  const bi = document.createElement('button'); bi.type = 'button'; bi.dataset.shape = 'image'; bi.title = 'Image (extincteur, logo…)'; bi.setAttribute('aria-label', 'Image');
+  bi.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26"><rect x="3" y="4" width="18" height="16" rx="2" fill="#fff" stroke="#000" stroke-width="1.8"/><circle cx="9" cy="10" r="2" fill="#F59E0B" stroke="#000" stroke-width="1.2"/><path d="M4 18l5-5 3 3 3-4 5 6" fill="#9ad0ee" stroke="#000" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+  bi.addEventListener('click', ()=>document.getElementById('fileInputTypeImage').click());
+  box.appendChild(bi);
+  document.getElementById('fileInputTypeImage').addEventListener('change', async (e)=>{ const f = e.target.files[0]; e.target.value = ''; if (f) await applyTypeImageFile(f); });
+  document.getElementById('newTypeCutWhite').addEventListener('change', async (e)=>{
+    if (!newTypeImageSrc) return;
+    try{ const out = await prepareTypeImage(newTypeImageSrc, e.target.checked); newTypeImage = out.url; newTypeImageRatio = out.ratio; updateTypePreview(); } catch(err){ /* sans conséquence */ }
+  });
+  document.getElementById('btnTypeImageRemove').addEventListener('click', ()=>{ newTypeImage = null; newTypeImageSrc = null; syncShapeUI(); updateTypePreview(); });
 })();
-function syncShapeUI(){ document.querySelectorAll('#newTypeShapes button').forEach(b=>b.classList.toggle('active', b.dataset.shape === newTypeShape)); }
+function syncShapeUI(){
+  document.querySelectorAll('#newTypeShapes button').forEach(b=>b.classList.toggle('active', newTypeImage ? b.dataset.shape === 'image' : b.dataset.shape === newTypeShape));
+  document.getElementById('rowTypeImage').style.display = newTypeImage ? 'flex' : 'none';
+  document.getElementById('pvHint').textContent = newTypeImage ? 'Aperçu : l\'image garde ses proportions, le curseur Taille règle sa plus grande dimension' : 'Touchez la forme pour changer la couleur';
+  const pk = document.getElementById('currentColorPicker'); pk.style.pointerEvents = newTypeImage ? 'none' : ''; // une image n'a pas de couleur à choisir
+  document.getElementById('chipCutWhite').style.display = newTypeImageSrc ? 'flex' : 'none'; // le détourage ne se refait que sur une image importée pendant cette ouverture
+}
 function updateTypePreview(){
   const pv = document.getElementById('pvShape'); if (!pv) return;
   const col = document.getElementById('currentColorPicker').value;
@@ -5684,6 +5784,12 @@ function updateTypePreview(){
   const n = label.length;
   const fs = size * (newTypeShape === 'triangle' ? (n > 1 ? 0.23 : 0.3) : newTypeShape === 'diamond' ? (n > 1 ? 0.25 : 0.32) : (n > 2 ? 0.26 : n > 1 ? 0.32 : 0.4));
   const ty = size * (newTypeShape === 'triangle' ? 0.68 : 0.5);
+  if (newTypeImage){ // v2.1-179 : aperçu d'une pastille-image : image dans sa boîte, numéro dessous
+    const g = newTypeImageRatio >= 1 ? { w:size, h:size/newTypeImageRatio } : { w:size*newTypeImageRatio, h:size };
+    pv.innerHTML = `<svg width="${size}" height="${Math.round(size*1.25)}" viewBox="0 0 ${size} ${Math.round(size*1.25)}"><image href="${newTypeImage}" x="${(size-g.w)/2}" y="0" width="${g.w}" height="${g.h}"/>`
+      + (label ? `<text x="${size/2}" y="${g.h + size*0.17}" text-anchor="middle" dominant-baseline="central" font-family="${APP_FONT}" font-weight="700" font-size="${size*0.26}" fill="#111" stroke="#fff" stroke-width="${size*0.06}" paint-order="stroke">${escapeAttr(label)}</text>` : '') + '</svg>';
+    return;
+  }
   pv.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${shapeSvgInner(newTypeShape, size, col, Math.max(2, size*0.06))}`
     + (label ? `<text x="${size/2}" y="${ty}" text-anchor="middle" dominant-baseline="central" font-family="${APP_FONT}" font-weight="700" font-size="${fs}" fill="${tcol}">${escapeAttr(label)}</text>` : '') + '</svg>';
 }
@@ -5712,7 +5818,7 @@ function startEditType(typeId){
   document.getElementById('newTypeName').value = t.name;
   document.getElementById('currentColorPicker').value = t.color;
   document.getElementById('newTypeNoNumber').checked = !!t.noNumber;
-  newTypeShape = t.shape || 'circle'; syncShapeUI();
+  newTypeShape = t.shape || 'circle'; newTypeImage = t.image || null; newTypeImageSrc = null; newTypeImageRatio = t.imageRatio || 1; syncShapeUI();
   document.getElementById('newTypeTextAuto').checked = !t.textColor;
   document.getElementById('newTypeTextColor').value = t.textColor || autoTextColor(t.color);
   syncTextColorUI();
@@ -5780,11 +5886,12 @@ document.getElementById('btnAddType').addEventListener('click', ()=>{
     const color = document.getElementById('currentColorPicker').value;
     pages.forEach(pg=>{
       const t = pg.deviceTypes.find(x=>x.id===editingTypeId);
-      if (t){ t.code = code; t.name = name; t.color = color; t.noNumber = noNumber; t.defaultRadius = defaultRadius; t.shape = newTypeShape; if (textColor) t.textColor = textColor; else delete t.textColor; }
+      if (t){ t.code = code; t.name = name; t.color = color; t.noNumber = noNumber; t.defaultRadius = defaultRadius; t.shape = newTypeShape; if (newTypeImage){ t.image = newTypeImage; t.imageRatio = newTypeImageRatio; } else { delete t.image; delete t.imageRatio; } if (textColor) t.textColor = textColor; else delete t.textColor; }
     });
     toast(pages.length>1 ? 'Poste modifié sur toutes les pages.' : 'Poste modifié.');
   } else {
     const t = { id: nextId('type-'), code, name, color: currentColor, shape:newTypeShape, noNumber, defaultRadius };
+    if (newTypeImage){ t.image = newTypeImage; t.imageRatio = newTypeImageRatio; }
     if (textColor) t.textColor = textColor;
     pages.forEach(pg=>{
       if (!pg.deviceTypes.some(x=>x.id===t.id)) pg.deviceTypes.push({...t});
@@ -5795,7 +5902,7 @@ document.getElementById('btnAddType').addEventListener('click', ()=>{
   document.getElementById('btnAddType').textContent = '+ Ajouter ce poste';
   nameInput.value=''; codeInput.value='';
   document.getElementById('newTypeNoNumber').checked = false;
-  document.getElementById('newTypeTextAuto').checked = true; newTypeShape = 'circle'; syncShapeUI(); syncTextColorUI();
+  document.getElementById('newTypeTextAuto').checked = true; newTypeShape = 'circle'; newTypeImage = null; newTypeImageSrc = null; syncShapeUI(); syncTextColorUI();
   document.getElementById('newTypeRadius').value = 16;
   document.getElementById('newTypeRadiusLabel').textContent = '16';
   closeAllPopovers();
@@ -6186,7 +6293,7 @@ document.getElementById('btnAddTypeMenu').addEventListener('click', ()=>{
   document.getElementById('newTypeCode').value = '';
   document.getElementById('newTypeName').value = '';
   document.getElementById('newTypeNoNumber').checked = false;
-  document.getElementById('newTypeTextAuto').checked = true; newTypeShape = 'circle'; syncShapeUI(); syncTextColorUI();
+  document.getElementById('newTypeTextAuto').checked = true; newTypeShape = 'circle'; newTypeImage = null; newTypeImageSrc = null; syncShapeUI(); syncTextColorUI();
   document.getElementById('newTypeRadius').value = 16;
   document.getElementById('newTypeRadiusLabel').textContent = '16';
   document.getElementById('btnAddType').textContent = '+ Ajouter ce poste';
@@ -6750,6 +6857,7 @@ function waitForLogoImages(){
       }));
     }
   });
+  typeImgCache.forEach(e=>pending.push(e.promise)); // images des postes (v2.1-179)
   return pending.length ? Promise.all(pending) : Promise.resolve();
 }
 function withCleanStage(fn){
