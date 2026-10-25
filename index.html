@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-172 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-173 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -616,7 +616,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-172</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-173</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -884,7 +884,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-172 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-173 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2057,9 +2057,20 @@ function normalizeShape(sh){
   delete sh.x1; delete sh.y1; delete sh.x2; delete sh.y2;
   return sh;
 }
+// v2.1-173 : accroche d'angle d'une ligne / flèche = celle de la rotation d'un plan : à moins de ROT_SNAP_DEG d'un angle droit (0°, 90°, 180°,
+// 270°), le point mobile est ramené sur cet angle (longueur conservée). Au tracé comme au déplacement d'une extrémité.
+function snapLinePoint(fixed, moving){
+  const dx = moving.x-fixed.x, dy = moving.y-fixed.y, len = Math.hypot(dx, dy);
+  if (len < 1e-6) return moving;
+  const ang = Math.atan2(dy, dx)*180/Math.PI, norm = ((ang%360)+360)%360, nearest = Math.round(norm/90)*90;
+  if (Math.abs(norm-nearest) > ROT_SNAP_DEG) return moving;
+  const r = nearest*Math.PI/180;
+  return { x: fixed.x + len*Math.cos(r), y: fixed.y + len*Math.sin(r) };
+}
 // Deux points -> géométrie d'un dessin.
 function shapeGeomFromPoints(kind, p1, p2){
   if (kind === 'line' || kind === 'arrow'){
+    p2 = snapLinePoint(p1, p2); // le 2e point est le point mobile (tracé) ; pour une extrémité 1 déplacée, voir la poignée
     const dx = p2.x-p1.x, dy = p2.y-p1.y;
     return { x:p1.x, y:p1.y, width:Math.hypot(dx, dy), height:0, rotation:Math.atan2(dy, dx)*180/Math.PI };
   }
@@ -2153,7 +2164,9 @@ uiLayer.add(shapeHandles);
       const sh = selectedShape(), node = sh && shapeNodes.get(sh.id); if (!sh || !node || !h._fixed) return;
       const wd = { x:h.x(), y:h.y() }, wo = h._fixed;
       if (sh.kind === 'line' || sh.kind === 'arrow'){
-        const p1 = k === 0 ? wd : wo, p2 = k === 0 ? wo : wd;
+        const snapped = snapLinePoint(wo, wd); // accroche d'angle comme la rotation d'un plan (v2.1-173)
+        h.position(snapped);
+        const p1 = k === 0 ? snapped : wo, p2 = k === 0 ? wo : snapped;
         Object.assign(sh, shapeGeomFromPoints(sh.kind, p1, p2));
       } else {
         const r = (sh.rotation||0)*Math.PI/180, c = Math.cos(r), s = Math.sin(r);

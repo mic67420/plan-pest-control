@@ -293,6 +293,14 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       openDrawWin(); const a = isDrawTool(activeTool); document.getElementById('drawSelect').click(); const b = activeTool === null && win.classList.contains('show'); closeDrawWin();
       return migr && four && exact && rot && fixed && two && row2 && noClose && a && b;
     }), 'dessins : poignées pile sur les angles, redimensionnement angle opposé fixe, rotation, ancien format, bouton Sélection sans croix');
+    // v2.1-173 : accroche d'angle des lignes / flèches = celle de la rotation d'un plan (ROT_SNAP_DEG autour de 0/90/180/270°)
+    ok(await pg.evaluate(()=>{
+      const g = (p2)=>shapeGeomFromPoints('line', { x:100, y:100 }, p2);
+      const h0 = g({ x:300, y:100 + 200*Math.tan(3*Math.PI/180) }), v90 = g({ x:100 + 200*Math.tan(3*Math.PI/180), y:300 }), free = g({ x:300, y:100 + 200*Math.tan(8*Math.PI/180) });
+      const diag = g({ x:300, y:300 }), back = g({ x:-100, y:100 + 200*Math.tan(2*Math.PI/180) });
+      const near = (a,b)=>Math.abs(a-b) < 0.01;
+      return near(h0.rotation, 0) && near(v90.rotation, 90) && Math.abs(free.rotation - 8) < 0.01 && near(diag.rotation, 45) && near(Math.abs(back.rotation), 180) && near(h0.width, Math.hypot(200, 200*Math.tan(3*Math.PI/180)));
+    }), 'lignes / flèches : accroche à 0/90/180/270° à moins de 4° comme la rotation d\'un plan');
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

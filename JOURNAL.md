@@ -1466,4 +1466,10 @@ v2.1-172 — Dessins : sélection précise, poignées sur les angles, rotation c
   ellipse (même tournée), 2 extrémités pour ligne / flèche ; l'angle opposé reste fixe à l'écran pendant le glissement. Cadenas + croix en
   rangée au-dessus du dessin (au coin, ils recouvraient la main de rotation de droite des petits dessins). Anciens dessins (x1,y1,x2,y2)
   convertis automatiquement ; épaisseur du trait = sh.sw.
+
+v2.1-173 — Lignes et flèches : même accroche d'angle que la rotation d'un plan
+  Demande : « même niveau d'accroche que la rotation des plans ». Correctif : snapLinePoint() ramène le point mobile sur 0 / 90 / 180 / 270°
+  quand l'angle est à moins de ROT_SNAP_DEG (4°) d'un angle droit, longueur conservée ; appliqué au tracé (aperçu compris) et au glissement
+  d'une extrémité (la poignée suit le point accroché). La rotation par les mains et le redimensionnement des rectangles / ellipses étaient déjà
+  identiques à ceux d'un plan.
 ```
