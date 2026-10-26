@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-187 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-188 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -138,7 +138,10 @@
   #typeImgEditor .tie-title{ font-weight:700; font-size:15px; } #typeImgEditor .tie-title span{ display:block; font-weight:500; font-size:12px; color:#5c6478; }
   #typeImgEditor .tie-view{ overflow:auto; max-height:48vh; border:1px solid #c9ced8; border-radius:8px; background:repeating-conic-gradient(#d9dde4 0 25%, #fff 0 50%) 0 0 / 16px 16px; }
   #typeImgEditor .tie-stage{ position:relative; width:max-content; margin:0 auto; line-height:0; }
-  #typeImgEditor .tie-cv, #typeImgEditor .tie-sel{ display:block; image-rendering:pixelated; cursor:crosshair; } #typeImgEditor .tie-sel{ position:absolute; left:0; top:0; pointer-events:none; }
+  #typeImgEditor .tie-cv, #typeImgEditor .tie-sel, #typeImgEditor .tie-sela, #typeImgEditor .tie-selb{ display:block; image-rendering:pixelated; cursor:crosshair; } #typeImgEditor .tie-sel, #typeImgEditor .tie-sela, #typeImgEditor .tie-selb{ position:absolute; left:0; top:0; pointer-events:none; }
+  /* v2.1-188 : trait mixte = 2 calques (motif et motif inverse) dessinés UNE fois ; l'animation CSS les fait clignoter en alternance, sans aucun code par image (fluide, même sur téléphone) */
+  #typeImgEditor .tie-sela{ animation:tieBlinkA .9s steps(1) infinite; } #typeImgEditor .tie-selb{ animation:tieBlinkB .9s steps(1) infinite; }
+  @keyframes tieBlinkA{ 0%{opacity:1} 50%{opacity:0} } @keyframes tieBlinkB{ 0%{opacity:0} 50%{opacity:1} }
   #typeImgEditor .tie-row{ display:flex; align-items:center; gap:10px; font-size:13px; } #typeImgEditor .tie-row input[type=range]{ flex:1 1 auto; height:30px; accent-color:var(--accent); }
   #typeImgEditor .tie-chk{ display:flex; align-items:center; gap:8px; } #typeImgEditor .tie-chk input{ width:20px; height:20px; }
   #typeImgEditor .tie-btns button{ flex:1 1 0; min-height:44px; border:1px solid #c9ced8; border-radius:10px; background:#fff; color:#1c2230; font:inherit; font-weight:600; font-size:13px; cursor:pointer; }
@@ -659,7 +662,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-187</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-188</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -929,7 +932,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-187 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-188 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -5977,7 +5980,7 @@ function openTypeImageEditor(){
   if (!newTypeImage || document.getElementById('typeImgEditor')) return;
   const ov = document.createElement('div'); ov.id = 'typeImgEditor';
   ov.innerHTML = `<div class="tie-card"><div class="tie-title">Retouche de l'image <span>Touchez le fond : la zone est entourée. Réglez la tolérance, puis « Effacer ».</span></div>
-    <div class="tie-view"><div class="tie-stage"><canvas class="tie-cv"></canvas><canvas class="tie-sel"></canvas></div></div>
+    <div class="tie-view"><div class="tie-stage"><canvas class="tie-cv"></canvas><canvas class="tie-sel"></canvas><canvas class="tie-sela"></canvas><canvas class="tie-selb"></canvas></div></div>
     <div class="tie-row"><label>Tolérance <b class="tie-tolv">30</b> · zone <b class="tie-pct">0 %</b></label><input type="range" class="tie-tol" min="0" max="100" value="30"></div>
     <div class="tie-row"><label class="tie-chk"><input type="checkbox" class="tie-all"> Toute l'image (pas seulement la zone touchée)</label></div>
     <div class="tie-row tie-btns"><button type="button" class="tie-zm">Zoom −</button><button type="button" class="tie-zp">Zoom +</button><button type="button" class="tie-undo" disabled>Annuler</button><button type="button" class="tie-reset" disabled>Recommencer</button></div>
@@ -5985,32 +5988,39 @@ function openTypeImageEditor(){
   ov.addEventListener('click', e=>e.stopPropagation());
   ov.addEventListener('pointerdown', e=>e.stopPropagation());
   document.body.appendChild(ov);
-  const $ = q=>ov.querySelector(q), cv = $('.tie-cv'), cx = cv.getContext('2d', { willReadFrequently:true }), sel = $('.tie-sel'), sx = sel.getContext('2d');
-  let hist = [], scale = 1, w = 0, h = 0, seed = null, mask = null, edge = [], phase = 0, timer = null;
-  const css = ()=>{ [cv, sel].forEach(c=>{ c.style.width = (w*scale)+'px'; c.style.height = (h*scale)+'px'; }); };
-  const upd = ()=>{ css(); if (w) drawSel(); $('.tie-undo').disabled = hist.length < 2; $('.tie-reset').disabled = hist.length < 2; $('.tie-del').disabled = !mask; };
-  const tint = document.createElement('canvas'); // zone teintée à la résolution de l'image, agrandie ensuite
-  const drawSel = ()=>{ // zone teintée + trait mixte (alternance noir / blanc le long du contour, décalée à chaque image = fourmis qui marchent)
-    // dessiné à la résolution de l'ÉCRAN (et non de l'image) : sinon le trait fait moins d'un pixel d'écran et disparaît sur téléphone
+  const $ = q=>ov.querySelector(q), cv = $('.tie-cv'), cx = cv.getContext('2d', { willReadFrequently:true }), sel = $('.tie-sel'), sx = sel.getContext('2d'), selA = $('.tie-sela'), selB = $('.tie-selb'), ax = selA.getContext('2d'), bx = selB.getContext('2d');
+  let hist = [], scale = 1, w = 0, h = 0, seed = null, mask = null, edge = [], px = null; // px = pixels de l'image, lus UNE fois par modification (la sélection est recalculée à chaque cran du curseur)
+  const css = ()=>{ [cv, sel, selA, selB].forEach(c=>{ c.style.width = (w*scale)+'px'; c.style.height = (h*scale)+'px'; }); };
+  const upd = ()=>{ css(); if (w) drawSoon(); $('.tie-undo').disabled = hist.length < 2; $('.tie-reset').disabled = hist.length < 2; $('.tie-del').disabled = !mask; };
+  const tint = document.createElement('canvas'), off = {}; // zone teintée à la résolution de l'image, agrandie ensuite ; off = calques de travail du trait
+  const drawSel = ()=>{ // zone teintée + trait mixte, dessinés à la résolution de l'ÉCRAN (sinon le trait fait moins d'un pixel d'écran sur téléphone)
     const dpr = Math.max(1, window.devicePixelRatio || 1), k = scale*dpr, W = Math.max(1, Math.round(w*k)), H = Math.max(1, Math.round(h*k));
-    if (sel.width !== W || sel.height !== H){ sel.width = W; sel.height = H; }
-    sx.clearRect(0, 0, W, H); if (!mask) return;
-    tint.width = w; tint.height = h; const tx = tint.getContext('2d'), im = tx.createImageData(w, h), d = im.data;
-    for (let p = 0; p < mask.length; p++) if (mask[p]){ d[p*4] = 30; d[p*4+1] = 120; d[p*4+2] = 255; d[p*4+3] = 46; }
-    tx.putImageData(im, 0, 0); sx.imageSmoothingEnabled = false; sx.drawImage(tint, 0, 0, W, H);
-    const t = Math.max(k, 2*dpr);
-    for (let i = 0; i < edge.length; i++){ const p = edge[i], x = p % w, y = (p - x)/w; sx.fillStyle = (((x + y + phase) >> 2) & 1) === 0 ? '#000' : '#fff'; sx.fillRect(x*k - (t-k)/2, y*k - (t-k)/2, t, t); }
+    [sel, selA, selB].forEach(c=>{ if (c.width !== W || c.height !== H){ c.width = W; c.height = H; } else c.getContext('2d').clearRect(0, 0, W, H); });
+    if (!mask) return;
+    // trait et teinte : UNE image (w x h) par calque, agrandie sans lissage (au lieu de milliers de petits carrés) ; épaisseur du trait = 1 pixel d'image agrandi
+    if (!off.A){ off.A = document.createElement('canvas'); off.B = document.createElement('canvas'); }
+    const tx = tint.getContext('2d'), mk = (cv)=>{ cv.width = w; cv.height = h; const c = cv.getContext('2d'); const im = c.createImageData(w, h); return { c, im, d: im.data }; };
+    tint.width = w; tint.height = h;
+    const T = tx.createImageData(w, h), td = T.data;
+    for (let p = 0; p < mask.length; p++) if (mask[p]){ td[p*4] = 30; td[p*4+1] = 120; td[p*4+2] = 255; td[p*4+3] = 46; }
+    tx.putImageData(T, 0, 0); sx.imageSmoothingEnabled = false; sx.drawImage(tint, 0, 0, W, H);
+    const A = mk(off.A), B = mk(off.B);
+    for (let i = 0; i < edge.length; i++){ // calque A : motif noir / blanc ; calque B : le motif inverse
+      const p = edge[i], x = p % w, y = (p - x)/w, on = (((x + y) >> 2) & 1) === 0, va = on ? 0 : 255, vb = 255 - va, o4 = p*4;
+      A.d[o4] = A.d[o4+1] = A.d[o4+2] = va; A.d[o4+3] = 255; B.d[o4] = B.d[o4+1] = B.d[o4+2] = vb; B.d[o4+3] = 255;
+    }
+    A.c.putImageData(A.im, 0, 0); B.c.putImageData(B.im, 0, 0);
+    ax.imageSmoothingEnabled = false; bx.imageSmoothingEnabled = false; ax.drawImage(off.A, 0, 0, W, H); bx.drawImage(off.B, 0, 0, W, H);
   };
+  let raf = 0; const drawSoon = ()=>{ if (!raf) raf = requestAnimationFrame(()=>{ raf = 0; drawSel(); }); }; // regroupe les mises à jour pendant le glissement du curseur
   const setMask = (m)=>{
     mask = m; edge = [];
     if (m){ for (let p = 0; p < m.length; p++){ if (!m[p]) continue; const x = p % w, y = (p - x)/w; if (x === 0 || y === 0 || x === w-1 || y === h-1 || !m[p-1] || !m[p+1] || !m[p-w] || !m[p+w]) edge.push(p); } }
     let n = 0; if (m) for (let p = 0; p < m.length; p++) if (m[p]) n++;
     $('.tie-pct').textContent = Math.round(100*n/(w*h || 1)) + ' %';
-    clearInterval(timer); timer = null;
-    if (m){ timer = setInterval(()=>{ phase = (phase + 1) & 7; drawSel(); }, 140); }
-    drawSel(); upd();
+    drawSoon(); $('.tie-del').disabled = !mask;
   };
-  const close = ()=>{ clearInterval(timer); ov.remove(); };
+  const close = ()=>{ cancelAnimationFrame(raf); ov.remove(); };
   loadImage(newTypeImage).then(img=>{
     w = cv.width = img.naturalWidth; h = cv.height = img.naturalHeight; cx.drawImage(img, 0, 0);
     scale = Math.max(0.5, Math.min(3, Math.min(window.innerWidth - 60, 420) / w));
@@ -6019,17 +6029,20 @@ function openTypeImageEditor(){
   // sélection : zone reliée au point touché (ou toute l'image), pixels visibles de couleur proche (écart max par canal = tolérance %)
   const select = ()=>{
     if (!seed) return;
-    const d = cx.getImageData(0, 0, w, h).data, si = (seed.y*w + seed.x)*4;
+    const d = (px || (px = cx.getImageData(0, 0, w, h))).data, si = (seed.y*w + seed.x)*4;
     if (d[si+3] < 8){ setMask(null); return; }
     const sr = d[si], sg = d[si+1], sb = d[si+2], tol = (+$('.tie-tol').value)*2.55;
     const match = (i)=>d[i+3] >= 8 && Math.abs(d[i]-sr) <= tol && Math.abs(d[i+1]-sg) <= tol && Math.abs(d[i+2]-sb) <= tol;
     const m = new Uint8Array(w*h);
     if ($('.tie-all').checked){ for (let p = 0; p < m.length; p++) if (match(p*4)) m[p] = 1; }
-    else {
-      const stack = [seed.y*w + seed.x]; m[stack[0]] = 1;
-      while (stack.length){
-        const p = stack.pop(), px = p % w, py = (p - px)/w;
-        for (const [nx, ny] of [[px+1,py],[px-1,py],[px,py+1],[px,py-1]]){ if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue; const q = ny*w + nx; if (m[q]) continue; if (match(q*4)){ m[q] = 1; stack.push(q); } }
+    else { // remplissage sans allocation par pixel (pile d'entiers) : reste fluide pendant le glissement du curseur
+      const stack = new Int32Array(w*h); let n = 0; const start = seed.y*w + seed.x; stack[n++] = start; m[start] = 1;
+      while (n){
+        const p = stack[--n], px0 = p % w;
+        if (px0 + 1 < w && !m[p+1] && match((p+1)*4)){ m[p+1] = 1; stack[n++] = p+1; }
+        if (px0 > 0 && !m[p-1] && match((p-1)*4)){ m[p-1] = 1; stack[n++] = p-1; }
+        if (p + w < m.length && !m[p+w] && match((p+w)*4)){ m[p+w] = 1; stack[n++] = p+w; }
+        if (p >= w && !m[p-w] && match((p-w)*4)){ m[p-w] = 1; stack[n++] = p-w; }
       }
     }
     setMask(m);
@@ -6049,10 +6062,10 @@ function openTypeImageEditor(){
     const id = cx.getImageData(0, 0, w, h), d = id.data;
     for (let p = 0; p < mask.length; p++) if (mask[p]) d[p*4+3] = 0;
     cx.putImageData(id, 0, 0); hist.push(id); if (hist.length > 13) hist.splice(1, 1);
-    seed = null; setMask(null);
+    px = null; seed = null; setMask(null);
   });
-  $('.tie-undo').addEventListener('click', ()=>{ seed = null; if (hist.length > 1){ hist.pop(); cx.putImageData(hist[hist.length-1], 0, 0); } setMask(null); });
-  $('.tie-reset').addEventListener('click', ()=>{ seed = null; hist.length = 1; cx.putImageData(hist[0], 0, 0); setMask(null); });
+  $('.tie-undo').addEventListener('click', ()=>{ seed = null; if (hist.length > 1){ hist.pop(); cx.putImageData(hist[hist.length-1], 0, 0); } px = null; setMask(null); });
+  $('.tie-reset').addEventListener('click', ()=>{ seed = null; hist.length = 1; cx.putImageData(hist[0], 0, 0); px = null; setMask(null); });
   $('.tie-close').addEventListener('click', close);
   $('.tie-ok').addEventListener('click', ()=>{
     const out = trimTransparent(cv); newTypeImage = out.toDataURL('image/png'); newTypeImageRatio = out.width/out.height;

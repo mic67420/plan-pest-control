@@ -1575,4 +1575,9 @@ v2.1-187 — Retouche d'image refaite à la manière de Paint.NET (aucune détec
   Correctif : import = image telle quelle (plus de détourage automatique ni de case « Détourer le fond ») ; fenêtre « Retouche » : on touche le fond, la zone est
   entourée d'un trait mixte (pointillés noir / blanc qui avancent, dessinés à la résolution de l'écran) avec une légère teinte ; le curseur Tolérance agrandit /
   réduit la zone en direct ; « Effacer la zone » la rend transparente ; Annuler / Recommencer ; « Valider » enregistre (marges transparentes rognées).
+
+v2.1-188 — Retouche d'image : trait mixte clignotant, parfaitement fluide
+  Cause : l'animation des pointillés (v2.1-187) redessinait toute la sélection (teinte + milliers de petits carrés) toutes les 140 ms : saccadé sur téléphone.
+  Correctif : le trait est dessiné UNE seule fois sur deux calques (motif et motif inverse) ; une animation CSS (steps) les fait clignoter en alternance : plus aucun code
+  par image. Pendant le glissement du curseur, la sélection est recalculée au plus une fois par image d'écran (requestAnimationFrame) à partir de pixels lus une seule fois.
 ```

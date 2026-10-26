@@ -442,16 +442,16 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       ok(await pg.evaluate(async()=>{
         const c=document.createElement('canvas');c.width=100;c.height=20;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,100,0);g.addColorStop(0,'#000');g.addColorStop(1,'#fff');x.fillStyle=g;x.fillRect(0,0,100,20);
         newTypeImage=c.toDataURL(); newTypeImageRatio=5; openTypeImageEditor(); await new Promise(r=>setTimeout(r,300));
-        const q=s=>document.querySelector('#typeImgEditor '+s), cv=q('.tie-cv'), rr=cv.getBoundingClientRect(), tol=q('.tie-tol');
+        const q=s=>document.querySelector('#typeImgEditor '+s), cv=q('.tie-cv'), rr=cv.getBoundingClientRect(), tol=q('.tie-tol'), raf2=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
         const selPx=()=>{ const d=q('.tie-sel').getContext('2d').getImageData(0,0,100,20).data; let n=0; for(let i=3;i<d.length;i+=4) if(d[i]>0) n++; return n; };
         const clear=()=>{ const d=cv.getContext('2d').getImageData(0,0,100,20).data; let n=0; for(let i=3;i<d.length;i+=4) if(d[i]===0) n++; return n; };
         const bg=getComputedStyle(q('.tie-view')).backgroundImage;
         tol.value=5; tol.dispatchEvent(new Event('input')); cv.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:rr.left+1,clientY:rr.top+rr.height/2}));
-        const a=selPx(), delOn=!q('.tie-del').disabled, noErase=clear()===0;               // sélection dessinée, rien d'effacé
-        tol.value=60; tol.dispatchEvent(new Event('input')); const b=selPx();                // plus de tolérance = zone plus grande
-        tol.value=5; tol.dispatchEvent(new Event('input')); const c2=selPx();
+        await raf2(); const a=selPx(), delOn=!q('.tie-del').disabled, noErase=clear()===0;               // sélection dessinée, rien d'effacé
+        tol.value=60; tol.dispatchEvent(new Event('input')); await raf2(); const b=selPx();                // plus de tolérance = zone plus grande
+        tol.value=5; tol.dispatchEvent(new Event('input')); await raf2(); const c2=selPx();
         tol.value=40; tol.dispatchEvent(new Event('input')); q('.tie-del').click();         // Effacer
-        const erased=clear(), cleared=q('.tie-del').disabled && selPx()===0;
+        await raf2(); const erased=clear(), cleared=q('.tie-del').disabled && selPx()===0;
         q('.tie-ok').click(); await new Promise(r=>setTimeout(r,200));
         return a>0 && delOn && noErase && b>a*2 && c2===a && erased>0 && cleared && !document.getElementById('typeImgEditor') && !/255, 122, 200|ff7ac8/i.test(bg);
       }), 'baguette magique : touche = zone entourée, tolérance en direct, Effacer rend transparent, Valider ferme (fond gris)');
