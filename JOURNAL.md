@@ -1568,4 +1568,11 @@ v2.1-186 — Baguette magique : on voit enfin ce qui est effacé
   Cause : le fond de la fenêtre de retouche était un damier gris / blanc, identique au faux damier enregistré dans l'image (arbre, bateau) : effacer le faux damier
   ne changeait rien à l'écran, la tolérance semblait sans effet (le curseur, lui, fonctionnait : vérifié au doigt et à la souris).
   Correctif : zone effacée = damier ROSE bien distinct ; compteur « effacé xx % » mis à jour à chaque retouche et à chaque déplacement du curseur.
+
+v2.1-187 — Retouche d'image refaite à la manière de Paint.NET (aucune détection automatique)
+  Cause : le détourage automatique (v2.1-184) et le fond rose (v2.1-186) ne correspondaient pas à ce que Mic veut : on retouche À LA MAIN à partir de l'image d'origine,
+  avec le fond gris habituel pour « pas de fond », et la tolérance doit agir sur une zone visible AVANT d'être effacée.
+  Correctif : import = image telle quelle (plus de détourage automatique ni de case « Détourer le fond ») ; fenêtre « Retouche » : on touche le fond, la zone est
+  entourée d'un trait mixte (pointillés noir / blanc qui avancent, dessinés à la résolution de l'écran) avec une légère teinte ; le curseur Tolérance agrandit /
+  réduit la zone en direct ; « Effacer la zone » la rend transparente ; Annuler / Recommencer ; « Valider » enregistre (marges transparentes rognées).
 ```

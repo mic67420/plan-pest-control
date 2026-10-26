@@ -375,12 +375,12 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
         const blob = await new Promise(r=>c.toBlob(r, 'image/jpeg', 0.9)); await applyTypeImageFile(new File([blob], 'extincteur.jpg', { type:'image/jpeg' }));
       });
       return await pg.evaluate(async()=>{
-        const im = await loadImage(newTypeImage); const small = Math.max(im.naturalWidth, im.naturalHeight) <= 384 && Math.abs(newTypeImageRatio - 1) < 0.02; // v2.1-184 : marges transparentes rognées -> le disque seul (ratio 1)
+        const im = await loadImage(newTypeImage); const small = Math.max(im.naturalWidth, im.naturalHeight) <= 384 && Math.abs(newTypeImageRatio - 2) < 0.02; // v2.1-187 : image gardée telle quelle (aucune détection automatique du fond)
         const px = async(url)=>{ const i = await loadImage(url), c = document.createElement('canvas'); c.width = i.naturalWidth; c.height = i.naturalHeight; const x = c.getContext('2d'); x.drawImage(i,0,0); return x.getImageData(0,0,1,1).data[3]; };
-        const cut = document.getElementById('newTypeCutWhite').checked && (await px(newTypeImage)) === 0;            // fond blanc détouré d'office
+        const cut = (await px(newTypeImage)) === 255 && !document.getElementById('newTypeCutWhite'); // v2.1-187 : fond conservé (pas de détourage automatique)
         const t = model.deviceTypes[3]; const rowShown = document.getElementById('rowTypeImage').style.display !== 'none';
         document.getElementById('btnAddType').click();
-        const saved = pages.every(pg=>!!pg.deviceTypes.find(y=>y.id===t.id).image) && Math.abs(t.imageRatio - 1) < 0.02;
+        const saved = pages.every(pg=>!!pg.deviceTypes.find(y=>y.id===t.id).image) && Math.abs(t.imageRatio - 2) < 0.02;
         const p = { id:'pi1', typeId:t.id, label:'X1', x:100, y:100, radius:20, rotation:0 }; model.pastilles.push(p); render();
         const grp = pastilleNodes.get('pi1'); const body = grp && grp.findOne('.pastille-body');
         const drawn = !!body && body._isImage && body.find('Image').length === 1 && body.find('Text').length === 1;
@@ -391,7 +391,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
         model.pastilles = model.pastilles.filter(q=>q.id !== 'pi1'); render();
         return small && cut && rowShown && saved && drawn && legendOk && stored && removed;
       });
-    })(), 'image de poste : import réduit, fond blanc détouré, pastille-image (numéro dessous), sauvegarde, retrait par une forme');
+    })(), 'image de poste : import réduit, fond conservé, pastille-image (numéro dessous), sauvegarde, retrait par une forme');
     // v2.1-180 : toucher « Image » dans la fenêtre d'un NOUVEAU poste ne la ferme plus (le clic simulé du champ fichier remontait à document) ; un resize pendant le choix du fichier non plus
     {
       await pg.evaluate(()=>{ closeOtherWindows(''); resetRemoteGesture(); openTileDrawer('pastille', false); document.getElementById('deviceTypeDropdownBtn').click(); });
@@ -437,37 +437,24 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       ok(await pg.evaluate(()=>{ const n=ghostGroup.children[0]; return n && n.className==='Image' && Math.abs(n.opacity()-0.55)<0.01 && Math.abs(n.x()+n.width()/2-snapToGrid(200))<0.6 && Math.abs(n.y()+n.height()/2-snapToGrid(200))<0.6 && n.height()>n.width(); }), 'aperçu de pose d\'un poste image : image semi-transparente centrée (pas un cercle)');
       await pg.evaluate(()=>{ ghostGroup.destroyChildren(); pages.forEach(pg=>{ pg.deviceTypes=pg.deviceTypes.filter(t=>t.id!=='type-ghost'); }); selectedTypeId=model.deviceTypes[0].id; activeTool=null; });
     }
-    // détourage de l'image d'un poste (v2.1-184) : damier gris/blanc effacé, objet gardé, rognage ; baguette magique
+    // baguette magique (v2.1-187) : sélection entourée, tolérance en direct, Effacer, Valider
     {
-      ok(await pg.evaluate(async()=>{
-        const c=document.createElement('canvas');c.width=100;c.height=100;const x=c.getContext('2d');
-        for(let i=0;i<10;i++)for(let j=0;j<10;j++){x.fillStyle=(i+j)%2?'#cccccc':'#ffffff';x.fillRect(i*10,j*10,10,10);}
-        x.fillStyle='#c00000';x.fillRect(30,20,40,60);
-        const out=await prepareTypeImage(c.toDataURL('image/jpeg',0.92),true), pr=await prepareTypeImage(c.toDataURL('image/jpeg',0.92),false);
-        const im=await loadImage(out.url); const k=document.createElement('canvas');k.width=im.naturalWidth;k.height=im.naturalHeight;const kx=k.getContext('2d');kx.drawImage(im,0,0);
-        return pr.bgLikely && Math.abs(out.ratio-40/60)<0.08 && im.naturalWidth<50 && kx.getImageData(Math.floor(k.width/2),Math.floor(k.height/2),1,1).data[3]===255;
-      }), 'détourage auto : fond en damier détecté, effacé et marges rognées');
-      ok(await pg.evaluate(async()=>{
-        const c=document.createElement('canvas');c.width=60;c.height=60;const x=c.getContext('2d');x.fillStyle='#2080e0';x.fillRect(0,0,60,60);x.fillStyle='#000';x.fillRect(20,20,20,20);
-        newTypeImage=c.toDataURL(); newTypeImageRatio=1; openTypeImageEditor(); await new Promise(r=>setTimeout(r,300));
-        const cv=document.querySelector('#typeImgEditor .tie-cv'), r=cv.getBoundingClientRect();
-        cv.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:r.left+2*r.width/60,clientY:r.top+2*r.height/60}));
-        await new Promise(r=>setTimeout(r,100));
-        const a=cv.getContext('2d').getImageData(1,1,1,1).data[3], b=cv.getContext('2d').getImageData(30,30,1,1).data[3];
-        document.querySelector('#typeImgEditor .tie-ok').click(); await new Promise(r=>setTimeout(r,200));
-        const im=await loadImage(newTypeImage);
-        return a===0 && b===255 && !document.getElementById('typeImgEditor') && im.naturalWidth===20 && Math.abs(newTypeImageRatio-1)<0.01;
-      }), 'baguette magique : touche le fond = transparent, objet gardé, Valider rogne et ferme');
       ok(await pg.evaluate(async()=>{
         const c=document.createElement('canvas');c.width=100;c.height=20;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,100,0);g.addColorStop(0,'#000');g.addColorStop(1,'#fff');x.fillStyle=g;x.fillRect(0,0,100,20);
         newTypeImage=c.toDataURL(); newTypeImageRatio=5; openTypeImageEditor(); await new Promise(r=>setTimeout(r,300));
-        const cv=document.querySelector('#typeImgEditor .tie-cv'), rr=cv.getBoundingClientRect(), tol=document.querySelector('#typeImgEditor .tie-tol');
+        const q=s=>document.querySelector('#typeImgEditor '+s), cv=q('.tie-cv'), rr=cv.getBoundingClientRect(), tol=q('.tie-tol');
+        const selPx=()=>{ const d=q('.tie-sel').getContext('2d').getImageData(0,0,100,20).data; let n=0; for(let i=3;i<d.length;i+=4) if(d[i]>0) n++; return n; };
         const clear=()=>{ const d=cv.getContext('2d').getImageData(0,0,100,20).data; let n=0; for(let i=3;i<d.length;i+=4) if(d[i]===0) n++; return n; };
+        const bg=getComputedStyle(q('.tie-view')).backgroundImage;
         tol.value=5; tol.dispatchEvent(new Event('input')); cv.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:rr.left+1,clientY:rr.top+rr.height/2}));
-        const a=clear(); tol.value=60; tol.dispatchEvent(new Event('input')); const b=clear(); tol.value=5; tol.dispatchEvent(new Event('input')); const c2=clear();
-        document.querySelector('#typeImgEditor .tie-close').click();
-        return a>0 && b>a*2 && c2===a;
-      }), 'baguette magique : le curseur de tolérance agit en direct (plus fort = plus effacé, retour possible)');
+        const a=selPx(), delOn=!q('.tie-del').disabled, noErase=clear()===0;               // sélection dessinée, rien d'effacé
+        tol.value=60; tol.dispatchEvent(new Event('input')); const b=selPx();                // plus de tolérance = zone plus grande
+        tol.value=5; tol.dispatchEvent(new Event('input')); const c2=selPx();
+        tol.value=40; tol.dispatchEvent(new Event('input')); q('.tie-del').click();         // Effacer
+        const erased=clear(), cleared=q('.tie-del').disabled && selPx()===0;
+        q('.tie-ok').click(); await new Promise(r=>setTimeout(r,200));
+        return a>0 && delOn && noErase && b>a*2 && c2===a && erased>0 && cleared && !document.getElementById('typeImgEditor') && !/255, 122, 200|ff7ac8/i.test(bg);
+      }), 'baguette magique : touche = zone entourée, tolérance en direct, Effacer rend transparent, Valider ferme (fond gris)');
       ok(await pg.evaluate(()=>{ newTypeImage='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='; syncShapeUI(); const on=document.getElementById('btnTypeImageEdit').style.display!=='none' && document.getElementById('pvHint').style.display==='none'; newTypeImage=null; syncShapeUI(); return on && document.getElementById('btnTypeImageEdit').style.display==='none' && document.getElementById('pvHint').style.display!=='none'; }), 'icône « Retouche » : visible seulement avec une image (le texte Aperçu disparaît)');
       await pg.evaluate(()=>{ newTypeImage=null; newTypeImageSrc=null; syncShapeUI(); });
     }

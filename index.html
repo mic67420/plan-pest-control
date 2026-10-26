@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-186 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-187 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -136,12 +136,13 @@
   #typeImgEditor{ position:fixed; inset:0; z-index:1200; background:rgba(15,20,30,.6); display:flex; align-items:center; justify-content:center; padding:8px; box-sizing:border-box; }
   #typeImgEditor .tie-card{ background:#fff; color:#1c2230; border-radius:14px; width:min(460px,100%); max-height:100%; overflow:auto; padding:12px; box-sizing:border-box; display:flex; flex-direction:column; gap:8px; }
   #typeImgEditor .tie-title{ font-weight:700; font-size:15px; } #typeImgEditor .tie-title span{ display:block; font-weight:500; font-size:12px; color:#5c6478; }
-  #typeImgEditor .tie-view{ overflow:auto; max-height:48vh; border:1px solid #c9ced8; border-radius:8px; background:repeating-conic-gradient(#ff7ac8 0 25%, #ffd1ea 0 50%) 0 0 / 16px 16px; } /* v2.1-186 : fond ROSE (et non gris) : le faux damier gris / blanc d'une image se confondait avec lui, on ne voyait pas ce qui était effacé */
-  #typeImgEditor .tie-cv{ display:block; margin:0 auto; image-rendering:pixelated; cursor:crosshair; }
+  #typeImgEditor .tie-view{ overflow:auto; max-height:48vh; border:1px solid #c9ced8; border-radius:8px; background:repeating-conic-gradient(#d9dde4 0 25%, #fff 0 50%) 0 0 / 16px 16px; }
+  #typeImgEditor .tie-stage{ position:relative; width:max-content; margin:0 auto; line-height:0; }
+  #typeImgEditor .tie-cv, #typeImgEditor .tie-sel{ display:block; image-rendering:pixelated; cursor:crosshair; } #typeImgEditor .tie-sel{ position:absolute; left:0; top:0; pointer-events:none; }
   #typeImgEditor .tie-row{ display:flex; align-items:center; gap:10px; font-size:13px; } #typeImgEditor .tie-row input[type=range]{ flex:1 1 auto; height:30px; accent-color:var(--accent); }
   #typeImgEditor .tie-chk{ display:flex; align-items:center; gap:8px; } #typeImgEditor .tie-chk input{ width:20px; height:20px; }
   #typeImgEditor .tie-btns button{ flex:1 1 0; min-height:44px; border:1px solid #c9ced8; border-radius:10px; background:#fff; color:#1c2230; font:inherit; font-weight:600; font-size:13px; cursor:pointer; }
-  #typeImgEditor .tie-btns button:disabled{ opacity:.4; } #typeImgEditor .tie-ok{ background:var(--accent) !important; color:#fff !important; border-color:var(--accent) !important; }
+  #typeImgEditor .tie-btns button:disabled{ opacity:.4; } #typeImgEditor .tie-del{ color:#C0392B !important; } #typeImgEditor .tie-ok{ background:var(--accent) !important; color:#fff !important; border-color:var(--accent) !important; }
   body.night-mode #typeImgEditor .tie-card{ background:#161b26; color:#e9edf4; } body.night-mode #typeImgEditor .tie-btns button{ background:#1b2230; color:#e9edf4; border-color:#394258; }
   /* v2.1-182 : bibliothèque de postes = grille de tuiles (vignette, code, nom) */
   #popLibrary{ left:50% !important; right:auto !important; transform:translateX(-50%); width:min(440px, calc(100vw - 16px)); max-width:none; min-width:0; padding:12px; z-index:1001; box-sizing:border-box; }
@@ -658,7 +659,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-186</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-187</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -799,7 +800,7 @@
         <div class="tf"><label for="newTypeCode">Code</label><input type="text" id="newTypeCode" placeholder="ex : R"></div>
         <div class="tf"><label for="newTypeName">Nom</label><input type="text" id="newTypeName" placeholder="Nom du dispositif"></div>
         <div class="tf"><label>Forme</label><div class="tf-ctl tf-shapes" id="newTypeShapes"></div></div>
-        <div class="tf" id="rowTypeImage" style="display:none"><label>Image</label><div class="tf-ctl"><label class="chip" id="chipCutWhite"><input type="checkbox" id="newTypeCutWhite"><span>Détourer le fond</span></label><button type="button" id="btnTypeImageRemove" class="chip" style="color:#D6493E">Retirer</button></div></div>
+        <div class="tf" id="rowTypeImage" style="display:none"><label>Image</label><div class="tf-ctl"><button type="button" id="btnTypeImageRemove" class="chip" style="color:#D6493E">Retirer</button></div></div>
         <div class="tf"><label>Couleur</label><div class="tf-ctl tf-preview"><span class="type-preview" title="Touchez la forme pour changer la couleur"><span id="pvShape"></span><input type="color" id="currentColorPicker" value="#0E6FA8" aria-label="Couleur du poste"></span><button type="button" id="btnTypeImageEdit" class="tf-edit" style="display:none" aria-label="Retouche de l'image" title="Retouche (baguette magique)"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M4 20L15 9" stroke="#000" stroke-width="2.4" stroke-linecap="round"/><path d="M15 9l1.6-3.4L20 4l-1.6 3.4L15 9z" fill="#F59E0B" stroke="#000" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 6v3M4.5 7.5h3M18 15v3M16.5 16.5h3" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg><span>Retouche</span></button><span class="tf-hint" id="pvHint">Touchez la forme pour changer la couleur</span></div></div>
         <div class="tf"><label for="newTypeTextColor">Police</label><div class="tf-ctl"><input type="color" id="newTypeTextColor" value="#ffffff" title="Couleur du numéro dans la pastille"><label class="chip"><input type="checkbox" id="newTypeTextAuto" checked><span>Auto</span></label></div></div>
         <div class="tf"><label>Numéro</label><label class="chip"><input type="checkbox" id="newTypeNoNumber"><span>Sans numéro</span></label></div>
@@ -928,7 +929,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-186 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-187 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -5939,43 +5940,16 @@ let newTypeShape = 'circle';
 let newTypeImage = null, newTypeImageSrc = null, newTypeImageRatio = 1;
 const TYPE_IMAGE_MAX = 384; // côté max (px) de l'image enregistrée : net même à la taille maximale et à l'export, sans alourdir le document
 
-// Réduit l'image (côté max TYPE_IMAGE_MAX, transparence conservée) ; option cutBg : efface le FOND relié aux bords.
-// v2.1-184 : le fond n'est plus seulement « blanc » : les 1 à 3 couleurs dominantes du pourtour sont repérées (blanc, couleur unie, ou faux
-// damier gris / blanc des images « fond transparent » enregistrées en JPEG / capture d'écran), puis effacées depuis les bords. Les marges
-// transparentes sont ensuite rognées : le CENTRE de l'image est alors le centre de l'objet (visée plus précise).
-const BG_TOL = 28; // écart max par canal (0-255) pour qu'un pixel compte comme « fond »
-function detectBgPalette(d, w, h){
-  const buckets = new Map(); let n = 0;
-  const add = (x, y)=>{ const i = (y*w + x)*4; if (d[i+3] < 250) return; const k = (d[i]>>5)*64 + (d[i+1]>>5)*8 + (d[i+2]>>5); let b = buckets.get(k); if (!b){ b = { c:0, r:0, g:0, b:0 }; buckets.set(k, b); } b.c++; b.r += d[i]; b.g += d[i+1]; b.b += d[i+2]; n++; };
-  for (let x = 0; x < w; x++){ add(x, 0); add(x, h-1); }
-  for (let y = 1; y < h-1; y++){ add(0, y); add(w-1, y); }
-  const pal = [...buckets.values()].filter(b=>b.c >= Math.max(3, n*0.08)).sort((a, b)=>b.c - a.c).slice(0, 3).map(b=>[b.r/b.c, b.g/b.c, b.b/b.c]);
-  return { pal, n };
-}
-async function prepareTypeImage(dataURL, cutBg){
+// Réduit l'image (côté max TYPE_IMAGE_MAX, transparence conservée). v2.1-187 : AUCUNE détection automatique du fond (consigne de Mic) : l'image
+// importée reste telle quelle ; le fond se retire à la main avec la baguette magique (« Retouche »).
+async function prepareTypeImage(dataURL){
   const img = await loadImage(dataURL);
   const k = Math.min(1, TYPE_IMAGE_MAX / Math.max(img.naturalWidth, img.naturalHeight));
-  let w = Math.max(1, Math.round(img.naturalWidth*k)), h = Math.max(1, Math.round(img.naturalHeight*k));
-  let cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-  let cx = cv.getContext('2d', { willReadFrequently:true }); cx.drawImage(img, 0, 0, w, h);
-  const id = cx.getImageData(0, 0, w, h), d = id.data;
-  let opaque = true; for (let i = 3; i < d.length; i += 4){ if (d[i] < 250){ opaque = false; break; } }
-  const { pal, n } = opaque ? detectBgPalette(d, w, h) : { pal:[], n:0 };
-  const near = (i)=>{ for (const c of pal){ if (Math.abs(d[i]-c[0]) <= BG_TOL && Math.abs(d[i+1]-c[1]) <= BG_TOL && Math.abs(d[i+2]-c[2]) <= BG_TOL) return true; } return false; };
-  // « fond probable » : l'image est opaque et (presque) tout son pourtour est fait de 1 à 3 couleurs
-  let bgShare = 0;
-  if (pal.length){ let m = 0; const chk = (x, y)=>{ if (near((y*w + x)*4)) m++; }; for (let x = 0; x < w; x++){ chk(x, 0); chk(x, h-1); } for (let y = 1; y < h-1; y++){ chk(0, y); chk(w-1, y); } bgShare = m / Math.max(1, n); }
-  const bgLikely = opaque && pal.length > 0 && bgShare >= 0.92;
-  if (cutBg && pal.length){
-    const seen = new Uint8Array(w*h), stack = [];
-    const push = (x, y)=>{ if (x < 0 || y < 0 || x >= w || y >= h) return; const p = y*w + x; if (seen[p]) return; seen[p] = 1; if (near(p*4)) stack.push(p); };
-    for (let x = 0; x < w; x++){ push(x, 0); push(x, h-1); }
-    for (let y = 0; y < h; y++){ push(0, y); push(w-1, y); }
-    while (stack.length){ const p = stack.pop(), x = p % w, y = (p - x) / w; d[p*4+3] = 0; push(x+1, y); push(x-1, y); push(x, y+1); push(x, y-1); }
-    cx.putImageData(id, 0, 0);
-  }
+  const w = Math.max(1, Math.round(img.naturalWidth*k)), h = Math.max(1, Math.round(img.naturalHeight*k));
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  cv.getContext('2d').drawImage(img, 0, 0, w, h);
   const out = trimTransparent(cv);
-  return { url: out.toDataURL('image/png'), ratio: out.width/out.height, opaque, bgLikely };
+  return { url: out.toDataURL('image/png'), ratio: out.width/out.height };
 }
 // Rogne les marges entièrement transparentes (sans effet si l'image est pleine ou entièrement transparente).
 function trimTransparent(cv){
@@ -5990,83 +5964,98 @@ function trimTransparent(cv){
 async function applyTypeImageFile(file){
   try{
     const raw = await fileToImageDataURL(file, { pdfChoose:true });
-    const probe = await prepareTypeImage(raw, false);
-    newTypeImageSrc = raw; // l'original (jusqu'à 2000 px pour un SVG) est refait à la volée si on (dé)coche le détourage
-    const cut = probe.opaque && probe.bgLikely; // image à fond uni / damier : détourage proposé d'office
-    const out = cut ? await prepareTypeImage(raw, true) : probe;
+    newTypeImageSrc = raw;
+    const out = await prepareTypeImage(raw);
     newTypeImage = out.url; newTypeImageRatio = out.ratio;
-    document.getElementById('newTypeCutWhite').checked = cut;
     syncShapeUI(); updateTypePreview();
-    if (!cut && probe.opaque) toast('Fond non détecté : touchez « Retoucher » pour l\'effacer à la baguette magique.');
   } catch(err){ toast('Image illisible : ' + (err && err.message ? err.message : 'format non pris en charge')); }
 }
-// v2.1-184 : fenêtre « Retoucher » = baguette magique (comme Paint.NET) : on touche le fond, les pixels de couleur proche (tolérance réglable)
-// deviennent transparents — la zone reliée au point touché, ou toute l'image si la case est cochée. Annulation pas à pas ; damier = transparent.
+// v2.1-187 : fenêtre « Retouche » = baguette magique comme Paint.NET. On part de l'image d'origine. Toucher le fond SÉLECTIONNE une zone (pixels de couleur
+// proche, reliés au point touché, ou toute l'image si la case est cochée) : elle s'entoure d'un trait mixte (pointillés noir / blanc qui avancent) ;
+// le curseur Tolérance agrandit / réduit la sélection en direct ; « Effacer » la rend transparente (fond gris = absence de fond) ; « Valider » enregistre.
 function openTypeImageEditor(){
   if (!newTypeImage || document.getElementById('typeImgEditor')) return;
   const ov = document.createElement('div'); ov.id = 'typeImgEditor';
-  ov.innerHTML = `<div class="tie-card"><div class="tie-title">Retoucher l'image <span>Touchez le fond à effacer : ce qui est effacé devient rose</span></div>
-    <div class="tie-view"><canvas class="tie-cv"></canvas></div>
-    <div class="tie-row"><label>Tolérance <b class="tie-tolv">30</b> · effacé <b class="tie-pct">0 %</b></label><input type="range" class="tie-tol" min="0" max="100" value="30"></div>
+  ov.innerHTML = `<div class="tie-card"><div class="tie-title">Retouche de l'image <span>Touchez le fond : la zone est entourée. Réglez la tolérance, puis « Effacer ».</span></div>
+    <div class="tie-view"><div class="tie-stage"><canvas class="tie-cv"></canvas><canvas class="tie-sel"></canvas></div></div>
+    <div class="tie-row"><label>Tolérance <b class="tie-tolv">30</b> · zone <b class="tie-pct">0 %</b></label><input type="range" class="tie-tol" min="0" max="100" value="30"></div>
     <div class="tie-row"><label class="tie-chk"><input type="checkbox" class="tie-all"> Toute l'image (pas seulement la zone touchée)</label></div>
     <div class="tie-row tie-btns"><button type="button" class="tie-zm">Zoom −</button><button type="button" class="tie-zp">Zoom +</button><button type="button" class="tie-undo" disabled>Annuler</button><button type="button" class="tie-reset" disabled>Recommencer</button></div>
-    <div class="tie-row tie-btns"><button type="button" class="tie-close">Fermer</button><button type="button" class="tie-ok">✓ Valider</button></div></div>`;
+    <div class="tie-row tie-btns"><button type="button" class="tie-close">Fermer</button><button type="button" class="tie-del" disabled>Effacer la zone</button><button type="button" class="tie-ok">✓ Valider</button></div></div>`;
   ov.addEventListener('click', e=>e.stopPropagation());
   ov.addEventListener('pointerdown', e=>e.stopPropagation());
   document.body.appendChild(ov);
-  const $ = q=>ov.querySelector(q), cv = $('.tie-cv'), cx = cv.getContext('2d', { willReadFrequently:true });
-  let hist = [], scale = 1, w = 0, h = 0;
-  const pct = ()=>{ const d = cx.getImageData(0, 0, w, h).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] < 8) n++; $('.tie-pct').textContent = Math.round(100*n/(w*h)) + ' %'; };
-  const upd = ()=>{ cv.style.width = (w*scale)+'px'; cv.style.height = (h*scale)+'px'; if (w) pct(); $('.tie-undo').disabled = hist.length < 2; $('.tie-reset').disabled = hist.length < 2; };
-  const snap = ()=>{ hist.push(cx.getImageData(0, 0, w, h)); if (hist.length > 13){ hist.splice(1, 1); } upd(); };
-  const close = ()=>ov.remove();
+  const $ = q=>ov.querySelector(q), cv = $('.tie-cv'), cx = cv.getContext('2d', { willReadFrequently:true }), sel = $('.tie-sel'), sx = sel.getContext('2d');
+  let hist = [], scale = 1, w = 0, h = 0, seed = null, mask = null, edge = [], phase = 0, timer = null;
+  const css = ()=>{ [cv, sel].forEach(c=>{ c.style.width = (w*scale)+'px'; c.style.height = (h*scale)+'px'; }); };
+  const upd = ()=>{ css(); if (w) drawSel(); $('.tie-undo').disabled = hist.length < 2; $('.tie-reset').disabled = hist.length < 2; $('.tie-del').disabled = !mask; };
+  const tint = document.createElement('canvas'); // zone teintée à la résolution de l'image, agrandie ensuite
+  const drawSel = ()=>{ // zone teintée + trait mixte (alternance noir / blanc le long du contour, décalée à chaque image = fourmis qui marchent)
+    // dessiné à la résolution de l'ÉCRAN (et non de l'image) : sinon le trait fait moins d'un pixel d'écran et disparaît sur téléphone
+    const dpr = Math.max(1, window.devicePixelRatio || 1), k = scale*dpr, W = Math.max(1, Math.round(w*k)), H = Math.max(1, Math.round(h*k));
+    if (sel.width !== W || sel.height !== H){ sel.width = W; sel.height = H; }
+    sx.clearRect(0, 0, W, H); if (!mask) return;
+    tint.width = w; tint.height = h; const tx = tint.getContext('2d'), im = tx.createImageData(w, h), d = im.data;
+    for (let p = 0; p < mask.length; p++) if (mask[p]){ d[p*4] = 30; d[p*4+1] = 120; d[p*4+2] = 255; d[p*4+3] = 46; }
+    tx.putImageData(im, 0, 0); sx.imageSmoothingEnabled = false; sx.drawImage(tint, 0, 0, W, H);
+    const t = Math.max(k, 2*dpr);
+    for (let i = 0; i < edge.length; i++){ const p = edge[i], x = p % w, y = (p - x)/w; sx.fillStyle = (((x + y + phase) >> 2) & 1) === 0 ? '#000' : '#fff'; sx.fillRect(x*k - (t-k)/2, y*k - (t-k)/2, t, t); }
+  };
+  const setMask = (m)=>{
+    mask = m; edge = [];
+    if (m){ for (let p = 0; p < m.length; p++){ if (!m[p]) continue; const x = p % w, y = (p - x)/w; if (x === 0 || y === 0 || x === w-1 || y === h-1 || !m[p-1] || !m[p+1] || !m[p-w] || !m[p+w]) edge.push(p); } }
+    let n = 0; if (m) for (let p = 0; p < m.length; p++) if (m[p]) n++;
+    $('.tie-pct').textContent = Math.round(100*n/(w*h || 1)) + ' %';
+    clearInterval(timer); timer = null;
+    if (m){ timer = setInterval(()=>{ phase = (phase + 1) & 7; drawSel(); }, 140); }
+    drawSel(); upd();
+  };
+  const close = ()=>{ clearInterval(timer); ov.remove(); };
   loadImage(newTypeImage).then(img=>{
     w = cv.width = img.naturalWidth; h = cv.height = img.naturalHeight; cx.drawImage(img, 0, 0);
     scale = Math.max(0.5, Math.min(3, Math.min(window.innerWidth - 60, 420) / w));
     hist = [cx.getImageData(0, 0, w, h)]; upd();
   }).catch(()=>{ toast('Image illisible.'); close(); });
-  $('.tie-tol').addEventListener('input', e=>{ $('.tie-tolv').textContent = e.target.value; });
-  $('.tie-zm').addEventListener('click', ()=>{ scale = Math.max(0.5, scale/1.4); upd(); });
-  $('.tie-zp').addEventListener('click', ()=>{ scale = Math.min(8, scale*1.4); upd(); });
-  $('.tie-undo').addEventListener('click', ()=>{ seed = null; if (hist.length > 1){ hist.pop(); cx.putImageData(hist[hist.length-1], 0, 0); upd(); } });
-  $('.tie-reset').addEventListener('click', ()=>{ seed = null; hist.length = 1; cx.putImageData(hist[0], 0, 0); upd(); });
-  $('.tie-close').addEventListener('click', close);
-  // v2.1-185 : la tolérance ne faisait RIEN tant qu'on ne touchait pas de nouveau le fond. Elle agit maintenant en direct : le dernier point touché est
-  // retraité (à partir de l'image d'avant) à chaque déplacement du curseur, comme dans Paint.NET ; « Annuler » défait le tout d'un coup.
-  let seed = null;
-  const wand = (id, x, y)=>{
-    const d = id.data, si = (y*w + x)*4;
-    if (d[si+3] < 8) return false; // déjà transparent
+  // sélection : zone reliée au point touché (ou toute l'image), pixels visibles de couleur proche (écart max par canal = tolérance %)
+  const select = ()=>{
+    if (!seed) return;
+    const d = cx.getImageData(0, 0, w, h).data, si = (seed.y*w + seed.x)*4;
+    if (d[si+3] < 8){ setMask(null); return; }
     const sr = d[si], sg = d[si+1], sb = d[si+2], tol = (+$('.tie-tol').value)*2.55;
-    const match = (i)=>d[i+3] > 0 && Math.abs(d[i]-sr) <= tol && Math.abs(d[i+1]-sg) <= tol && Math.abs(d[i+2]-sb) <= tol;
-    if ($('.tie-all').checked){ for (let i = 0; i < d.length; i += 4) if (match(i)) d[i+3] = 0; }
+    const match = (i)=>d[i+3] >= 8 && Math.abs(d[i]-sr) <= tol && Math.abs(d[i+1]-sg) <= tol && Math.abs(d[i+2]-sb) <= tol;
+    const m = new Uint8Array(w*h);
+    if ($('.tie-all').checked){ for (let p = 0; p < m.length; p++) if (match(p*4)) m[p] = 1; }
     else {
-      const seen = new Uint8Array(w*h), stack = [y*w + x]; seen[y*w + x] = 1;
+      const stack = [seed.y*w + seed.x]; m[stack[0]] = 1;
       while (stack.length){
-        const p = stack.pop(); d[p*4+3] = 0; const px = p % w, py = (p - px)/w;
-        for (const [nx, ny] of [[px+1,py],[px-1,py],[px,py+1],[px,py-1]]){ if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue; const q = ny*w + nx; if (seen[q]) continue; seen[q] = 1; if (match(q*4)) stack.push(q); }
+        const p = stack.pop(), px = p % w, py = (p - px)/w;
+        for (const [nx, ny] of [[px+1,py],[px-1,py],[px,py+1],[px,py-1]]){ if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue; const q = ny*w + nx; if (m[q]) continue; if (match(q*4)){ m[q] = 1; stack.push(q); } }
       }
     }
-    return true;
+    setMask(m);
   };
-  const redo = ()=>{ // retraite le dernier point touché avec les réglages actuels (remplace la dernière étape de l'historique)
-    if (!seed) return;
-    const id = new ImageData(new Uint8ClampedArray(seed.base.data), w, h);
-    wand(id, seed.x, seed.y); cx.putImageData(id, 0, 0); hist[hist.length-1] = id; upd();
-  };
-  cv.addEventListener('click', (e)=>{
+  sel.parentNode.addEventListener('click', (e)=>{
     if (!w) return;
     const r = cv.getBoundingClientRect(), x = Math.floor((e.clientX - r.left)*w/r.width), y = Math.floor((e.clientY - r.top)*h/r.height);
     if (x < 0 || y < 0 || x >= w || y >= h) return;
-    const base = cx.getImageData(0, 0, w, h), id = cx.getImageData(0, 0, w, h);
-    if (!wand(id, x, y)) return;
-    cx.putImageData(id, 0, 0); snap(); seed = { x, y, base };
+    seed = { x, y }; select();
   });
-  $('.tie-tol').addEventListener('input', redo);
-  $('.tie-all').addEventListener('change', redo);
+  $('.tie-tol').addEventListener('input', (e)=>{ $('.tie-tolv').textContent = e.target.value; select(); });
+  $('.tie-all').addEventListener('change', select);
+  $('.tie-zm').addEventListener('click', ()=>{ scale = Math.max(0.5, scale/1.4); upd(); });
+  $('.tie-zp').addEventListener('click', ()=>{ scale = Math.min(8, scale*1.4); upd(); });
+  $('.tie-del').addEventListener('click', ()=>{ // efface la zone entourée
+    if (!mask) return;
+    const id = cx.getImageData(0, 0, w, h), d = id.data;
+    for (let p = 0; p < mask.length; p++) if (mask[p]) d[p*4+3] = 0;
+    cx.putImageData(id, 0, 0); hist.push(id); if (hist.length > 13) hist.splice(1, 1);
+    seed = null; setMask(null);
+  });
+  $('.tie-undo').addEventListener('click', ()=>{ seed = null; if (hist.length > 1){ hist.pop(); cx.putImageData(hist[hist.length-1], 0, 0); } setMask(null); });
+  $('.tie-reset').addEventListener('click', ()=>{ seed = null; hist.length = 1; cx.putImageData(hist[0], 0, 0); setMask(null); });
+  $('.tie-close').addEventListener('click', close);
   $('.tie-ok').addEventListener('click', ()=>{
     const out = trimTransparent(cv); newTypeImage = out.toDataURL('image/png'); newTypeImageRatio = out.width/out.height;
-    newTypeImageSrc = null; // retouche manuelle : le réglage automatique « Détourer le fond » ne s'applique plus
     syncShapeUI(); updateTypePreview(); close();
   });
 }
@@ -6089,10 +6078,6 @@ const TYPE_SHAPES = [['circle','Rond'],['square','Carré'],['rounded','Carré ar
   box.appendChild(bi);
   document.getElementById('fileInputTypeImage').addEventListener('change', async (e)=>{ filePickerOpenUntil = Date.now() + 3000; const f = e.target.files[0]; e.target.value = ''; if (f) await applyTypeImageFile(f); });
   document.getElementById('fileInputTypeImage').addEventListener('cancel', ()=>{ filePickerOpenUntil = Date.now() + 3000; });
-  document.getElementById('newTypeCutWhite').addEventListener('change', async (e)=>{
-    if (!newTypeImageSrc) return;
-    try{ const out = await prepareTypeImage(newTypeImageSrc, e.target.checked); newTypeImage = out.url; newTypeImageRatio = out.ratio; updateTypePreview(); } catch(err){ /* sans conséquence */ }
-  });
   document.getElementById('btnTypeImageEdit').addEventListener('click', (e)=>{ e.stopPropagation(); openTypeImageEditor(); });
   document.getElementById('btnTypeImageRemove').addEventListener('click', ()=>{ newTypeImage = null; newTypeImageSrc = null; syncShapeUI(); updateTypePreview(); });
 })();
@@ -6104,7 +6089,6 @@ function syncShapeUI(){
   document.getElementById('pvHint').style.display = newTypeImage ? 'none' : '';
   document.getElementById('btnTypeImageEdit').style.display = newTypeImage ? 'flex' : 'none';
   const pk = document.getElementById('currentColorPicker'); pk.style.pointerEvents = newTypeImage ? 'none' : ''; // une image n'a pas de couleur à choisir
-  document.getElementById('chipCutWhite').style.display = newTypeImageSrc ? 'flex' : 'none'; // le détourage ne se refait que sur une image importée pendant cette ouverture
 }
 function updateTypePreview(){
   const pv = document.getElementById('pvShape'); if (!pv) return;
