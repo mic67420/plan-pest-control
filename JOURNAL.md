@@ -1557,4 +1557,10 @@ v2.1-184 — Image d'un poste : détourage automatique du fond (uni ou damier) +
   Correctif : prepareTypeImage repère les 1 à 3 couleurs dominantes du pourtour (blanc, uni, damier) et les efface depuis les bords (détourage proposé
   d'office si presque tout le pourtour est ainsi) ; marges transparentes rognées (le centre de l'image = le centre de l'objet). Nouveau bouton « Retoucher… » :
   fenêtre baguette magique (touche = efface la zone de couleur proche reliée, tolérance réglable, case « toute l'image », zoom, annuler / recommencer, fond en damier).
+
+v2.1-185 — Retouche d'image : icône « Retouche » à la place du texte « Aperçu » ; la tolérance agit en direct
+  Cause : (1) le texte d'aide « Aperçu : l'image garde ses proportions… » occupait la ligne d'aperçu et le bouton « Retoucher… » était dans une autre ligne ;
+  (2) le curseur Tolérance ne faisait rien tant qu'on ne retouchait pas le fond (la valeur n'était lue qu'au toucher suivant) : il paraissait en panne.
+  Correctif : pour une image, le texte disparaît et l'icône baguette + « Retouche » prend sa place (visible seulement quand le poste a une image) ;
+  dans la fenêtre de retouche, déplacer le curseur (ou cocher « Toute l'image ») retraite en direct le dernier point touché à partir de l'image d'avant.
 ```

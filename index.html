@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-184 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-185 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -178,6 +178,8 @@
   #popAddType .tf-ctl .mono{ width:24px; text-align:right; font-size:13px; font-weight:600; color:#1c2230; }
   /* v2.1-176 : la forme réelle du poste EST le réglage de couleur (le sélecteur transparent la recouvre) ; sa taille suit le curseur « Taille » */
   #popAddType .tf-preview{ height:68px; }
+  #popAddType .tf-edit{ display:flex; align-items:center; gap:8px; min-height:44px; padding:0 12px; border:2px solid #c9ced8; border-radius:10px; background:#fff; color:#1c2230; font:inherit; font-weight:600; font-size:13px; cursor:pointer; } /* v2.1-185 : icône « Retouche » (image importée) */
+  body.night-mode #popAddType .tf-edit{ background:#1b2230; color:#e9edf4; border-color:#394258; }
   #popAddType .type-preview{ position:relative; width:64px; height:64px; flex:none; display:flex; align-items:center; justify-content:center; }
   #popAddType .type-preview #pvShape{ display:flex; align-items:center; justify-content:center; pointer-events:none; }
   #popAddType .type-preview input[type=color]{ position:absolute; inset:0; width:100%; height:100%; opacity:0; padding:0; border:none; cursor:pointer; }
@@ -656,7 +658,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-184</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-185</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -797,8 +799,8 @@
         <div class="tf"><label for="newTypeCode">Code</label><input type="text" id="newTypeCode" placeholder="ex : R"></div>
         <div class="tf"><label for="newTypeName">Nom</label><input type="text" id="newTypeName" placeholder="Nom du dispositif"></div>
         <div class="tf"><label>Forme</label><div class="tf-ctl tf-shapes" id="newTypeShapes"></div></div>
-        <div class="tf" id="rowTypeImage" style="display:none"><label>Image</label><div class="tf-ctl"><label class="chip" id="chipCutWhite"><input type="checkbox" id="newTypeCutWhite"><span>Détourer le fond</span></label><button type="button" id="btnTypeImageEdit" class="chip">Retoucher…</button><button type="button" id="btnTypeImageRemove" class="chip" style="color:#D6493E">Retirer</button></div></div>
-        <div class="tf"><label>Couleur</label><div class="tf-ctl tf-preview"><span class="type-preview" title="Touchez la forme pour changer la couleur"><span id="pvShape"></span><input type="color" id="currentColorPicker" value="#0E6FA8" aria-label="Couleur du poste"></span><span class="tf-hint" id="pvHint">Touchez la forme pour changer la couleur</span></div></div>
+        <div class="tf" id="rowTypeImage" style="display:none"><label>Image</label><div class="tf-ctl"><label class="chip" id="chipCutWhite"><input type="checkbox" id="newTypeCutWhite"><span>Détourer le fond</span></label><button type="button" id="btnTypeImageRemove" class="chip" style="color:#D6493E">Retirer</button></div></div>
+        <div class="tf"><label>Couleur</label><div class="tf-ctl tf-preview"><span class="type-preview" title="Touchez la forme pour changer la couleur"><span id="pvShape"></span><input type="color" id="currentColorPicker" value="#0E6FA8" aria-label="Couleur du poste"></span><button type="button" id="btnTypeImageEdit" class="tf-edit" style="display:none" aria-label="Retouche de l'image" title="Retouche (baguette magique)"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M4 20L15 9" stroke="#000" stroke-width="2.4" stroke-linecap="round"/><path d="M15 9l1.6-3.4L20 4l-1.6 3.4L15 9z" fill="#F59E0B" stroke="#000" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 6v3M4.5 7.5h3M18 15v3M16.5 16.5h3" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg><span>Retouche</span></button><span class="tf-hint" id="pvHint">Touchez la forme pour changer la couleur</span></div></div>
         <div class="tf"><label for="newTypeTextColor">Police</label><div class="tf-ctl"><input type="color" id="newTypeTextColor" value="#ffffff" title="Couleur du numéro dans la pastille"><label class="chip"><input type="checkbox" id="newTypeTextAuto" checked><span>Auto</span></label></div></div>
         <div class="tf"><label>Numéro</label><label class="chip"><input type="checkbox" id="newTypeNoNumber"><span>Sans numéro</span></label></div>
         <div class="tf"><label for="newTypeRadius">Taille</label><div class="tf-ctl"><input type="range" id="newTypeRadius" min="6" max="40" value="16"><span id="newTypeRadiusLabel" class="mono">16</span></div></div>
@@ -926,7 +928,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-184 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-185 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -6025,15 +6027,15 @@ function openTypeImageEditor(){
   $('.tie-tol').addEventListener('input', e=>{ $('.tie-tolv').textContent = e.target.value; });
   $('.tie-zm').addEventListener('click', ()=>{ scale = Math.max(0.5, scale/1.4); upd(); });
   $('.tie-zp').addEventListener('click', ()=>{ scale = Math.min(8, scale*1.4); upd(); });
-  $('.tie-undo').addEventListener('click', ()=>{ if (hist.length > 1){ hist.pop(); cx.putImageData(hist[hist.length-1], 0, 0); upd(); } });
-  $('.tie-reset').addEventListener('click', ()=>{ hist.length = 1; cx.putImageData(hist[0], 0, 0); upd(); });
+  $('.tie-undo').addEventListener('click', ()=>{ seed = null; if (hist.length > 1){ hist.pop(); cx.putImageData(hist[hist.length-1], 0, 0); upd(); } });
+  $('.tie-reset').addEventListener('click', ()=>{ seed = null; hist.length = 1; cx.putImageData(hist[0], 0, 0); upd(); });
   $('.tie-close').addEventListener('click', close);
-  cv.addEventListener('click', (e)=>{
-    if (!w) return;
-    const r = cv.getBoundingClientRect(), x = Math.floor((e.clientX - r.left)*w/r.width), y = Math.floor((e.clientY - r.top)*h/r.height);
-    if (x < 0 || y < 0 || x >= w || y >= h) return;
-    const id = cx.getImageData(0, 0, w, h), d = id.data, si = (y*w + x)*4;
-    if (d[si+3] < 8) return; // déjà transparent
+  // v2.1-185 : la tolérance ne faisait RIEN tant qu'on ne touchait pas de nouveau le fond. Elle agit maintenant en direct : le dernier point touché est
+  // retraité (à partir de l'image d'avant) à chaque déplacement du curseur, comme dans Paint.NET ; « Annuler » défait le tout d'un coup.
+  let seed = null;
+  const wand = (id, x, y)=>{
+    const d = id.data, si = (y*w + x)*4;
+    if (d[si+3] < 8) return false; // déjà transparent
     const sr = d[si], sg = d[si+1], sb = d[si+2], tol = (+$('.tie-tol').value)*2.55;
     const match = (i)=>d[i+3] > 0 && Math.abs(d[i]-sr) <= tol && Math.abs(d[i+1]-sg) <= tol && Math.abs(d[i+2]-sb) <= tol;
     if ($('.tie-all').checked){ for (let i = 0; i < d.length; i += 4) if (match(i)) d[i+3] = 0; }
@@ -6044,8 +6046,23 @@ function openTypeImageEditor(){
         for (const [nx, ny] of [[px+1,py],[px-1,py],[px,py+1],[px,py-1]]){ if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue; const q = ny*w + nx; if (seen[q]) continue; seen[q] = 1; if (match(q*4)) stack.push(q); }
       }
     }
-    cx.putImageData(id, 0, 0); snap();
+    return true;
+  };
+  const redo = ()=>{ // retraite le dernier point touché avec les réglages actuels (remplace la dernière étape de l'historique)
+    if (!seed) return;
+    const id = new ImageData(new Uint8ClampedArray(seed.base.data), w, h);
+    wand(id, seed.x, seed.y); cx.putImageData(id, 0, 0); hist[hist.length-1] = id; upd();
+  };
+  cv.addEventListener('click', (e)=>{
+    if (!w) return;
+    const r = cv.getBoundingClientRect(), x = Math.floor((e.clientX - r.left)*w/r.width), y = Math.floor((e.clientY - r.top)*h/r.height);
+    if (x < 0 || y < 0 || x >= w || y >= h) return;
+    const base = cx.getImageData(0, 0, w, h), id = cx.getImageData(0, 0, w, h);
+    if (!wand(id, x, y)) return;
+    cx.putImageData(id, 0, 0); snap(); seed = { x, y, base };
   });
+  $('.tie-tol').addEventListener('input', redo);
+  $('.tie-all').addEventListener('change', redo);
   $('.tie-ok').addEventListener('click', ()=>{
     const out = trimTransparent(cv); newTypeImage = out.toDataURL('image/png'); newTypeImageRatio = out.width/out.height;
     newTypeImageSrc = null; // retouche manuelle : le réglage automatique « Détourer le fond » ne s'applique plus
@@ -6081,7 +6098,10 @@ const TYPE_SHAPES = [['circle','Rond'],['square','Carré'],['rounded','Carré ar
 function syncShapeUI(){
   document.querySelectorAll('#newTypeShapes button').forEach(b=>b.classList.toggle('active', newTypeImage ? b.dataset.shape === 'image' : b.dataset.shape === newTypeShape));
   document.getElementById('rowTypeImage').style.display = newTypeImage ? 'flex' : 'none';
-  document.getElementById('pvHint').textContent = newTypeImage ? 'Aperçu : l\'image garde ses proportions, le curseur Taille règle sa plus grande dimension' : 'Touchez la forme pour changer la couleur';
+  // v2.1-185 : plus de texte « Aperçu » pour une image : à la place, l'icône « Retouche » (baguette magique), visible seulement avec une image
+  document.getElementById('pvHint').textContent = 'Touchez la forme pour changer la couleur';
+  document.getElementById('pvHint').style.display = newTypeImage ? 'none' : '';
+  document.getElementById('btnTypeImageEdit').style.display = newTypeImage ? 'flex' : 'none';
   const pk = document.getElementById('currentColorPicker'); pk.style.pointerEvents = newTypeImage ? 'none' : ''; // une image n'a pas de couleur à choisir
   document.getElementById('chipCutWhite').style.display = newTypeImageSrc ? 'flex' : 'none'; // le détourage ne se refait que sur une image importée pendant cette ouverture
 }

@@ -458,6 +458,17 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
         const im=await loadImage(newTypeImage);
         return a===0 && b===255 && !document.getElementById('typeImgEditor') && im.naturalWidth===20 && Math.abs(newTypeImageRatio-1)<0.01;
       }), 'baguette magique : touche le fond = transparent, objet gardé, Valider rogne et ferme');
+      ok(await pg.evaluate(async()=>{
+        const c=document.createElement('canvas');c.width=100;c.height=20;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,100,0);g.addColorStop(0,'#000');g.addColorStop(1,'#fff');x.fillStyle=g;x.fillRect(0,0,100,20);
+        newTypeImage=c.toDataURL(); newTypeImageRatio=5; openTypeImageEditor(); await new Promise(r=>setTimeout(r,300));
+        const cv=document.querySelector('#typeImgEditor .tie-cv'), rr=cv.getBoundingClientRect(), tol=document.querySelector('#typeImgEditor .tie-tol');
+        const clear=()=>{ const d=cv.getContext('2d').getImageData(0,0,100,20).data; let n=0; for(let i=3;i<d.length;i+=4) if(d[i]===0) n++; return n; };
+        tol.value=5; tol.dispatchEvent(new Event('input')); cv.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:rr.left+1,clientY:rr.top+rr.height/2}));
+        const a=clear(); tol.value=60; tol.dispatchEvent(new Event('input')); const b=clear(); tol.value=5; tol.dispatchEvent(new Event('input')); const c2=clear();
+        document.querySelector('#typeImgEditor .tie-close').click();
+        return a>0 && b>a*2 && c2===a;
+      }), 'baguette magique : le curseur de tolérance agit en direct (plus fort = plus effacé, retour possible)');
+      ok(await pg.evaluate(()=>{ newTypeImage='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='; syncShapeUI(); const on=document.getElementById('btnTypeImageEdit').style.display!=='none' && document.getElementById('pvHint').style.display==='none'; newTypeImage=null; syncShapeUI(); return on && document.getElementById('btnTypeImageEdit').style.display==='none' && document.getElementById('pvHint').style.display!=='none'; }), 'icône « Retouche » : visible seulement avec une image (le texte Aperçu disparaît)');
       await pg.evaluate(()=>{ newTypeImage=null; newTypeImageSrc=null; syncShapeUI(); });
     }
     // règle commune : ouvrir une fenêtre referme les autres
