@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-188 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-189 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -348,10 +348,11 @@
   }
   body.mobile-mode #mobileTileBar .mtile{
     flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center;
-    justify-content:center; gap:2px; padding:7px 2px 6px; border-radius:9px;
+    justify-content:center; gap:2px; padding:3px 2px 3px; height:53px; box-sizing:border-box; border-radius:9px;
     background:#F1F3F6; border:none; cursor:pointer; color:var(--ink); font-family:inherit;
   }
-  body.mobile-mode #mobileTileBar .mtile .icon{ width:21px; height:21px; }
+  /* v2.1-189 : icônes PLUS GRANDES sans changer la taille des tuiles (hauteur fixée à 53 px, marges réduites) ; la taille suit la largeur de l'écran, plafonnée à 27 px */
+  body.mobile-mode #mobileTileBar .mtile .icon{ width:clamp(22px,7.5vw,27px); height:clamp(22px,7.5vw,27px); }
   body.mobile-mode #mobileTileBar .mtile .lbl{
     font-size:10px; font-weight:600; white-space:nowrap; overflow:hidden;
     text-overflow:ellipsis; max-width:100%;
@@ -362,7 +363,7 @@
     flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:center; padding:7px 0 6px;
     background:#F1F3F6; border:none; border-radius:9px; cursor:pointer; color:var(--ink);
   }
-  body.mobile-mode #mobileTileBar .mtile-split button .icon{ width:22px; height:22px; }
+  body.mobile-mode #mobileTileBar .mtile-split button .icon{ width:clamp(20px,7vw,26px); height:clamp(20px,7vw,26px); }
   body.mobile-mode #mobileTileBar .mtile-split button:active{ background:var(--accent-soft); }
   body.mobile-mode #mobileTileBar .mtile-split button:disabled{ opacity:.55; cursor:default; } /* v2.1-167 : inactif mais lisible (.35 -> .55) */
   /* "en cours d'utilisation" : soit le tiroir de cette tuile est ouvert, soit (si aucun
@@ -392,14 +393,14 @@
   body.mobile-mode .popover{ background:rgba(255,255,255,var(--drawer-alpha,1)); }
   body.mobile-mode .tb-icon{
     height:auto; min-height:54px; width:64px; min-width:64px; font-size:22px; border-radius:10px;
-    flex-direction:column; gap:3px; padding:6px 2px 5px; box-sizing:border-box;
+    flex-direction:column; gap:3px; padding:3px 2px 3px; box-sizing:border-box;
   }
   /* v2.1-92 : UNE seule ligne de texte sous l'icône, boutons de taille identique dans tous les tiroirs. */
   body.mobile-mode .tb-icon .tb-icon-label{
     font-size:9.5px; font-weight:600; line-height:1.15; text-align:center; color:inherit;
     max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
-  body.mobile-mode .tb-icon .icon{width:22px;height:22px;}
+  body.mobile-mode .tb-icon .icon{width:clamp(24px,8.6vw,32px);height:clamp(24px,8.6vw,32px);} /* v2.1-189 : 22 -> jusqu'à 32 px ; bouton inchangé (min-height 54 px) */
   /* v2.1-139 : cadenas à deux dessins (fermé / ouvert) : la classe is-open du bouton choisit lequel s'affiche */
   .pop-btn .pop-ico{display:inline-block;vertical-align:middle;margin-right:10px;}
   .pop-tool-btn .icon{flex:none;}
@@ -414,7 +415,7 @@
   .tb-icon.is-open .lock-open{display:inline;}
   .tb-icon.is-open .lock-closed{display:none;}
   /* v2.1-138 : pastille blanche derrière l'icône d'un bouton ACTIF (le contour sombre des nouvelles icônes se voyait mal sur le fond bleu) */
-  body.mobile-mode .tb-icon.active .icon{background:#fff;border-radius:7px;padding:2px;box-sizing:content-box;}
+  body.mobile-mode .tb-icon.active .icon{background:#fff;border-radius:7px;padding:2px;box-sizing:border-box;}
   body.mobile-mode .sep{height:36px;}
   /* v2.1-129 : icônes de chaque tiroir sur UNE ligne en portrait (largeur partagée, plus de 64 px fixes). Les conteneurs
      .pop-wrap deviennent « transparents » pour que leurs boutons se partagent la ligne ; le menu déroulant garde sa position fixe. */
@@ -590,7 +591,7 @@
   body.night-mode #mobileTileBar .mtile, body.night-mode #mobileTileBar .mtile-split button{ background:#242c3c; color:#e9edf4; }
   body.night-mode #mobileTileBar .mtile-split button:disabled{ opacity:.85; } /* v2.1-155 : Annuler / Rétablir inactifs restent proches des autres tuiles */
   body.night-mode #mobileTileBar .mtile.active{ background:#0E6FA8; color:#fff; }
-  body.night-mode #mobileTileBar .mtile .icon, body.night-mode #mobileTileBar .mtile-split .icon, body.night-mode .tb-icon .icon{ background:#eef1f6; border-radius:7px; padding:2px; box-sizing:content-box; }
+  body.night-mode #mobileTileBar .mtile .icon, body.night-mode #mobileTileBar .mtile-split .icon, body.night-mode .tb-icon .icon{ background:#eef1f6; border-radius:7px; padding:2px; box-sizing:border-box; }
   body.night-mode .tb-icon{ color:#e9edf4; }
   body.night-mode .tb-icon .tb-icon-label{ color:#e9edf4; }
   body.night-mode .tb-icon:hover{ background:#2a3243; }
@@ -662,7 +663,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-188</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-189</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -932,7 +933,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-188 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-189 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -7511,7 +7512,7 @@ const SHORT_ICON_LABELS = {
   'Déplacer cette page vers la gauche':'Page ←','Déplacer cette page vers la droite':'Page →',
   'Supprimer la page courante':'Suppr.','Nouveau projet':'Nouveau',
   'Orientation portrait':'Portrait','Orientation paysage':'Paysage','Zoom arrière':'Zoom −','Zoom avant':'Zoom +',
-  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Déplacement fin de la pastille':'Ajust. fin','Taille de tous les éléments d\'un poste':'Tailles','Contrôle des numéros':'Séries','Page récapitulative des postes':'Récap.','Mode d\'affichage : jour / nuit':'Jour','Ouvrir un projet':'Ouvrir',
+  "Ajuster à l'écran":'Ajuster','Enregistrer le projet':'Enregistrer','Mes documents':'Documents','Déplacement fin de la pastille':'Ajust. fin','Taille de tous les éléments d\'un poste':'Tailles','Contrôle des numéros':'Séries','Page récapitulative des postes':'Récap.','Mode d\'affichage : jour / nuit':'Jour','Ouvrir un projet':'Ouvrir JSON',
   'Importer un plan':'Importer','Découpe rectangulaire':'Découpe □','Découpe point par point':'Découpe pts','Dessin':'Dessin',
   'Outils image : pipette, pot de peinture, gomme, réglages':'Outils image','Pot de peinture intelligent':'Pot peinture',
   'Gomme carrée':'Gomme','Placement classique':'Classique','Placement déporté':'Déporté',

@@ -1580,4 +1580,11 @@ v2.1-188 — Retouche d'image : trait mixte clignotant, parfaitement fluide
   Cause : l'animation des pointillés (v2.1-187) redessinait toute la sélection (teinte + milliers de petits carrés) toutes les 140 ms : saccadé sur téléphone.
   Correctif : le trait est dessiné UNE seule fois sur deux calques (motif et motif inverse) ; une animation CSS (steps) les fait clignoter en alternance : plus aucun code
   par image. Pendant le glissement du curseur, la sélection est recalculée au plus une fois par image d'écran (requestAnimationFrame) à partir de pixels lus une seule fois.
+
+v2.1-189 — Icônes plus grandes (tuiles identiques) ; « Ouvrir JSON »
+  Demande : préciser « JSON » sur l'icône Ouvrir ; agrandir toutes les icônes sans changer la taille des tuiles.
+  Réalisation : libellé « Ouvrir JSON » (une entrée « Ouvrir » plus loin dans SHORT_ICON_LABELS écrasait la première : supprimée) ; icônes des tuiles du bandeau 21 -> jusqu'à 27 px,
+  annuler / rétablir 22 -> jusqu'à 26 px, icônes des tiroirs 22 -> jusqu'à 32 px (taille qui suit la largeur de l'écran, clamp) ; marges verticales réduites pour que les tuiles gardent
+  EXACTEMENT leurs dimensions (tuile 53 px, bouton de tiroir 54 px, tiroir 70 px : mesurées avant / après, téléphone et ordinateur) ; le fond blanc des icônes (mode nuit, bouton actif)
+  ne les agrandit plus (border-box).
 ```
