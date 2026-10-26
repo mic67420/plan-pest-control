@@ -73,6 +73,25 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       names.push((await dl).suggestedFilename());
     }
     ok(names.join('|')==='Plan test.pdf|Plan test.pptx|Plan test.png|Plan test.ppcx.json', 'exports : PDF, PPTX, PNG et .json au nom du document ('+names.join(', ')+')');
+    // 8 bis. Partage (v2.1-192) : menu d'envoi du téléphone simulé ; JSON, PDF, geste expiré, partage indisponible
+    {
+      await pg.evaluate(()=>{ window.__shared = []; window.__shareMode = 'ok'; navigator.canShare = ()=>window.__shareMode !== 'off'; navigator.share = async (d)=>{ if (window.__shareMode === 'expired'){ window.__shareMode = 'ok'; const e = new Error('x'); e.name = 'NotAllowedError'; throw e; } window.__shared.push({ files:d.files.map(f=>f.name+'|'+f.type), title:d.title, text:d.text }); }; setExportMode(true); });
+      await pg.evaluate(()=>document.getElementById('btnExportJSON').click()); await pg.waitForTimeout(600);
+      ok(await pg.evaluate(()=>window.__shared.length===1 && window.__shared[0].files[0]==='Plan test.ppcx.json|application/json' && window.__shared[0].title==='Plan test' && /Radical Pest Control/.test(window.__shared[0].text)), 'partage : le document JSON part par le menu d\'envoi, avec titre et message');
+      await pg.evaluate(()=>document.getElementById('btnExportPDF').click());
+      await pg.waitForFunction(()=>[...document.body.children].some(e=>e.style && e.style.zIndex==='950' && /Aperçu/.test(e.textContent)),null,{timeout:20000});
+      await pg.evaluate(()=>{ const c=[...document.body.children].filter(e=>e.style && e.style.zIndex==='950').pop(); [...c.querySelectorAll('button')].find(b=>b.textContent==='Exporter').click(); });
+      await pg.waitForFunction(()=>window.__shared.length===2,null,{timeout:20000});
+      ok(await pg.evaluate(()=>window.__shared[1].files.join()==='Plan test.pdf|application/pdf'), 'partage : le PDF part par le menu d\'envoi');
+      await pg.evaluate(()=>{ window.__shareMode = 'expired'; document.getElementById('btnExportJSON').click(); }); await pg.waitForTimeout(600);
+      ok(await pg.evaluate(()=>{ const b=document.getElementById('bubble'); return b.classList.contains('show') && /touchez ici/.test(b.textContent) && window.__shared.length===2; }), 'partage : geste expiré -> bulle « touchez ici pour l\'envoyer »');
+      await pg.evaluate(()=>document.getElementById('bubble').click()); await pg.waitForTimeout(400);
+      ok(await pg.evaluate(()=>window.__shared.length===3), 'partage : toucher la bulle envoie le document');
+      const dlp = pg.waitForEvent('download',{timeout:10000});
+      await pg.evaluate(()=>{ window.__shareMode = 'off'; document.getElementById('btnExportJSON').click(); });
+      ok((await dlp).suggestedFilename()==='Plan test.ppcx.json', 'partage indisponible : le fichier est téléchargé à la place');
+      await pg.evaluate(()=>{ setExportMode(false); hideBubble(); });
+    }
     // 9. Sauvegarde automatique légère (v2.1-105) : images à part, rechargement, ancien format
     const save = await pg.evaluate(async()=>{ scheduleAutoSave(); clearTimeout(autoSaveTimer); const t0=performance.now(); await doAutoSave(); const first=performance.now()-t0; scheduleAutoSave(); clearTimeout(autoSaveTimer); const t1=performance.now(); await doAutoSave(); const second=performance.now()-t1; const db=await openIDB(); const info=await new Promise(res=>{ const tx=db.transaction([IDB_STORE,IDB_IMG_STORE],'readonly'); const a=tx.objectStore(IDB_STORE).get(IDB_KEY); const k=tx.objectStore(IDB_IMG_STORE).getAllKeys(); tx.oncomplete=()=>res({ko:Math.round(JSON.stringify(a.result).length/1024),imgs:k.result.length,refs:!!a.result.imgRefs}); }); return Object.assign({first:Math.round(first),second:Math.round(second)}, info); });
     ok(save.refs && save.ko < 60 && save.imgs >= 1, 'sauvegarde auto : document léger ('+save.ko+' Ko), '+save.imgs+' image(s) à part, 2e sauvegarde en '+save.second+' ms');

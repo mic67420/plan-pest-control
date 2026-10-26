@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-191 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-192 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -351,6 +351,10 @@
     justify-content:flex-start; gap:2px; padding:5px 2px 0; height:53px; box-sizing:border-box; border-radius:9px;
     background:#F1F3F6; border:none; cursor:pointer; color:var(--ink); font-family:inherit;
   }
+  /* v2.1-192 : fenêtre d'export = Télécharger / Partager (menu d'envoi du téléphone : WhatsApp, mail…) */
+  #popExport .exp-mode{ display:flex; gap:6px; margin-bottom:8px; }
+  #popExport .exp-mode .pop-btn{ flex:1 1 0; justify-content:center; margin:0; text-align:center; font-weight:600; }
+  #popExport .exp-mode .pop-btn.active{ background:var(--accent); color:#fff; border-color:var(--accent); }
   /* v2.1-189 : icônes PLUS GRANDES sans changer la taille des tuiles (hauteur fixée à 53 px, marges réduites) ; la taille suit la largeur de l'écran, plafonnée à 27 px */
   body.mobile-mode #mobileTileBar .mtile .icon{ width:var(--ic-tile,clamp(22px,7.5vw,27px)); height:var(--ic-tile,clamp(22px,7.5vw,27px)); flex:none; }
   body.mobile-mode #mobileTileBar .mtile .lbl{
@@ -672,7 +676,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-191</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-192</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -734,10 +738,12 @@
     <div class="pop-wrap">
       <button class="tb-icon" id="btnExportMenu" title="Exporter"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="110.9 513.5 376.6 376.6"><path fill="#25284F" d="M162 753.8C152.6 753.8 143.1 754 133.7 753.8C128.6 753.8 124.7 750.9 127.9 745.7C140.5 724.8 152.8 703.8 165.4 682.9C167.1 680 168.2 679.1 171.7 679.0C171.7 679 172.9 679 172.9 679.0C223.2 679.3 273.5 679.1 323.7 679.2C358.9 679.2 394.1 678.6 429.2 679.0C432.3 679 433.5 679.7 435.1 682.4C447.1 703.2 459.1 723.9 471.3 744.6C471.9 745.7 472.8 747.1 472.9 748.4C473.4 753.8 467.6 753.8 464 753.8C455.2 753.7 446.4 753.6 437.7 753.7C437.6 782.6 438.1 811.5 438.1 840.5C438.1 845 435.7 846.5 431.2 846.5C428.2 846.6 425.2 846.5 422.2 846.4C337.6 846 253 846.7 168.5 846.4C163 846.4 162 843.7 161.9 838.7C161.9 838.7 161.9 835.7 161.9 835.7C161.7 808.4 161.6 781.1 162 753.8Z"/><path fill="#5584FE" d="M173.3 687.9L427.2 687.8L460.5 745.2L254.7 745.2L254.7 753.9L428.7 753.8L428.7 837.5L171.2 837.6L171.2 753.8L228.4 753.9L228.4 745.2L139.9 744.8L173.3 687.9Z"/><path fill="#25284F" d="M274 556.9L322.9 556.8L322.8 607.0L350.6 606.8C349.3 608.5 348 610 346.5 611.5C342.1 615.8 338.1 620.4 333.9 624.9C322.2 637.2 310.6 649.6 298.8 661.7L246.3 606.6L273.7 606.7L274 556.9Z"/><path fill="#FC3836" d="M283 565.3L313.8 565.5L313.8 615.2L329.6 615.3L298.6 648.2L267.6 615.2L283.1 615.4L283 565.3Z"/></svg></button>
       <div class="popover" id="popExport">
+        <div class="exp-mode" id="expMode"><button type="button" class="pop-btn active" id="expModeDl">Télécharger</button><button type="button" class="pop-btn" id="expModeShare">Partager…</button></div>
         <button class="pop-btn" id="btnExportPNG"><svg class="icon pop-ico" style="width:22px;height:22px" xmlns="http://www.w3.org/2000/svg" viewBox="31 854.2 114.4 114.4"><path fill="#25212D" d="M129.5 887.1C129.6 888.9 129.7 890.7 129.7 892.4C129.8 913.4 129.5 934.5 129.6 955.5C129.7 964.3 123.9 963.9 116.7 963.8C96.1 963.6 75.5 964 54.9 963.9C48.7 963.9 46.9 960.8 46.8 955.0C46.8 950.1 46.8 945.3 46.8 940.5C46.7 917 47.1 893.4 46.7 870C46.7 869.1 46.7 868.3 46.6 867.4C46.4 858.4 53.7 859.4 60.5 859.5C74 859.6 87.6 859.5 101.2 859.3C104.9 862.4 108 866.1 111.4 869.5C116.4 874.3 124.5 882.8 129.5 887.1Z"/><path fill="white" d="M126.2 890.2C126.3 911 126.3 933.6 126.2 954.2C126.1 958.2 125.1 960.3 121 960.4C120.9 960.4 120 960.4 120 960.4C99 960.3 77.9 960.7 56.9 960.4C51.9 960.3 50.3 960.2 50.3 955.0C50.2 925.7 50.2 896.4 50.3 867.2C50.3 866.4 50.4 865.7 50.5 864.9C50.9 862.8 56.1 863 57.4 863.0C71.3 862.8 85.2 862.8 99.1 863.0C99.2 870 99.1 877 99.1 884.0C99.1 888.7 100.5 890.2 105.4 890.2C112.4 890.2 119.3 890.3 126.2 890.2Z"/><path fill="#25212D" d="M108.2 905.0C112.8 905 114.1 905.3 114.1 909.9C114.1 919.2 114.2 928.5 114 937.7C114 940.2 113.8 943 110.7 943.2C110.7 943.3 109.7 943.2 109.7 943.2C95.3 943.1 80.9 943.4 66.4 943.2C59.9 943.1 60.6 939.9 60.7 933.7C60.7 925.5 60.6 917.3 60.6 909.2C60.6 908.9 60.6 908.5 60.7 908.2C61.5 905.1 64.6 905.1 67.2 905.1C80.9 905.1 94.5 905 108.2 905.0Z"/><path fill="#6C93FB" d="M63.9 908.2L111.1 908.3L111.1 939.7L87.1 914.0L63.9 938.9L63.9 908.2Z"/><path fill="#3962F5" d="M87.2 919.0L107.5 940.3L67.4 939.9L87.2 919.0Z"/><path fill="white" d="M102.5 865.8L123.6 886.5L102.6 886.5L102.5 865.8Z"/></svg>Exporter en PNG</button>
         <button class="pop-btn" id="btnExportJPEG"><svg class="icon pop-ico" style="width:22px;height:22px" xmlns="http://www.w3.org/2000/svg" viewBox="198.2 855.1 113.1 113.1"><path fill="#25212D" d="M297.1 887.3C297.1 889.2 297.2 891.2 297.1 893.2C297 913.8 297.3 934.4 297.1 955.0C297.1 961.3 294.9 963.7 288.7 963.8C279.2 963.9 269.7 963.7 260.2 963.7C247 963.7 233.7 964 220.4 963.9C213.4 963.9 212.2 960.2 212.2 954.0C212.1 944.2 212.2 934.4 212.2 924.7C212.2 905.8 212.1 886.9 212.2 867.9C212.3 861.6 214.8 859.3 221.2 859.3C237.1 859.4 252.9 859.4 268.8 859.4L297.1 887.3Z"/><path fill="white" d="M293.5 890.2C293.6 891.2 293.6 892.2 293.6 893.2C293.9 913.6 293.7 934.1 293.5 954.5C293.5 959.5 292.5 960.4 287.7 960.5C287.7 960.5 285.5 960.5 285.5 960.5C264.2 960.4 242.9 960.5 221.7 960.4C218.2 960.3 215.7 959.6 215.6 955.7C215.4 941.6 215.6 927.5 215.6 913.5C215.6 898 215.4 882.6 215.6 867.2C215.7 863.7 217.9 862.8 221.2 862.7C221.2 862.7 222.4 862.7 222.4 862.7C237.1 862.8 251.7 862.7 266.3 862.9C266.5 869.9 266.3 876.9 266.4 884.0C266.5 889.7 268.6 890.2 273.9 890.2C280.5 890.2 287 890.1 293.5 890.2Z"/><path fill="#25212D" d="M266.5 938.2C261.7 932.3 257 926.4 252.4 920.5C252.4 920.5 251.3 919 251.3 919.0C248.8 915.5 250.7 916.5 250.4 914.2C250.2 912.3 250.3 910.6 250.7 908.7C251.1 906.4 256.4 906.6 257.9 906.6C265 906.6 272 906.6 279 906.6C283.1 906.5 284 907.7 284.1 911.7C284.1 919.3 284.1 926.9 284 934.4C284 935.7 284 937 283.9 938.2C283.8 940.9 283 941.6 280.5 941.6C262.4 941.5 244.3 941.3 226.2 941.4C222.8 941.4 223.3 939.3 224.5 937.0C224.5 937 224.9 936.2 224.9 936.2C229 928.3 232.8 920.5 236.7 912.5C236.7 912.5 237.1 911.7 237.1 911.7C240.5 905.4 247.6 910.6 247.6 914.7C247.6 918.9 242.7 921 239.6 918.3C238.6 917.5 238.4 916.8 237.7 918.1C234.4 924.7 230.9 931.3 227.9 938.0L266.5 938.2Z"/><path fill="white" d="M259.6 924.6C258.6 923.4 257.7 922.1 256.7 920.8C256.5 920.6 255.3 919.2 255.6 918.7C255.9 918.3 258.5 918.6 260.2 916.6C262.9 913.5 260.3 911.6 260.5 910.2C260.7 909.5 264.9 909.6 265.2 909.6C270.4 909.5 275.6 909.6 280.8 909.6L280.9 935.4C277.7 930.6 274.2 925.9 270.5 921.4C264.6 914.3 264.4 917.7 259.6 924.6Z"/><path fill="#3962F5" d="M266.1 921.2L278.8 938.1L270.4 938.2L261.9 927.6L266.1 921.2Z"/><path fill="white" d="M256.2 910.2C257.4 910.3 258.3 911.2 258.4 912.4C258.5 913.5 257.8 914.6 256.8 915.0C255.8 915.3 254.7 915 254.1 914.2C253.4 913.5 253.3 912.4 253.8 911.5C254.2 910.6 255.2 910.1 256.2 910.2Z"/><path fill="white" d="M242.2 912.2C243.2 912.2 244.1 913 244.2 914.0C244.3 915.1 243.7 916 242.7 916.3C241.9 916.5 241 916.3 240.5 915.6C239.9 915 239.8 914.1 240.2 913.3C240.6 912.6 241.4 912.1 242.2 912.2Z"/><path fill="white" d="M269.8 865.4L290.9 886.5L270 886.4L269.8 865.4Z"/></svg>Exporter en JPEG</button>
         <button class="pop-btn" id="btnExportPDF"><svg class="icon pop-ico" style="width:22px;height:22px" xmlns="http://www.w3.org/2000/svg" viewBox="369.5 855.3 113 113"><path fill="#25212D" d="M386.3 917.5C386.4 910.1 386.4 902.6 386.3 895.2C386.3 886.4 386.1 877.5 386.2 868.7C386.3 862.3 388.2 859.4 394.9 859.4C409 859.5 423 859.5 437.1 859.4L464.9 887.5L465 917.5L474.5 917.6L474.4 944.7L465.2 944.8C465.2 948.3 465.3 951.9 465.2 955.5C465 962.1 462.8 963.8 456.7 963.8C447.8 963.8 438.9 963.8 430 963.7C418 963.7 406.1 964 394.2 963.8C387.5 963.7 385.9 959.7 385.9 953.7C385.9 950.7 385.9 947.7 385.9 944.7L377.5 944.6L377.3 917.6L386.3 917.5Z"/><path fill="white" d="M389.6 917.5C389.3 901.6 389.5 883.7 389.6 867.7C389.7 863.2 391.9 862.9 396.2 862.8C408.7 862.6 421.8 862.6 434.3 862.9C434.7 870.1 434.4 877.4 434.5 884.7C434.6 890.8 438.6 890.2 444 890.2C449.8 890.2 455.6 890.3 461.4 890.1L461.5 917.5L389.6 917.5Z"/><path fill="#F9271E" d="M380.7 920.8L471 920.8L471 941.2L381 941.4L380.7 920.8Z"/><path fill="white" d="M389.5 944.7L461.6 944.6C461.6 948.2 461.7 951.7 461.6 955.2C461.6 959.5 460.8 960.2 456.5 960.3C436.3 960.6 416.1 960.2 395.9 960.3C391.2 960.3 389.5 959.5 389.5 954.5C389.4 951.2 389.5 947.9 389.5 944.7Z"/><path fill="white" d="M438 865.3L459 886.5L438.2 886.4L438 865.3Z"/></svg>Exporter en PDF</button>
         <button class="pop-btn" id="btnExportPPTX"><svg class="icon pop-ico" style="width:22px;height:22px" xmlns="http://www.w3.org/2000/svg" viewBox="539.3 855.1 112.9 112.9"><path fill="#25212D" d="M636.7 887.1C636.7 887.2 636.7 888.9 636.7 888.9C637 911 636.6 933.1 636.7 955.2C636.8 961.5 634.5 963.7 628 963.8C627.9 963.8 626.5 963.8 626.5 963.8C605.1 963.7 583.8 963.6 562.4 963.7C555.8 963.8 554.4 960.8 554.4 955C554.4 954.9 554.4 952.5 554.4 952.5C554.7 924.9 554.3 897.3 554.3 869.7C554.4 863 555.6 859.5 562.7 859.4C562.7 859.4 564.2 859.4 564.2 859.4C579.1 859.5 594.1 859.2 609.1 859.5C616.6 867.9 624.2 874.4 632.7 882.8C634.1 884.2 635.5 885.6 636.7 887.1Z"/><path fill="white" d="M633.3 890.2C633.4 911.9 633.4 933.7 633.4 955.5C633.4 960.4 631.8 960.5 627.2 960.5C627.2 960.5 625.2 960.5 625.2 960.5C604.4 960.4 583.7 960.4 563 960.3C558.4 960.3 558 959.3 558 954.7C558 954.7 558 950.5 558 950.5C557.9 923.3 557.4 896.1 557.7 868.9C557.8 863.7 559.4 862.6 564.7 862.6C578.5 862.7 592.2 862.6 606 862.7C606 869.6 605.8 876.4 605.9 883.2C606 888.6 607.6 890.1 612.9 890.1C619.7 890.1 626.5 890.1 633.3 890.2Z"/><path fill="#25212D" d="M571.5 901.0C572.6 900.8 573.6 900.8 574.7 900.8C582.4 900.8 590 900.8 597.7 900.8C605 900.8 612.3 900.6 619.5 901.0C619.6 902.1 619.7 903.1 619.8 904.2C620 912.7 619.7 921.2 619.8 929.7C619.8 934.2 619.1 934.5 614.5 934.5C609.4 934.6 604.3 934.4 599.3 934.7C600.5 936.6 601.8 938.5 603.1 940.4C603.9 941.7 605.5 943.8 602.9 944.2C601.2 944.5 598.3 939.5 597.5 938.4C597.5 939.6 597.5 940.8 597.5 941.9C597.4 943 598 946.7 596.7 947.8C594.5 949.6 594 946.2 594 945.0C593.9 942.7 594 940.5 594 938.3C593.1 939.5 592.3 940.8 591.4 942.0C590.7 943 589.6 944.9 588.1 944.3C586.4 943.6 586.1 942.8 587.2 941.4C589 939.2 590.8 936.9 592.5 934.6C586.8 934.6 581 934.6 575.2 934.6C571.8 934.6 570.9 934 570.9 930.5C570.9 923.5 570.5 908.1 571.5 901.0Z"/><path fill="#F89426" d="M574.3 904.2L616.7 904.2L616.6 931.3L574.3 931.4L574.3 904.2Z"/><path fill="white" d="M609.5 865.2L631 886.4L609.5 886.4L609.5 865.2Z"/></svg>Exporter en PPTX</button>
+        <button class="pop-btn" id="btnExportJSON"><svg class="icon pop-ico" style="width:22px;height:22px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="#fff" stroke="#000" stroke-width="1.8"/><path d="M9.5 7.5c-1.5 0-1.5 1-1.5 2v1c0 .8-.5 1.5-1.5 1.5.9 0 1.5.7 1.5 1.5v1c0 1 0 2 1.5 2M14.5 7.5c1.5 0 1.5 1 1.5 2v1c0 .8.5 1.5 1.5 1.5-1 0-1.5.7-1.5 1.5v1c0 1 0 2-1.5 2" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg>Document JSON (modifiable)</button>
       </div>
     </div>
   </div>
@@ -942,7 +948,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-191 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-192 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -7140,20 +7146,60 @@ async function ensureDocName(){
   if (n){ docName = n; scheduleAutoSave(); }
   return n;
 }
-document.getElementById('btnSave').addEventListener('click', async ()=>{
+// v2.1-192 : PARTAGE. Chaque export peut être téléchargé OU envoyé par le menu d'envoi du téléphone (Web Share : WhatsApp, mail…) ; le mode se règle en haut de
+// la fenêtre d'export. navigator.share exige un geste récent de l'utilisateur : si la préparation (capture de toutes les pages) a pris trop de temps, le navigateur
+// refuse (NotAllowedError) : une bulle « touchez ici pour envoyer » redonne ce geste. Sans partage possible (ordinateur, Firefox…), le fichier est téléchargé.
+let exportShare = false;
+function setExportMode(share){
+  exportShare = share;
+  document.getElementById('expModeDl').classList.toggle('active', !share);
+  document.getElementById('expModeShare').classList.toggle('active', share);
+}
+document.getElementById('expModeDl').addEventListener('click', (e)=>{ e.stopPropagation(); setExportMode(false); });
+document.getElementById('expModeShare').addEventListener('click', (e)=>{ e.stopPropagation(); setExportMode(true); });
+function downloadBlob(blob, name){
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = name; a.click(); setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+function dataUrlToBlob(u){
+  const m = /^data:([^;,]+)?(;base64)?,(.*)$/.exec(u), bin = atob(m[3]), arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: m[1] || 'application/octet-stream' });
+}
+// files = [{blob, name}] ; share = vrai si l'utilisateur a choisi « Partager ». Retourne 'shared' | 'downloaded' | 'cancelled' | 'pending'.
+async function deliverFiles(files, share, base){
+  if (share){
+    const fs = files.map(f=>new File([f.blob], f.name, { type: f.blob.type }));
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: fs })){
+      const data = { files: fs, title: base, text: 'Plan de lutte antiparasitaire – Radical Pest Control – ' + new Date().toLocaleDateString('fr-FR') };
+      try{ await navigator.share(data); return 'shared'; }
+      catch(err){
+        if (err && err.name === 'AbortError') return 'cancelled'; // fenêtre d'envoi fermée par l'utilisateur
+        if (err && err.name === 'NotAllowedError'){ // préparation trop longue : le geste est expiré, on en redemande un
+          showBubble('Document prêt : touchez ici pour l\'envoyer', ()=>{ hideBubble(); navigator.share(data).catch(()=>{}); });
+          return 'pending';
+        }
+      }
+    }
+    toast('Partage indisponible ici : fichier téléchargé.');
+  }
+  for (const f of files) downloadBlob(f.blob, f.name);
+  return 'downloaded';
+}
+// Enregistrement du document (.ppcx.json) : téléchargé, ou partagé (share = vrai). Le point « fichier à jour » ne s'efface que si le fichier est réellement parti.
+async function exportJSON(share){
   const base = await ensureDocName(); if (!base) return;
   const doc = { docVersion:2, pages, currentPageIndex, docName };
   const blob = new Blob([JSON.stringify(doc, null, 0)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = base+'.ppcx.json';
-  a.click();
-  URL.revokeObjectURL(url);
+  const r = await deliverFiles([{ blob, name: base+'.ppcx.json' }], share, base);
+  if (r === 'cancelled' || r === 'pending') return;
   changesSinceFile = 0; fileReminded = false;
   try{ localStorage.setItem('ppc_filesave_'+docId, String(Date.now())); }catch(e){}
   updateFileDot();
-  toast('Projet enregistré ('+pages.length+' page'+(pages.length>1?'s':'')+').');
-});
+  toast(r === 'shared' ? 'Document envoyé.' : 'Projet enregistré ('+pages.length+' page'+(pages.length>1?'s':'')+').');
+}
+document.getElementById('btnSave').addEventListener('click', ()=>exportJSON(false));
+document.getElementById('btnExportJSON').addEventListener('click', ()=>{ closeAllPopovers(); exportJSON(exportShare); });
 // Met en place les `pages` / `currentPageIndex` déjà posés (fichier ouvert ou document de la liste) : migration, modèle,
 // canevas des plans, historique neuf, zoom ajusté (fitZoom : voir le commentaire historique du .json).
 async function loadDocIntoApp(name, id){
@@ -7400,20 +7446,23 @@ document.getElementById('btnPrint').addEventListener('click', async ()=>{
   };
   frame.srcdoc = html;
 });
-document.getElementById('btnExportPNG').addEventListener('click', async ()=>{
+// Images (PNG / JPEG) : une page = un fichier ; plusieurs pages = un .zip au téléchargement, mais des fichiers séparés au partage (les applications d'envoi acceptent plusieurs pièces jointes).
+async function exportImages(mime, quality, ext, label){
   closeAllPopovers();
   const base = await ensureDocName(); if (!base) return;
-  const images = await captureAllPagesAsImages('image/png'); if (!images) return;
-  await downloadImagesAsFileOrZip(images, 'png', base);
-  toast((images.length>1 ? images.length+' pages exportées (.zip).' : 'PNG exporté.'));
-});
-document.getElementById('btnExportJPEG').addEventListener('click', async ()=>{
-  closeAllPopovers();
-  const base = await ensureDocName(); if (!base) return;
-  const images = await captureAllPagesAsImages('image/jpeg', 0.92); if (!images) return;
-  await downloadImagesAsFileOrZip(images, 'jpg', base);
-  toast((images.length>1 ? images.length+' pages exportées (.zip).' : 'JPEG exporté.'));
-});
+  const images = await captureAllPagesAsImages(mime, quality); if (!images) return;
+  if (exportShare){
+    const files = images.map((im, i)=>({ blob: dataUrlToBlob(im.dataUrl), name: images.length > 1 ? base+'-page'+(i+1)+'.'+ext : base+'.'+ext }));
+    const r = await deliverFiles(files, true, base);
+    if (r === 'shared') toast(label+' envoyé.');
+    else if (r === 'downloaded') toast(images.length+' fichier'+(images.length>1?'s':'')+' téléchargé'+(images.length>1?'s':'')+'.');
+    return;
+  }
+  await downloadImagesAsFileOrZip(images, ext, base);
+  toast((images.length>1 ? images.length+' pages exportées (.zip).' : label+' exporté.'));
+}
+document.getElementById('btnExportPNG').addEventListener('click', ()=>exportImages('image/png', undefined, 'png', 'PNG'));
+document.getElementById('btnExportJPEG').addEventListener('click', ()=>exportImages('image/jpeg', 0.92, 'jpg', 'JPEG'));
 document.getElementById('btnExportPDF').addEventListener('click', async ()=>{
   closeAllPopovers();
   const base = await ensureDocName(); if (!base) return;
@@ -7427,6 +7476,11 @@ document.getElementById('btnExportPDF').addEventListener('click', async ()=>{
     else pdf.addPage('a4', orient);
     pdf.addImage(img.dataUrl, 'JPEG', 0,0, w, h);
   });
+  if (exportShare){
+    const r = await deliverFiles([{ blob: pdf.output('blob'), name: base+'.pdf' }], true, base);
+    if (r === 'shared') toast('PDF envoyé.'); else if (r === 'downloaded') toast('PDF téléchargé.');
+    return;
+  }
   pdf.save(base+'.pdf');
   toast('PDF exporté ('+images.length+' page'+(images.length>1?'s':'')+').');
 });
@@ -7452,6 +7506,12 @@ document.getElementById('btnExportPPTX').addEventListener('click', async ()=>{
     const w = pageW*scale, h = pageH*scale;
     slide.addImage({data:img.dataUrl, x:(layoutW-w)/2, y:(layoutH-h)/2, w, h});
   });
+  if (exportShare){
+    const blob = await pptx.write({ outputType:'blob' });
+    const r = await deliverFiles([{ blob, name: base+'.pptx' }], true, base);
+    if (r === 'shared') toast('PPTX envoyé.'); else if (r === 'downloaded') toast('PPTX téléchargé.');
+    return;
+  }
   pptx.writeFile({fileName:base+'.pptx'});
   toast('PPTX exporté ('+images.length+' page'+(images.length>1?'s':'')+').');
 });

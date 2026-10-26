@@ -1598,4 +1598,12 @@ v2.1-191 — Tuiles du jour : mêmes liserés de couleur que la nuit
   Cause : en mode jour, la règle « border:1px solid #BFC7D4 » (sélecteur plus précis) écrasait les liserés de couleur propres à chaque tuile : ils restaient tous gris-bleu ;
   seule la nuit les affichait.
   Correctif : règles de liseré recopiées avec le même niveau de précision pour le jour (Page gris clair #8A94AA comme la nuit, Vue, Fichier, Plan, Pastille, Texte, Annuler / Rétablir).
+
+v2.1-192 — Partager (WhatsApp, mail…) depuis la fenêtre d'export
+  Demande de Mic : envoyer directement les exports par mail / WhatsApp, tous les formats enregistrés, bouton dans la fenêtre d'export, titre + courte phrase préremplis.
+  Réalisation : en haut de la fenêtre d'export, bascule « Télécharger | Partager… » ; en mode Partager, PNG / JPEG (une pièce jointe par page), PDF, PPTX et le nouveau format
+  « Document JSON (modifiable) » passent par le menu d'envoi du téléphone (Web Share, fichiers) avec le nom du document en titre et « Plan de lutte antiparasitaire – Radical Pest Control – date ».
+  navigator.share exige un geste récent : si la préparation a été longue (NotAllowedError), une bulle « touchez ici pour l'envoyer » redonne le geste ; menu d'envoi fermé = rien ne se passe ;
+  partage impossible (ordinateur sans Web Share, Firefox) = téléchargement habituel. Le point orange « fichier à jour » ne s'efface que si le JSON est réellement parti.
+  Le bouton Enregistrer du tiroir Fichier reste un téléchargement. exportJSON / deliverFiles / exportImages factorisent les exports.
 ```
