@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-190 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-191 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -578,6 +578,15 @@
   body #mobileTileBar .mtile[data-tile="pastille"]{ border-bottom-color:#D6493E; }
   body #mobileTileBar .mtile[data-tile="texte"]{ border-bottom-color:#E8A83C; }
   body #mobileTileBar #mtileUndo, body #mobileTileBar #mtileRedo{ border-bottom-color:#2E9E6B; } /* v2.1-154 : liseré de couleur aussi pour Annuler / Rétablir */
+  /* v2.1-191 : en mode JOUR les liserés de couleur étaient écrasés par le gris de la règle ci-dessus (même sélecteur plus précis) : les tuiles du jour
+     reprennent maintenant EXACTEMENT les liserés de la nuit (Page gris clair, Vue turquoise, Fichier bleu, Plan violet, Pastille rouge, Texte ambre, Annuler / Rétablir vert). */
+  body.mobile-mode:not(.night-mode) #mobileTileBar .mtile[data-tile="page"]{ border-bottom-color:#8A94AA; }
+  body.mobile-mode:not(.night-mode) #mobileTileBar .mtile[data-tile="vue"]{ border-bottom-color:#2AA6B0; }
+  body.mobile-mode:not(.night-mode) #mobileTileBar .mtile[data-tile="historique"]{ border-bottom-color:#0E6FA8; }
+  body.mobile-mode:not(.night-mode) #mobileTileBar .mtile[data-tile="plan"]{ border-bottom-color:#7A5AD8; }
+  body.mobile-mode:not(.night-mode) #mobileTileBar .mtile[data-tile="pastille"]{ border-bottom-color:#D6493E; }
+  body.mobile-mode:not(.night-mode) #mobileTileBar .mtile[data-tile="texte"]{ border-bottom-color:#E8A83C; }
+  body.mobile-mode:not(.night-mode) #mobileTileBar #mtileUndo, body.mobile-mode:not(.night-mode) #mobileTileBar #mtileRedo{ border-bottom-color:#2E9E6B; }
   body:not(.night-mode) #mobileTileBar .mtile.active{ background:var(--accent); }
   /* v2.1-142 : bouton d'affichage à 3 états (Jour / Soleil / Nuit) : seul le dessin du mode actif est visible */
   #btnSun .th-night{ display:none; }
@@ -663,7 +672,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-190</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-191</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -933,7 +942,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-190 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-191 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip

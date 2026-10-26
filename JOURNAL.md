@@ -1593,4 +1593,9 @@ v2.1-190 — Icônes de nouveau nettes
   elle tombait à un demi-pixel d'écran (y = 44,5 px au lieu de 48 pile). Une icône vectorielle posée entre deux pixels est redessinée floue.
   Correctif : tailles calculées en JS (snapIconSizes) en nombre PAIR de pixels physiques d'écran (variables --ic-tile / --ic-undo / --ic-drawer, recalculées au redimensionnement) ;
   icône posée depuis le haut de la tuile (padding fixe) au lieu d'être centrée : position verticale entière. Dimensions des tuiles inchangées.
+
+v2.1-191 — Tuiles du jour : mêmes liserés de couleur que la nuit
+  Cause : en mode jour, la règle « border:1px solid #BFC7D4 » (sélecteur plus précis) écrasait les liserés de couleur propres à chaque tuile : ils restaient tous gris-bleu ;
+  seule la nuit les affichait.
+  Correctif : règles de liseré recopiées avec le même niveau de précision pour le jour (Page gris clair #8A94AA comme la nuit, Vue, Fichier, Plan, Pastille, Texte, Annuler / Rétablir).
 ```
