@@ -1587,4 +1587,10 @@ v2.1-189 — Icônes plus grandes (tuiles identiques) ; « Ouvrir JSON »
   annuler / rétablir 22 -> jusqu'à 26 px, icônes des tiroirs 22 -> jusqu'à 32 px (taille qui suit la largeur de l'écran, clamp) ; marges verticales réduites pour que les tuiles gardent
   EXACTEMENT leurs dimensions (tuile 53 px, bouton de tiroir 54 px, tiroir 70 px : mesurées avant / après, téléphone et ordinateur) ; le fond blanc des icônes (mode nuit, bouton actif)
   ne les agrandit plus (border-box).
+
+v2.1-190 — Icônes de nouveau nettes
+  Cause : en v2.1-189 la taille des icônes venait d'une valeur relative à la largeur de l'écran (donc quelconque, ex. 26,39 px) et l'icône était centrée verticalement dans sa tuile :
+  elle tombait à un demi-pixel d'écran (y = 44,5 px au lieu de 48 pile). Une icône vectorielle posée entre deux pixels est redessinée floue.
+  Correctif : tailles calculées en JS (snapIconSizes) en nombre PAIR de pixels physiques d'écran (variables --ic-tile / --ic-undo / --ic-drawer, recalculées au redimensionnement) ;
+  icône posée depuis le haut de la tuile (padding fixe) au lieu d'être centrée : position verticale entière. Dimensions des tuiles inchangées.
 ```

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-189 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-190 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -348,11 +348,11 @@
   }
   body.mobile-mode #mobileTileBar .mtile{
     flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center;
-    justify-content:center; gap:2px; padding:3px 2px 3px; height:53px; box-sizing:border-box; border-radius:9px;
+    justify-content:flex-start; gap:2px; padding:5px 2px 0; height:53px; box-sizing:border-box; border-radius:9px;
     background:#F1F3F6; border:none; cursor:pointer; color:var(--ink); font-family:inherit;
   }
   /* v2.1-189 : icônes PLUS GRANDES sans changer la taille des tuiles (hauteur fixée à 53 px, marges réduites) ; la taille suit la largeur de l'écran, plafonnée à 27 px */
-  body.mobile-mode #mobileTileBar .mtile .icon{ width:clamp(22px,7.5vw,27px); height:clamp(22px,7.5vw,27px); }
+  body.mobile-mode #mobileTileBar .mtile .icon{ width:var(--ic-tile,clamp(22px,7.5vw,27px)); height:var(--ic-tile,clamp(22px,7.5vw,27px)); flex:none; }
   body.mobile-mode #mobileTileBar .mtile .lbl{
     font-size:10px; font-weight:600; white-space:nowrap; overflow:hidden;
     text-overflow:ellipsis; max-width:100%;
@@ -363,7 +363,7 @@
     flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:center; padding:7px 0 6px;
     background:#F1F3F6; border:none; border-radius:9px; cursor:pointer; color:var(--ink);
   }
-  body.mobile-mode #mobileTileBar .mtile-split button .icon{ width:clamp(20px,7vw,26px); height:clamp(20px,7vw,26px); }
+  body.mobile-mode #mobileTileBar .mtile-split button .icon{ width:var(--ic-undo,clamp(20px,7vw,26px)); height:var(--ic-undo,clamp(20px,7vw,26px)); }
   body.mobile-mode #mobileTileBar .mtile-split button:active{ background:var(--accent-soft); }
   body.mobile-mode #mobileTileBar .mtile-split button:disabled{ opacity:.55; cursor:default; } /* v2.1-167 : inactif mais lisible (.35 -> .55) */
   /* "en cours d'utilisation" : soit le tiroir de cette tuile est ouvert, soit (si aucun
@@ -393,14 +393,14 @@
   body.mobile-mode .popover{ background:rgba(255,255,255,var(--drawer-alpha,1)); }
   body.mobile-mode .tb-icon{
     height:auto; min-height:54px; width:64px; min-width:64px; font-size:22px; border-radius:10px;
-    flex-direction:column; gap:3px; padding:3px 2px 3px; box-sizing:border-box;
+    flex-direction:column; justify-content:flex-start; gap:3px; padding:4px 2px 3px; box-sizing:border-box;
   }
   /* v2.1-92 : UNE seule ligne de texte sous l'icône, boutons de taille identique dans tous les tiroirs. */
   body.mobile-mode .tb-icon .tb-icon-label{
     font-size:9.5px; font-weight:600; line-height:1.15; text-align:center; color:inherit;
     max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
-  body.mobile-mode .tb-icon .icon{width:clamp(24px,8.6vw,32px);height:clamp(24px,8.6vw,32px);} /* v2.1-189 : 22 -> jusqu'à 32 px ; bouton inchangé (min-height 54 px) */
+  body.mobile-mode .tb-icon .icon{width:var(--ic-drawer,clamp(24px,8.6vw,32px));height:var(--ic-drawer,clamp(24px,8.6vw,32px));flex:none;} /* v2.1-189 : 22 -> jusqu'à 32 px ; bouton inchangé (min-height 54 px) */
   /* v2.1-139 : cadenas à deux dessins (fermé / ouvert) : la classe is-open du bouton choisit lequel s'affiche */
   .pop-btn .pop-ico{display:inline-block;vertical-align:middle;margin-right:10px;}
   .pop-tool-btn .icon{flex:none;}
@@ -663,7 +663,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-189</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-190</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -933,7 +933,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-189 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-190 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -6937,6 +6937,20 @@ document.getElementById('btnGrid').addEventListener('click', ()=>{
 // plutôt que la largeur : un iPad ou un téléphone en mode « ordinateur » restent tactiles. « desk » = souris ET écran >= 700 px.
 const deskMQ = window.matchMedia('(hover: hover) and (pointer: fine)');
 const IS_MAC = /Mac/i.test((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '') && !(navigator.maxTouchPoints > 0);
+// v2.1-190 : icônes NETTES. Une icône dont la taille ou la position tombe entre deux pixels d'écran est floue (v2.1-189 : taille issue de « vw » et
+// centrage vertical = demi-pixel). On calcule donc les tailles en nombre PAIR de pixels d'écran (valeurs physiques entières, centrage sans reste) ;
+// la position verticale est fixée par le haut de la tuile (CSS). Recalculé au redimensionnement / changement d'orientation.
+function snapIconSizes(){
+  const dpr = window.devicePixelRatio || 1, vw = window.innerWidth / 100;
+  const snap = (v)=>Math.max(2, Math.floor(v*dpr/2)*2) / dpr; // pair en pixels physiques
+  const clamp = (lo, v, hi)=>Math.max(lo, Math.min(hi, v));
+  const st = document.documentElement.style;
+  st.setProperty('--ic-tile', snap(clamp(22, 7.5*vw, 27)) + 'px');
+  st.setProperty('--ic-undo', snap(clamp(20, 7*vw, 26)) + 'px');
+  st.setProperty('--ic-drawer', snap(clamp(24, 8.6*vw, 32)) + 'px');
+}
+snapIconSizes();
+window.addEventListener('resize', snapIconSizes);
 function applyDeviceClass(){
   document.body.classList.toggle('desk', deskMQ.matches && window.innerWidth >= 700);
   if (typeof applyRenderRatio === 'function' && typeof planLayer !== 'undefined') applyRenderRatio(); // le plancher dépend de « desk »
