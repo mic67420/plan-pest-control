@@ -1563,4 +1563,9 @@ v2.1-185 — Retouche d'image : icône « Retouche » à la place du texte « Ap
   (2) le curseur Tolérance ne faisait rien tant qu'on ne retouchait pas le fond (la valeur n'était lue qu'au toucher suivant) : il paraissait en panne.
   Correctif : pour une image, le texte disparaît et l'icône baguette + « Retouche » prend sa place (visible seulement quand le poste a une image) ;
   dans la fenêtre de retouche, déplacer le curseur (ou cocher « Toute l'image ») retraite en direct le dernier point touché à partir de l'image d'avant.
+
+v2.1-186 — Baguette magique : on voit enfin ce qui est effacé
+  Cause : le fond de la fenêtre de retouche était un damier gris / blanc, identique au faux damier enregistré dans l'image (arbre, bateau) : effacer le faux damier
+  ne changeait rien à l'écran, la tolérance semblait sans effet (le curseur, lui, fonctionnait : vérifié au doigt et à la souris).
+  Correctif : zone effacée = damier ROSE bien distinct ; compteur « effacé xx % » mis à jour à chaque retouche et à chaque déplacement du curseur.
 ```

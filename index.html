@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-185 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-186 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -136,7 +136,7 @@
   #typeImgEditor{ position:fixed; inset:0; z-index:1200; background:rgba(15,20,30,.6); display:flex; align-items:center; justify-content:center; padding:8px; box-sizing:border-box; }
   #typeImgEditor .tie-card{ background:#fff; color:#1c2230; border-radius:14px; width:min(460px,100%); max-height:100%; overflow:auto; padding:12px; box-sizing:border-box; display:flex; flex-direction:column; gap:8px; }
   #typeImgEditor .tie-title{ font-weight:700; font-size:15px; } #typeImgEditor .tie-title span{ display:block; font-weight:500; font-size:12px; color:#5c6478; }
-  #typeImgEditor .tie-view{ overflow:auto; max-height:48vh; border:1px solid #c9ced8; border-radius:8px; background:repeating-conic-gradient(#d9dde4 0 25%, #fff 0 50%) 0 0 / 16px 16px; }
+  #typeImgEditor .tie-view{ overflow:auto; max-height:48vh; border:1px solid #c9ced8; border-radius:8px; background:repeating-conic-gradient(#ff7ac8 0 25%, #ffd1ea 0 50%) 0 0 / 16px 16px; } /* v2.1-186 : fond ROSE (et non gris) : le faux damier gris / blanc d'une image se confondait avec lui, on ne voyait pas ce qui était effacé */
   #typeImgEditor .tie-cv{ display:block; margin:0 auto; image-rendering:pixelated; cursor:crosshair; }
   #typeImgEditor .tie-row{ display:flex; align-items:center; gap:10px; font-size:13px; } #typeImgEditor .tie-row input[type=range]{ flex:1 1 auto; height:30px; accent-color:var(--accent); }
   #typeImgEditor .tie-chk{ display:flex; align-items:center; gap:8px; } #typeImgEditor .tie-chk input{ width:20px; height:20px; }
@@ -658,7 +658,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-185</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-186</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -928,7 +928,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-185 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-186 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -6005,9 +6005,9 @@ async function applyTypeImageFile(file){
 function openTypeImageEditor(){
   if (!newTypeImage || document.getElementById('typeImgEditor')) return;
   const ov = document.createElement('div'); ov.id = 'typeImgEditor';
-  ov.innerHTML = `<div class="tie-card"><div class="tie-title">Retoucher l'image <span>Touchez le fond à effacer (le damier = transparent)</span></div>
+  ov.innerHTML = `<div class="tie-card"><div class="tie-title">Retoucher l'image <span>Touchez le fond à effacer : ce qui est effacé devient rose</span></div>
     <div class="tie-view"><canvas class="tie-cv"></canvas></div>
-    <div class="tie-row"><label>Tolérance <b class="tie-tolv">30</b></label><input type="range" class="tie-tol" min="0" max="100" value="30"></div>
+    <div class="tie-row"><label>Tolérance <b class="tie-tolv">30</b> · effacé <b class="tie-pct">0 %</b></label><input type="range" class="tie-tol" min="0" max="100" value="30"></div>
     <div class="tie-row"><label class="tie-chk"><input type="checkbox" class="tie-all"> Toute l'image (pas seulement la zone touchée)</label></div>
     <div class="tie-row tie-btns"><button type="button" class="tie-zm">Zoom −</button><button type="button" class="tie-zp">Zoom +</button><button type="button" class="tie-undo" disabled>Annuler</button><button type="button" class="tie-reset" disabled>Recommencer</button></div>
     <div class="tie-row tie-btns"><button type="button" class="tie-close">Fermer</button><button type="button" class="tie-ok">✓ Valider</button></div></div>`;
@@ -6016,7 +6016,8 @@ function openTypeImageEditor(){
   document.body.appendChild(ov);
   const $ = q=>ov.querySelector(q), cv = $('.tie-cv'), cx = cv.getContext('2d', { willReadFrequently:true });
   let hist = [], scale = 1, w = 0, h = 0;
-  const upd = ()=>{ cv.style.width = (w*scale)+'px'; cv.style.height = (h*scale)+'px'; $('.tie-undo').disabled = hist.length < 2; $('.tie-reset').disabled = hist.length < 2; };
+  const pct = ()=>{ const d = cx.getImageData(0, 0, w, h).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] < 8) n++; $('.tie-pct').textContent = Math.round(100*n/(w*h)) + ' %'; };
+  const upd = ()=>{ cv.style.width = (w*scale)+'px'; cv.style.height = (h*scale)+'px'; if (w) pct(); $('.tie-undo').disabled = hist.length < 2; $('.tie-reset').disabled = hist.length < 2; };
   const snap = ()=>{ hist.push(cx.getImageData(0, 0, w, h)); if (hist.length > 13){ hist.splice(1, 1); } upd(); };
   const close = ()=>ov.remove();
   loadImage(newTypeImage).then(img=>{
