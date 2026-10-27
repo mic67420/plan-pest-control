@@ -485,6 +485,30 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     ok(await pg.evaluate(()=>{ const col=(n,sel)=>{ document.body.classList.toggle('night-mode',n); return getComputedStyle(document.querySelector(sel)).borderBottomColor; };
       const sels=['.mtile[data-tile="page"]','.mtile[data-tile="vue"]','.mtile[data-tile="historique"]','.mtile[data-tile="plan"]','.mtile[data-tile="pastille"]','.mtile[data-tile="texte"]','#mtileUndo'].map(s=>'#mobileTileBar '+s);
       const same=sels.every(s=>col(false,s)===col(true,s)); document.body.classList.remove('night-mode'); return same; }), 'tuiles du jour : mêmes liserés de couleur que la nuit');
+    // copie sur les autres pages (v2.1-193) : texte, date, logo, légende ; même position, remplacement sans doublon
+    {
+      const r = await pg.evaluate(async()=>{
+        window.__snap3 = cloneDoc();
+        pages.push(cloneModel(model)); const p2 = pages[1];
+        model.textes.push({ id:'text-copytest', text:'Zone froide', x:123.4, y:222.2, fontSize:20, fontFamily:APP_FONT, color:'#000000', background:null, rotation:7, align:'left', verticalAlign:'middle', locked:false });
+        render(); const out = {}; const click = ()=>document.querySelector('#typeImgEditor') || true;
+        const press = async(id)=>{ selectedId = id; render(); updateLockIndicator(); placeBadges(); const vis = badgeCopyEl.style.display !== 'none'; badgeCopyEl.click(); await new Promise(r=>setTimeout(r,50)); return vis; };
+        out.vTexte = await press('text-copytest'); await press('text-copytest');
+        const c = p2.textes.filter(t=>t.id==='text-copytest'); out.texte = c.length===1 && c[0].x===123.4 && c[0].y===222.2 && c[0].rotation===7 && c[0].text==='Zone froide';
+        const d = model.textes.find(t=>t.id==='text-update-date'); d.x = 51; d.y = 901;
+        await press('text-update-date'); const d2 = p2.textes.filter(t=>t.id==='text-update-date'); out.date = d2.length===1 && d2[0].x===51 && d2[0].y===901;
+        model.legend.x = 321; model.legend.y = 444; out.vLeg = await press('legend-frame'); out.leg = p2.legend.x===321 && p2.legend.y===444 && p2.legend !== model.legend;
+        const lg = model.logos.find(l=>l.which==='entreprise'); lg.x = 55; lg.y = 66; lg.width = 100;
+        out.vLogo = await press(lg.id); const l2 = p2.logos.filter(l=>l.which==='entreprise'); out.logo = l2.length===1 && l2[0].x===55 && l2[0].y===66 && l2[0].width===100;
+        const pl = model.pastilles[0]; if (pl){ selectedId = pl.id; render(); updateLockIndicator(); placeBadges(); out.noPastille = badgeCopyEl.style.display === 'none'; } else out.noPastille = true;
+        restoreDoc(window.__snap3); selectedId = null;
+        return out;
+      });
+      await pg.waitForTimeout(500);
+      ok(r.vTexte && r.texte, 'copie sur les autres pages : texte (même position, pas de doublon au 2e appui)');
+      ok(r.date && r.leg && r.vLeg, 'copie sur les autres pages : date remplacée, légende copiée');
+      ok(r.logo && r.vLogo && r.noPastille, 'copie sur les autres pages : logo remplacé sans doublon ; pas d\'icône pour une pastille');
+    }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

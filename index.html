@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-192 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-193 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -676,7 +676,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-192</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-193</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -948,7 +948,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-192 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-193 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -3443,8 +3443,8 @@ function nodeForId(id){
 // toujours au premier plan. Pour ne pas toucher au reste du code, `lockIndicatorGroup` et `lockBadge` gardent
 // l'interface qu'avaient les anciens objets Konva (visible(), position() en coordonnées FEUILLE, path.data()) ;
 // c'est placeBadges() qui convertit en position écran, à chaque affichage, défilement, zoom ou redimensionnement.
-let badgeOverlay = null, badgeLockEl = null, badgeDelEl = null, badgeCutEl = null, badgeSetEl = null, badgeRenEl = null;
-const badgeState = { show:false, lock:{x:0,y:0}, delShow:false, toolsShow:false, setShow:false, locked:false, row:null, renShow:false };
+let badgeOverlay = null, badgeLockEl = null, badgeDelEl = null, badgeCutEl = null, badgeSetEl = null, badgeRenEl = null, badgeCopyEl = null;
+const badgeState = { show:false, lock:{x:0,y:0}, delShow:false, toolsShow:false, setShow:false, locked:false, row:null, renShow:false, copyShow:false };
 function placeBadges(){
   if (!badgeOverlay) return;
   const wrap = document.getElementById('canvasWrap').getBoundingClientRect();
@@ -3454,6 +3454,7 @@ function placeBadges(){
   const host = sheetShadowHostEl.getBoundingClientRect();
   const px = host.left - wrap.left + badgeState.lock.x*zoom, py = host.top - wrap.top + badgeState.lock.y*zoom;
   badgeRenEl.style.display = badgeState.renShow ? 'flex' : 'none';
+  badgeCopyEl.style.display = (badgeState.copyShow && !badgeState.row) ? 'flex' : 'none'; // v2.1-193 : copie sur les autres pages (texte, logo, date, légende)
   if (badgeState.row){
     // v2.1-142 : pastille sélectionnée = 4 icônes en LIGNE au-dessus d'elle (cadenas, renommer, supprimer, réglages)
     const cx = host.left - wrap.left + badgeState.row.x*zoom;
@@ -3481,6 +3482,7 @@ function placeBadges(){
   badgeSetEl.style.display = badgeState.setShow ? 'flex' : 'none'; // v2.1-124 : icône bleue aussi pour pastille, légende, texte
   badgeCutEl.style.transform = 'translate('+(px-13)+'px,'+(py+64-13)+'px)';
   badgeSetEl.style.transform = 'translate('+(px-13)+'px,'+(py+(badgeState.toolsShow ? 96 : 64)-13)+'px)'; // sans ciseaux : juste sous la croix
+  badgeCopyEl.style.transform = 'translate('+(px-13)+'px,'+(py+((badgeState.toolsShow ? 96 : 64) + (badgeState.setShow ? 32 : 0))-13)+'px)'; // 4e icône : sous Réglages (ou sous la croix pour un logo, qui n'a pas de réglages)
   const cutOn = activeTool === 'cut-rect';
   badgeCutEl.style.boxShadow = cutOn ? '0 0 0 3px #F59E0B' : 'none'; // découpe en cours : anneau orange (le dessin rond ne peut plus s'inverser)
 }
@@ -3539,6 +3541,8 @@ function ensureLockBadge(){
   });
   // v2.1-142 : icône bleue « renommer » (crayon blanc) pour la pastille : ouvre une petite carte de saisie du nom
   badgeRenEl = toolBtn('Renommer la pastille', '<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="884.1 663.4 103 103"><path fill="#25212D" d="M935.2 667.4C961.6 667.2 983.1 688.5 983.1 714.9C983.1 741.2 961.6 762.6 935.2 762.4C909.1 762.2 888.1 741 888.1 714.9C888.1 688.8 909.1 667.6 935.2 667.4Z"/><path fill="#3962F5" d="M934.7 671.0C959.1 670.5 979.2 690 979.5 714.4C979.8 738.8 960.1 758.7 935.7 758.8C911.6 758.8 892 739.5 891.7 715.4C891.4 691.3 910.6 671.5 934.7 671.0Z"/><path fill="#fff" d="M913 738.2 916.2 724.6 944.5 696.3a4.6 4.6 0 0 1 6.5 0l6.7 6.7a4.6 4.6 0 0 1 0 6.5L929.4 737.8Z"/><path fill="#3962F5" d="M919.8 726.4 927.6 734.2 916.6 736.4Z" opacity=".0"/><path fill="none" stroke="#3962F5" stroke-width="2.2" stroke-linecap="round" d="M941.2 699.7 954.4 712.9"/></svg>', ()=>{ askPastilleLabel(); });
+  // v2.1-193 : 4e icône (bleue, deux feuilles) : recopie l'élément sélectionné sur TOUTES les autres pages, strictement à la même position
+  badgeCopyEl = toolBtn('Copier sur les autres pages (même position)', '<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26"><circle cx="13" cy="13" r="12" fill="#0E6FA8" stroke="#000" stroke-width="1.6"/><rect x="7.5" y="6.5" width="8" height="10" rx="1.2" fill="#fff" stroke="#000" stroke-width="1.2"/><rect x="10.5" y="9.5" width="8" height="10" rx="1.2" fill="#fff" stroke="#000" stroke-width="1.2"/></svg>', ()=>copySelectionToOtherPages());
   document.body.appendChild(badgeOverlay);
   document.getElementById('canvasWrap').addEventListener('scroll', schedulePlaceBadges, { passive:true });
   window.addEventListener('resize', schedulePlaceBadges);
@@ -3552,10 +3556,36 @@ function ensureLockBadge(){
     del: { visible(v){ if (v === undefined) return badgeState.delShow; badgeState.delShow = !!v; }, position(){}, scale(){} },
     tools: { visible(v){ badgeState.toolsShow = !!v; } },
     set: { visible(v){ badgeState.setShow = !!v; } },
+    copy: { visible(v){ badgeState.copyShow = !!v; } },
     locked:false
   };
 }
 // v2.1-83 : icône + texte du bouton cadenas de la tuile Plan selon l'état du plan (sélectionné, sinon le 1er).
+// v2.1-193 : recopie l'élément sélectionné (texte, date, adresse, logo, légende) sur toutes les AUTRES pages, avec exactement les mêmes coordonnées,
+// taille, rotation et style. Un élément déjà présent sur la page cible (même id ; pour un logo, même rôle entreprise / client ; la légende est unique)
+// est REMPLACÉ : appuyer deux fois ne crée jamais de doublon. Annulable (une seule étape d'historique).
+function copySelectionToOtherPages(){
+  if (pages.length < 2){ toast('Il n\'y a qu\'une seule page : ajoutez un étage d\'abord.'); return; }
+  const id = selectedId; let kind = null, src = null;
+  if (id === 'legend-frame'){ kind = 'legend'; src = model.legend; }
+  else if ((src = model.textes.find(t=>t.id===id))) kind = 'text';
+  else if ((src = model.logos.find(l=>l.id===id))) kind = 'logo';
+  if (!kind) return;
+  let n = 0;
+  pages.forEach(pg=>{
+    if (pg === model) return;
+    if (kind === 'legend') pg.legend = JSON.parse(JSON.stringify(src));
+    else {
+      const list = kind === 'text' ? pg.textes : pg.logos;
+      const i = list.findIndex(o=>o.id === src.id || (kind === 'logo' && src.which && o.which === src.which));
+      const copy = { ...src };
+      if (i >= 0){ copy.id = list[i].id; list[i] = copy; } else list.push(copy); // le remplaçant garde l'identifiant de l'élément remplacé
+    }
+    n++;
+  });
+  pushHistory();
+  toast('Copié sur '+n+' autre'+(n>1?'s':'')+' page'+(n>1?'s':'')+', même position.');
+}
 function updatePlanLockButton(){
   const btn = document.getElementById('toolLockPlan');
   if (!btn) return;
@@ -3614,6 +3644,7 @@ function updateLockIndicator(duringRotation){
   lockBadge.tools.visible(!!findPlanById(selectedId)); // ciseaux : plan seulement (v2.1-115)
   lockBadge.set.visible(hasBadgeSet);
   lockBadge.ren.visible(!!pastille);
+  lockBadge.copy.visible((model.textes.some(t=>t.id===selectedId) || model.logos.some(l=>l.id===selectedId) || selectedId==='legend-frame') && !findPlanById(selectedId)); // texte, date, logo, légende
   if (hasBadgeSet){
     const gp = lockBadge.g.position();
     lockBadge.del.position({ x:gp.x, y:gp.y + 32/zoom });

@@ -1606,4 +1606,11 @@ v2.1-192 — Partager (WhatsApp, mail…) depuis la fenêtre d'export
   navigator.share exige un geste récent : si la préparation a été longue (NotAllowedError), une bulle « touchez ici pour l'envoyer » redonne le geste ; menu d'envoi fermé = rien ne se passe ;
   partage impossible (ordinateur sans Web Share, Firefox) = téléchargement habituel. Le point orange « fichier à jour » ne s'efface que si le JSON est réellement parti.
   Le bouton Enregistrer du tiroir Fichier reste un téléchargement. exportJSON / deliverFiles / exportImages factorisent les exports.
+
+v2.1-193 — 4e icône « Copier sur les autres pages » (texte, date, adresse, logo, légende)
+  Demande de Mic : sous l'icône Réglages, une icône qui copie / duplique l'élément sur les autres pages en gardant strictement la même position. Réponses : toutes les autres pages
+  d'un coup ; un élément déjà présent est remplacé.
+  Réalisation : badge bleu « deux feuilles » (badgeCopyEl) sous Réglages (sous la croix pour un logo, qui n'a pas de réglages) ; copySelectionToOtherPages : texte recopié par id, logo par id ou
+  par rôle (entreprise / client), légende clonée ; mêmes x, y, taille, rotation, style, verrou ; le remplaçant garde l'identifiant de l'élément remplacé (pas de doublon au 2e appui) ;
+  une seule étape d'historique (annulable) ; un seul étage = message. Aucune icône pour pastille, plan ou dessin.
 ```
