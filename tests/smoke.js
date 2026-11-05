@@ -541,8 +541,17 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       ok(r.pastille && r.ajoutes, 'gomme : efface pastille, texte et logo ajouté touchés, sans plan sélectionné');
       ok(r.deuxPlans && r.coins && r.rien, 'gomme : efface tous les plans traversés ; jamais les éléments de coin ; rien touché = pas d\'historique' + ((r.deuxPlans && r.coins && r.rien) ? '' : ' ' + JSON.stringify(r)));
       ok(await pg.evaluate(()=>{ openTileDrawer('pastille', true); schedulePastilleDrawerClose(); const open = !!document.querySelector('.tb-group[data-tile="pastille"].mobile-open'); const noTimer = pastilleDrawerTimer === null; closeAllTileDrawers(); return open && noTimer; }), 'tiroirs : aucune minuterie de fermeture (restent jusqu\'au clic sur la tuile)');
-      ok(await pg.evaluate(()=>{ const t = model.deviceTypes[0]; pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); x.defaultRadius = 20; }); lastTypeListSig = null; refreshTypeList(); const w = ()=>parseFloat(document.querySelector('#deviceTypeDropdownList .dd-item .dd-sw svg').getAttribute('width'));
-        const a = w(); pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); x.defaultRadius = 10; }); refreshTypeList(); const b = w(); pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); delete x.defaultRadius; }); lastTypeListSig = null; refreshTypeList(); return a===40 && b===20; }), 'liste des postes : la vignette est à la taille réelle du poste et suit les + / −');
+      ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const setR = (r)=>pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); if (r) x.defaultRadius = r; else delete x.defaultRadius; });
+        const w = ()=>parseFloat(document.querySelector('#deviceTypeDropdownList .dd-item .dd-sw svg').getAttribute('width'));
+        setR(20); lastTypeListSig = null; refreshTypeList(); const a = w(), ea = Math.round(2*20*zoom);               // échelle 1:1 : 2 x taille x zoom
+        // + / − : la vignette change PENDANT l'appui, sans quitter la liste ; zoom : elle suit aussi
+        const list = document.getElementById('deviceTypeDropdownList'); list.classList.add('open');
+        const btn = document.querySelector('#deviceTypeDropdownList .dd-item .sz-ctl button[data-sz="1"]');
+        btn.dispatchEvent(new PointerEvent('pointerdown', { bubbles:true, pointerId:7 })); window.dispatchEvent(new PointerEvent('pointerup', { bubbles:true, pointerId:7 }));
+        const b = w(), eb = Math.round(2*21*zoom);
+        const z0 = zoom; setZoom(z0*1.5); const c = w(), ec = Math.round(2*21*zoom); setZoom(z0);
+        setR(0); lastTypeListSig = null; refreshTypeList(); list.classList.remove('open');
+        return a===ea && b===eb && c===ec && c > b; }), 'liste des postes : vignette à l\'échelle 1:1 (2 x taille x zoom), change en direct avec + / − et avec le zoom');
     }
     // v2.1-195 : la bibliothèque de postes s'applique aussi aux documents rouverts (JSON, Mes documents, version)
     {

@@ -1629,4 +1629,10 @@ v2.1-195 — Les postes modifiés s'appliquent aussi aux documents rouverts (JSO
   Correctif : applyLibraryToPages (appelée par loadDocIntoApp = JSON, Mes documents, version restaurée ; et au démarrage) : un poste du document correspondant à la bibliothèque (même id d'origine,
   même libId, ou ancien poste sans libId : même code + même nom) prend exactement les réglages de la bibliothèque en gardant son identifiant (les pastilles posées gardent leur poste ET leur propre
   taille) ; un poste de la bibliothèque absent est ajouté ; rouvrir ne crée pas de doublon. CLAUDE.md §4 ter mis à jour.
+
+v2.1-196 — Liste des postes : vignette à l'échelle 1:1 et en temps réel
+  Cause : (1) les + / − ne mettaient à jour que le chiffre (la ligne n'est pas reconstruite pendant l'appui, pour que le bouton reste sous le doigt) : la vignette n'était refaite qu'en
+  quittant puis rouvrant la liste ; (2) la vignette valait 2 x taille plafonnée à 48 px, sans tenir compte du zoom de la feuille.
+  Correctif : updateTypeSwatches met à jour les vignettes SANS reconstruire les lignes, à chaque cran de + / −, à chaque changement de zoom (settleZoom) et à l'ouverture ; taille = 2 x taille x zoom
+  (même diamètre à l'écran que la pastille qui sera posée, échelle 1:1 ; plancher 8 px, plafond de sécurité 140 px) ; colonne de vignettes = la plus grande (variable --sw-w) pour garder les codes alignés.
 ```

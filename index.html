@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-195 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-196 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -267,7 +267,7 @@
   @keyframes ddFlash{0%{background:#2E9E6B;transform:scale(1.03);}100%{background:#bfe8d3;transform:scale(1);}}
   .dd-item.selected::before{content:'✓';position:absolute;left:3px;top:50%;margin-top:-8px;width:16px;height:16px;border-radius:50%;background:#2E9E6B;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;}
   .dd-item .code{font-weight:700;min-width:30px;flex:none;text-align:center;}
-  .dd-item .dd-sw{ width:48px; min-height:20px; flex:none; display:flex; align-items:center; justify-content:center; } /* v2.1-194 : emplacement fixe : les codes restent alignés quelle que soit la taille du poste */
+  .dd-item .dd-sw{ width:var(--sw-w,48px); min-height:20px; flex:none; display:flex; align-items:center; justify-content:center; } /* v2.1-194 : emplacement fixe : les codes restent alignés quelle que soit la taille du poste */
   /* Nom complet : sur une seule ligne si la place le permet, sinon renvoyé à la ligne
      (petit écran) — jamais tronqué. */
   .dd-item .nm{flex:1;white-space:nowrap;}
@@ -677,7 +677,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-195</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-196</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -949,7 +949,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-195 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-196 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -5948,8 +5948,21 @@ function setTypeSize(typeId, r){
   // v2.1-153 : la taille du poste ne concerne QUE les prochaines pastilles posées (les existantes : fenêtre « Tailles »)
   return r;
 }
-// v2.1-194 : le poste est affiché à sa dimension RÉELLE (diamètre = 2 x sa taille, comme la pastille posée sur la feuille à 100 %), plafonnée à 48 px pour que la ligne reste lisible.
-function swatchSizeOf(t){ return Math.max(14, Math.min(48, 2*typeSizeOf(t))); }
+// v2.1-195 : vignette du poste à l'ÉCHELLE 1:1 de ce qui sera posé sur le plan : diamètre à l'écran = 2 x taille x zoom actuel (la feuille est affichée avec ce zoom). Elle suit donc le zoom
+// ET les + / − en direct (updateTypeSwatches). Plancher 8 px (zoom très faible), plafond de sécurité 140 px.
+function swatchSizeOf(t){ return Math.max(8, Math.min(140, Math.round(2*typeSizeOf(t)*zoom))); }
+// Met à jour les vignettes de la liste SANS reconstruire les lignes (appelée à chaque cran de + / − et à chaque changement de zoom) ; colonne commune = la plus grande, pour garder les codes alignés.
+function updateTypeSwatches(){
+  const list = document.getElementById('deviceTypeDropdownList'); if (!list) return;
+  let mx = 20;
+  list.querySelectorAll('.dd-item').forEach((row, i)=>{
+    const t = model.deviceTypes[i], sw = row.querySelector('.dd-sw'); if (!t || !sw) return;
+    const z = swatchSizeOf(t);
+    if (sw.dataset.s !== String(z)){ sw.innerHTML = shapeSwatchHTML(t, z); sw.dataset.s = String(z); }
+    mx = Math.max(mx, z);
+  });
+  list.style.setProperty('--sw-w', mx + 'px');
+}
 function refreshTypeList(){
   const prev = selectedTypeId;
   if (model.deviceTypes.length===0){ selectedTypeId = null; }
@@ -5963,7 +5976,7 @@ function refreshTypeList(){
   // v2.1-151 : la taille n'est plus dans la signature (sinon la ligne était reconstruite pendant l'appui sur − / +, le bouton disparaissait
   // sous le doigt, le relâchement n'était jamais reçu et le compteur défilait jusqu'au bout) ; les nombres sont mis à jour sur place.
   if (sig === lastTypeListSig){
-    document.querySelectorAll('#deviceTypeDropdownList .dd-item').forEach((row,i)=>{ const n = row.querySelector('.sz-n'), t = model.deviceTypes[i]; const sw = row.querySelector('.dd-sw'); if (sw && t && sw.dataset.s !== String(swatchSizeOf(t))){ sw.innerHTML = shapeSwatchHTML(t, swatchSizeOf(t)); sw.dataset.s = String(swatchSizeOf(t)); } /* la vignette suit la taille en direct */ if (n && t && n.textContent !== String(typeSizeOf(t))) n.textContent = typeSizeOf(t); });
+    document.querySelectorAll('#deviceTypeDropdownList .dd-item').forEach((row,i)=>{ const n = row.querySelector('.sz-n'), t = model.deviceTypes[i]; if (n && t && n.textContent !== String(typeSizeOf(t))) n.textContent = typeSizeOf(t); }); updateTypeSwatches();
     updateDropdownButton(); syncColorPickerToSelectedType(); return; }
   lastTypeListSig = sig;
 
@@ -5972,7 +5985,7 @@ function refreshTypeList(){
   model.deviceTypes.forEach((t,idx)=>{
     const row = document.createElement('div');
     row.className = 'dd-item' + (t.id===selectedTypeId ? ' selected':'');
-    row.innerHTML = `<span class="dd-sw">${shapeSwatchHTML(t,swatchSizeOf(t))}</span><span class="code">${escapeAttr(t.code)}</span><span class="dd-col"><span class="nm">${escapeAttr(t.name)}</span>
+    row.innerHTML = `<span class="dd-sw" data-s="${swatchSizeOf(t)}">${shapeSwatchHTML(t,swatchSizeOf(t))}</span><span class="code">${escapeAttr(t.code)}</span><span class="dd-col"><span class="nm">${escapeAttr(t.name)}</span>
         <span class="sz-ctl" title="Taille de ce poste"><button type="button" data-sz="-1" aria-label="Plus petit">−</button><span class="sz-n">${typeSizeOf(t)}</span><button type="button" data-sz="1" aria-label="Plus grand">+</button></span></span>
       <span class="dd-item-actions">
         <button class="dd-item-btn" data-act="up" title="Monter dans la liste" ${idx===0?'disabled':''}><svg width="13" height="13" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -6015,7 +6028,7 @@ function refreshTypeList(){
     });
     const nEl = row.querySelector('.sz-n');
     row.querySelectorAll('.sz-ctl button').forEach(sb=>{
-      bindStepper(sb, +sb.dataset.sz, ()=>typeSizeOf(t), (v)=>{ const r = setTypeSize(t.id, v); if (r === typeSizeOf(t) && nEl.textContent !== String(r)){ nEl.textContent = r; return true; } return false; }, ()=>{ pushHistory(); lastTypeListSig = null; });
+      bindStepper(sb, +sb.dataset.sz, ()=>typeSizeOf(t), (v)=>{ const r = setTypeSize(t.id, v); if (r === typeSizeOf(t) && nEl.textContent !== String(r)){ nEl.textContent = r; updateTypeSwatches(); return true; } return false; }, ()=>{ pushHistory(); lastTypeListSig = null; });
     });
     list.appendChild(row);
   });
@@ -6044,6 +6057,7 @@ function refreshTypeList(){
   libRow.innerHTML = '<span style="font-size:17px;line-height:1;width:20px;text-align:center;">▦</span><span class="nm" style="font-weight:600;">Bibliothèque de postes…</span>';
   libRow.addEventListener('click', (e)=>{ e.stopPropagation(); openLibraryWindow(); });
   list.appendChild(libRow);
+  updateTypeSwatches();
   updateDropdownButton();
   syncColorPickerToSelectedType();
 }
@@ -7017,6 +7031,7 @@ function applyRenderRatio(){
 }
 function settleZoom(){
   applyRenderRatio();
+  updateTypeSwatches(); // v2.1-195 : les vignettes de la liste des postes suivent le zoom (échelle 1:1)
   updateShapeHandles(); // v2.1-178 : poignées et contour d'un dessin gardent leur taille écran
   if (!planRotate.active) updateLockIndicator(); // met à jour aussi les icônes de rotation : taille constante à l'écran
   if (selectedId){ // zone de saisie de la pastille sélectionnée : taille constante à l'écran
