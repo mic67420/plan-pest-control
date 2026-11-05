@@ -1641,4 +1641,11 @@ v2.1-197 — Renommer le code d'un poste : les pastilles suivent, la numérotati
   sur toutes les pages) ne voyait donc aucune pastille « EXT » et repartait de 1 ; deux postes renommés avec le même code recommençaient chacun à 1.
   Correctif : relabelForCodeChange (appelée à l'enregistrement du poste, toutes les pages) : les pastilles du poste prennent le nouveau code en gardant leur numéro ; un numéro déjà pris par un autre poste
   de même code est remplacé par le premier libre (EXT1, EXT2 puis EXT3…). Le message annonce « n pastilles renumérotées ». Annulable (même étape d'historique que la modification du poste).
+
+v2.1-198 — Numérotation PAR POSTE : deux postes de même code commencent chacun à 1
+  Demande de Mic (capture : deux postes « NT » de couleurs différentes) : chaque poste doit avoir sa propre série qui commence à 1.
+  Cause : le comptage se faisait par CODE (v2.1-96…197) : le 2e poste « NT » continuait la série du 1er (NT4, NT5…) au lieu de repartir de 1.
+  Correctif : nextFreeLabelNumber(code, typeId) ne regarde que les pastilles du MÊME poste (trous comblés, toutes pages) ; relabelForCodeChange garde les numéros en changeant seulement le code ;
+  « Contrôle des numéros » : une série par poste (si deux postes ont le même code, le nom du poste les distingue : « NT — NT vert ») ; plus de faux « en double » entre postes ; « Renuméroter » agit
+  sur la série du poste. Deux étiquettes identiques (NT1) peuvent donc exister pour deux postes différents : la couleur / le poste les distingue.
 ```

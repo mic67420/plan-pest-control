@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-197 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-198 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -677,7 +677,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-197</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-198</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -949,7 +949,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-197 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-198 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1822,37 +1822,31 @@ function deleteCurrentPage(){
 // postes de même lettre ; copies « Dupliquer » portant le même numéro). Maintenant : le plus petit numéro
 // non utilisé par une étiquette « CODEn » de n'importe quelle page (les trous laissés par une suppression
 // sont comblés, jamais de doublon).
-function nextFreeLabelNumber(code){
+// v2.1-198 : comptage PAR POSTE (et non plus par code). Deux postes qui portent le même code (ex. deux « NT » de couleurs différentes) ont chacun leur série qui commence à 1 :
+// le plus petit numéro non utilisé par une étiquette « CODEn » DU MÊME POSTE, toutes pages confondues (les trous laissés par une suppression sont comblés).
+// Avant (v2.1-96…197) : par code, donc le 2e poste « NT » continuait la série du 1er au lieu de repartir de 1.
+function nextFreeLabelNumber(code, typeId){
   const re = new RegExp('^'+code.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(\\d+)$');
   const used = new Set();
-  pages.forEach(pg=>pg.pastilles.forEach(p=>{ const m = re.exec(p.label||''); if (m) used.add(parseInt(m[1],10)); }));
+  pages.forEach(pg=>pg.pastilles.forEach(p=>{ if (p.typeId !== typeId) return; const m = re.exec(p.label||''); if (m) used.add(parseInt(m[1],10)); }));
   let n = 1; while (used.has(n)) n++;
   return n;
 }
-// v2.1-197 : changer le CODE d'un poste (ex. E -> EXT) laissait ses pastilles déjà posées avec l'ancien code (« E1 », « E2 ») : le comptage du nouveau code repartait donc de 1, et deux postes
-// renommés avec le même code recommençaient chacun à 1 (doublons). Les pastilles du poste suivent maintenant son nouveau code, dans toutes les pages ; un numéro déjà pris par une
-// pastille d'un autre poste portant ce même code est remplacé par le premier numéro libre (la série continue : EXT1, EXT2 puis EXT3…). Retourne le nombre de pastilles changées.
+// v2.1-197 : changer le CODE d'un poste (ex. E -> EXT) laissait ses pastilles déjà posées avec l'ancien code (« E1 », « E2 ») : le comptage du nouveau code repartait donc de 1.
+// Les pastilles du poste suivent maintenant son nouveau code, dans toutes les pages, en GARDANT leur numéro (v2.1-198 : la série est propre au poste, donc aucun conflit avec un autre
+// poste de même code). Retourne le nombre de pastilles changées.
 function relabelForCodeChange(typeId, oldCode, newCode){
   if (!oldCode || oldCode === newCode) return 0;
-  const rx = (c)=>new RegExp('^'+c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(\\d+)$');
-  const reOld = rx(oldCode), reNew = rx(newCode), mine = [];
-  pages.forEach(pg=>pg.pastilles.forEach(p=>{ if (p.typeId === typeId && reOld.test(p.label||'')) mine.push(p); }));
-  if (!mine.length) return 0;
-  const mineSet = new Set(mine), used = new Set();
-  pages.forEach(pg=>pg.pastilles.forEach(p=>{ if (mineSet.has(p)) return; const m = reNew.exec(p.label||''); if (m) used.add(parseInt(m[1],10)); }));
-  mine.sort((a,b)=>parseInt(reOld.exec(a.label)[1],10) - parseInt(reOld.exec(b.label)[1],10));
-  mine.forEach(p=>{
-    let n = parseInt(reOld.exec(p.label)[1],10);
-    if (used.has(n)){ n = 1; while (used.has(n)) n++; }
-    used.add(n); p.label = newCode + n;
-  });
-  return mine.length;
+  const re = new RegExp('^'+oldCode.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(\\d+)$');
+  let n = 0;
+  pages.forEach(pg=>pg.pastilles.forEach(p=>{ if (p.typeId !== typeId) return; const m = re.exec(p.label||''); if (m){ p.label = newCode + m[1]; n++; } }));
+  return n;
 }
 function nextPastilleLabel(typeId){
   const type = model.deviceTypes.find(t=>t.id===typeId);
   if (type && type.noNumber) return '';
   const code = type ? type.code : '?';
-  return code + nextFreeLabelNumber(code);
+  return code + nextFreeLabelNumber(code, typeId);
 }
 // Déplace la page courante d'une position dans le document (elle reste affichée : seul son
 // rang change), sans recharger le plan puisque le contenu affiché ne change pas.
@@ -6556,27 +6550,31 @@ function closeOtherWindows(keep){
   if (keep !== 'draw') closeDrawWin();
   if (keep !== 'nudge' && nudgeOpen){ nudgeOpen = false; syncPastilleDrawer(); }
 }
-// v2.1-158 : contrôle des séries de numéros. Pour chaque lettre (code du poste), toutes pages confondues : numéros posés,
-// numéros qui MANQUENT dans la suite 1…max (trous) et numéros en DOUBLE. « Renuméroter » remet la lettre en suite continue
-// 1…n (ordre des pages puis ordre de pose), annulable.
+// v2.1-158 : contrôle des séries de numéros. Pour chaque série (v2.1-198 : chaque POSTE a la sienne, même si deux postes portent le même code), toutes pages confondues : numéros posés,
+// numéros qui MANQUENT dans la suite 1…max (trous) et numéros en DOUBLE. « Renuméroter » remet la série en suite continue 1…n (ordre des pages puis ordre de pose), annulable.
 function numberSeries(){
   const by = new Map();
   pages.forEach((pg, pi)=>pg.pastilles.forEach(p=>{
     const m = /^(.*?)(\d+)$/.exec(p.label||''); if (!m || !m[1]) return;
-    const o = by.get(m[1]) || { code:m[1], nums:new Map(), total:0 };
-    const n = parseInt(m[2],10); o.nums.set(n, (o.nums.get(n)||0)+1); o.total++; by.set(m[1], o);
+    const key = (p.typeId || '?') + '\u0001' + m[1];
+    const o = by.get(key) || { key, code:m[1], typeId:p.typeId, nums:new Map(), total:0 };
+    const n = parseInt(m[2],10); o.nums.set(n, (o.nums.get(n)||0)+1); o.total++; by.set(key, o);
   }));
-  return [...by.values()].sort((a,b)=>a.code.localeCompare(b.code)).map(o=>{
+  const codeCount = new Map(); by.forEach(o=>codeCount.set(o.code, (codeCount.get(o.code)||0)+1));
+  const out = [...by.values()].map(o=>{
     const max = Math.max(...o.nums.keys());
     const missing = []; for (let i=1;i<=max;i++) if (!o.nums.has(i)) missing.push(i);
     const dups = [...o.nums.entries()].filter(([,c])=>c>1).map(([n])=>n).sort((a,b)=>a-b);
-    return { code:o.code, total:o.total, max, missing, dups };
+    const type = model.deviceTypes.find(t=>t.id===o.typeId) || (pages.map(pg=>pg.deviceTypes.find(t=>t.id===o.typeId)).find(Boolean));
+    // deux séries de même code : le nom du poste les distingue
+    return { key:o.key, code:o.code, label: codeCount.get(o.code) > 1 && type ? o.code+' — '+type.name : o.code, total:o.total, max, missing, dups };
   });
+  return out.sort((a,b)=>a.label.localeCompare(b.label));
 }
-function renumberCode(code){
+function renumberSeries(key){
   let n = 0;
   const re = /^(.*?)(\d+)$/;
-  pages.forEach(pg=>pg.pastilles.forEach(p=>{ const m = re.exec(p.label||''); if (m && m[1]===code) p.label = code + (++n); }));
+  pages.forEach(pg=>pg.pastilles.forEach(p=>{ const m = re.exec(p.label||''); if (m && m[1] && (p.typeId || '?') + '\u0001' + m[1] === key){ n++; p.label = m[1] + n; } }));
   return n;
 }
 function closeCtrlWin(){
@@ -6593,15 +6591,15 @@ function fillCtrlWin(){
   series.forEach(se=>{
     const row = document.createElement('div'); row.className = 'cw-row';
     const bad = se.missing.length || se.dups.length;
-    row.innerHTML = '<div class="cw-head"><span>'+escapeAttr(se.code)+'</span><span style="font-weight:500;font-size:12px;">'+se.total+' pastille'+(se.total>1?'s':'')+'</span></div>'
+    row.innerHTML = '<div class="cw-head"><span>'+escapeAttr(se.label)+'</span><span style="font-weight:500;font-size:12px;">'+se.total+' pastille'+(se.total>1?'s':'')+'</span></div>'
       + (bad ? '' : '<div class="cw-ok">✓ série complète 1 → '+se.max+'</div>')
       + (se.missing.length ? '<div class="cw-miss">Manque : '+fmt(se.missing.map(n=>se.code+n))+'</div>' : '')
       + (se.dups.length ? '<div class="cw-dup">En double : '+fmt(se.dups.map(n=>se.code+n))+'</div>' : '');
     if (bad){
       const b = document.createElement('button'); b.type = 'button'; b.className = 'cw-btn'; b.textContent = 'Renuméroter 1 → '+se.total;
       b.addEventListener('click', async ()=>{
-        if (!(await askYesNo('Renuméroter toutes les pastilles « '+se.code+' » de 1 à '+se.total+' ?'))) return;
-        renumberCode(se.code); pushHistory(); resetContentNodeCaches(); render(); fillCtrlWin();
+        if (!(await askYesNo('Renuméroter toutes les pastilles « '+se.label+' » de 1 à '+se.total+' ?'))) return;
+        renumberSeries(se.key); pushHistory(); resetContentNodeCaches(); render(); fillCtrlWin();
       });
       row.querySelector('.cw-head').appendChild(b);
     }

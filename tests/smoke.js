@@ -105,7 +105,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     ok(rb.n===9 && rb.a && rb.b && rb.a!==rb.b && rb.v==='31', 'réglages modèle E : '+rb.n+' barres, le remplissage suit la valeur (30 puis 31 avec le bouton +)');
     // 11. Numérotation des pastilles (v2.1-113) : pas de doublon, trous comblés, une suite par lettre
     const num = await pg.evaluate(()=>{ const saved = model.pastilles.slice(); model.pastilles = []; selectedTypeId='type-E'; addPastille(100,100); addPastille(150,100); addPastille(200,100); model.pastilles = model.pastilles.filter(p=>p.label!=='E2'); addPastille(250,100); selectedTypeId='type-Rext'; addPastille(300,100); selectedId = model.pastilles[0].id; { const q = model.pastilles[0]; model.pastilles.push({ ...q, id:'dup-test', label:nextPastilleLabel(q.typeId) }); } /* l'ex-bouton Dupliquer (supprimé en v2.1-125) numérotait ainsi */ const labels = model.pastilles.map(p=>p.label); model.pastilles = saved; return labels; });
-    ok(num.join()==='E1,E3,E2,E4,E5' && new Set(num).size===num.length, 'numérotation : '+num.join(' ')+' (trou comblé, une suite par lettre, copie renumérotée)');
+    ok(num.join()==='E1,E3,E2,E1,E4', 'numérotation : '+num.join(' ')+' (trou comblé ; chaque POSTE a sa série : le 2e poste « E » repart de 1 ; copie renumérotée) — v2.1-198');
     // 12. Cadenas / croix en HTML (v2.1-114) : visibles hors de la page
     await pg.evaluate(()=>{ model.plans[0].x = SHEET_W - model.plans[0].width; render(); onTileChosen('plan'); selectNode(planImageNodes.get(model.plans[0].id), model.plans[0].id); });
     await pg.waitForTimeout(400);
@@ -233,7 +233,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     // v2.1-157 : pavé de rotation et fenêtre « Tailles » (même place) : l'un ferme l'autre
     ok(await pg.evaluate(async()=>{ if (!model.plans.length){ const c=document.createElement('canvas');c.width=300;c.height=300; await importPlanImageFromDataURL(c.toDataURL(),'R.png'); } if (!model.pastilles.length) model.pastilles.push({ id:'pt-rot', x:50, y:50, radius:16, typeId:model.deviceTypes[0].id, label:'E1' }); render(); const pl = model.plans[0]; selectNode(stage.findOne('#'+pl.id), pl.id); updateRotateIcons(); const w = document.getElementById('sizeAllWin'); const a = rotFineEl.style.display === 'flex'; document.getElementById('btnSizeAll').click(); const b = w.classList.contains('show') && rotFineEl.style.display === 'none'; selectNode(null, null); selectNode(stage.findOne('#'+pl.id), pl.id); updateRotateIcons(); const c = !w.classList.contains('show') && rotFineEl.style.display === 'flex'; return a && b && c; }), 'pavé de rotation et fenêtre Tailles : l\'un ferme l\'autre');
     // v2.1-158 : contrôle des numéros : trous et doublons repérés, renumérotation
-    ok(await pg.evaluate(()=>{ const bakPages = pages; const tid = model.deviceTypes[0].id; pages = [{ pastilles:['E1','E2','E4','E4','R1','R2'].map((l,i)=>({ id:'ct'+i, x:50+i*20, y:50, radius:16, typeId:tid, label:l })) }]; const se = numberSeries(); const e = se.find(x=>x.code==='E'), r = se.find(x=>x.code==='R'); const a = e.missing.join()==='3' && e.dups.join()==='4' && r.missing.length===0; openCtrlWin(); const shown = document.getElementById('ctrlWin').classList.contains('show') && document.querySelectorAll('#ctrlList .cw-row').length===2; renumberCode('E'); const b = pages[0].pastilles.filter(q=>q.label.startsWith('E')).map(q=>q.label).join()==='E1,E2,E3,E4'; closeCtrlWin(); pages = bakPages; return a && shown && b; }), 'contrôle des numéros : trou E3 et doublon E4 repérés, renumérotation continue');
+    ok(await pg.evaluate(()=>{ const bakPages = pages; const tid = model.deviceTypes[0].id; pages = [{ pastilles:['E1','E2','E4','E4','R1','R2'].map((l,i)=>({ id:'ct'+i, x:50+i*20, y:50, radius:16, typeId:tid, label:l })) }]; const se = numberSeries(); const e = se.find(x=>x.code==='E'), r = se.find(x=>x.code==='R'); const a = e.missing.join()==='3' && e.dups.join()==='4' && r.missing.length===0; openCtrlWin(); const shown = document.getElementById('ctrlWin').classList.contains('show') && document.querySelectorAll('#ctrlList .cw-row').length===2; renumberSeries(e.key); const b = pages[0].pastilles.filter(q=>q.label.startsWith('E')).map(q=>q.label).join()==='E1,E2,E3,E4'; closeCtrlWin(); pages = bakPages; return a && shown && b; }), 'contrôle des numéros : trou E3 et doublon E4 repérés, renumérotation continue');
     // v2.1-161 : versions automatiques (Restaurer) + v2.1-160 : rappel de sauvegarde du fichier
     ok(await pg.evaluate(async()=>{ if (!docHasContent(pages)){ model.pastilles.push({ id:'sn1', x:60, y:60, radius:16, typeId:model.deviceTypes[0].id, label:'E1' }); } lastSnapAt = 0; scheduleAutoSave(); clearTimeout(autoSaveTimer); await doAutoSave(); const list = await idbListSnaps(); if (!list.length) return false; const idBefore = docId; const n0 = pages.length; await restoreSnap(list[0].key); return docId !== idBefore && pages.length === n0 && /version/.test(docName||''); }), 'restaurer : une version automatique est rangée puis rouverte comme copie');
     ok(await pg.evaluate(()=>{ changesSinceFile = FILE_REMIND_CHANGES - 1; if (!docHasContent(pages)) model.pastilles.push({ id:'sn2', x:70, y:70, radius:16, typeId:model.deviceTypes[0].id, label:'E2' }); pushHistory(); const on = document.getElementById('btnSave').classList.contains('file-stale') && document.querySelector('#mobileTileBar .mtile[data-tile="historique"]').classList.contains('file-stale') && !document.getElementById('bubble').classList.contains('show'); changesSinceFile = 0; try{ localStorage.setItem('ppc_filesave_'+docId, String(Date.now())); }catch(e){} updateFileDot(); const off = !document.getElementById('btnSave').classList.contains('file-stale'); return on && off && /jamais|il y a|instant/.test(agoText(lastFileSaveOf(docId))); }), 'fichier pas à jour : point orange discret (sans bulle), il disparaît une fois enregistré');
@@ -588,11 +588,25 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
         rename('type-a197','XX'); const l1 = model.pastilles.filter(p=>p.typeId==='type-a197').map(p=>p.label).join();
         rename('type-b197','XX'); const l2 = model.pastilles.filter(p=>p.typeId==='type-b197').map(p=>p.label).join();
         const next = nextPastilleLabel('type-b197');
-        const out = { l1, l2, next, ok1: l1==='XX1,XX2', ok2: l2==='XX3,XX4,XX5', ok3: next==='XX6' };
+        const out = { l1, l2, next, ok1: l1==='XX1,XX2', ok2: l2==='XX1,XX2,XX3', ok3: next==='XX4' };
         restoreDoc(window.__snap6); return out;
       });
       await pg.waitForTimeout(400);
-      ok(r.ok1 && r.ok2 && r.ok3, 'renommer le code de 2 postes avec le même code : les pastilles suivent et la série continue ('+r.l1+' | '+r.l2+' | suivant '+r.next+')');
+      ok(r.ok1 && r.ok2 && r.ok3, 'renommer le code de 2 postes avec le même code : les pastilles suivent, chaque poste garde sa série ('+r.l1+' | '+r.l2+' | suivant '+r.next+')');
+    }
+    // v2.1-198 : 2 postes de même code (2 « NT » de couleurs différentes) = chacun sa série qui commence à 1 ; le contrôle des numéros les sépare
+    {
+      const r = await pg.evaluate(()=>{
+        window.__snap7 = cloneDoc();
+        pages.forEach(pg=>pg.deviceTypes.push({ id:'type-n1', code:'NT', name:'NT vert', color:'#4c7a2e', shape:'circle' }, { id:'type-n2', code:'NT', name:'NT rose', color:'#f4a6a0', shape:'circle' }));
+        const add = (typeId)=>{ const pa = { id:'pn'+Math.random().toString(36).slice(2,6), typeId, label:nextPastilleLabel(typeId), x:60, y:60, radius:12, rotation:0 }; model.pastilles.push(pa); return pa.label; };
+        const a = [add('type-n1'), add('type-n1'), add('type-n1')], b = [add('type-n2'), add('type-n2')], c = add('type-n1');
+        const series = numberSeries().filter(s=>s.code==='NT');
+        const out = { a:a.join(), b:b.join(), c, ok: a.join()==='NT1,NT2,NT3' && b.join()==='NT1,NT2' && c==='NT4', nSeries: series.length, noDup: series.every(s=>!s.dups.length && !s.missing.length), named: series.every(s=>/NT — NT (vert|rose)/.test(s.label)) };
+        restoreDoc(window.__snap7); return out;
+      });
+      await pg.waitForTimeout(400);
+      ok(r.ok && r.nSeries===2 && r.noDup && r.named, 'deux postes de même code : chacun sa série qui commence à 1 ('+r.a+' | '+r.b+' | suivant '+r.c+') ; contrôle des numéros : 2 séries distinctes, sans faux doublon');
     }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
