@@ -1635,4 +1635,10 @@ v2.1-196 — Liste des postes : vignette à l'échelle 1:1 et en temps réel
   quittant puis rouvrant la liste ; (2) la vignette valait 2 x taille plafonnée à 48 px, sans tenir compte du zoom de la feuille.
   Correctif : updateTypeSwatches met à jour les vignettes SANS reconstruire les lignes, à chaque cran de + / −, à chaque changement de zoom (settleZoom) et à l'ouverture ; taille = 2 x taille x zoom
   (même diamètre à l'écran que la pastille qui sera posée, échelle 1:1 ; plancher 8 px, plafond de sécurité 140 px) ; colonne de vignettes = la plus grande (variable --sw-w) pour garder les codes alignés.
+
+v2.1-197 — Renommer le code d'un poste : les pastilles suivent, la numérotation continue
+  Cause : changer le CODE d'un poste (ex. E -> EXT) ne touchait pas les pastilles déjà posées, qui gardaient l'ancien code (« E1 », « E2 ») ; le comptage du nouveau code (nextFreeLabelNumber, par code,
+  sur toutes les pages) ne voyait donc aucune pastille « EXT » et repartait de 1 ; deux postes renommés avec le même code recommençaient chacun à 1.
+  Correctif : relabelForCodeChange (appelée à l'enregistrement du poste, toutes les pages) : les pastilles du poste prennent le nouveau code en gardant leur numéro ; un numéro déjà pris par un autre poste
+  de même code est remplacé par le premier libre (EXT1, EXT2 puis EXT3…). Le message annonce « n pastilles renumérotées ». Annulable (même étape d'historique que la modification du poste).
 ```

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-196 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-197 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -677,7 +677,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-196</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-197</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -949,7 +949,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-196 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-197 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1828,6 +1828,25 @@ function nextFreeLabelNumber(code){
   pages.forEach(pg=>pg.pastilles.forEach(p=>{ const m = re.exec(p.label||''); if (m) used.add(parseInt(m[1],10)); }));
   let n = 1; while (used.has(n)) n++;
   return n;
+}
+// v2.1-197 : changer le CODE d'un poste (ex. E -> EXT) laissait ses pastilles déjà posées avec l'ancien code (« E1 », « E2 ») : le comptage du nouveau code repartait donc de 1, et deux postes
+// renommés avec le même code recommençaient chacun à 1 (doublons). Les pastilles du poste suivent maintenant son nouveau code, dans toutes les pages ; un numéro déjà pris par une
+// pastille d'un autre poste portant ce même code est remplacé par le premier numéro libre (la série continue : EXT1, EXT2 puis EXT3…). Retourne le nombre de pastilles changées.
+function relabelForCodeChange(typeId, oldCode, newCode){
+  if (!oldCode || oldCode === newCode) return 0;
+  const rx = (c)=>new RegExp('^'+c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(\\d+)$');
+  const reOld = rx(oldCode), reNew = rx(newCode), mine = [];
+  pages.forEach(pg=>pg.pastilles.forEach(p=>{ if (p.typeId === typeId && reOld.test(p.label||'')) mine.push(p); }));
+  if (!mine.length) return 0;
+  const mineSet = new Set(mine), used = new Set();
+  pages.forEach(pg=>pg.pastilles.forEach(p=>{ if (mineSet.has(p)) return; const m = reNew.exec(p.label||''); if (m) used.add(parseInt(m[1],10)); }));
+  mine.sort((a,b)=>parseInt(reOld.exec(a.label)[1],10) - parseInt(reOld.exec(b.label)[1],10));
+  mine.forEach(p=>{
+    let n = parseInt(reOld.exec(p.label)[1],10);
+    if (used.has(n)){ n = 1; while (used.has(n)) n++; }
+    used.add(n); p.label = newCode + n;
+  });
+  return mine.length;
 }
 function nextPastilleLabel(typeId){
   const type = model.deviceTypes.find(t=>t.id===typeId);
@@ -6341,12 +6360,13 @@ document.getElementById('btnAddType').addEventListener('click', ()=>{
   // gardait son ancien nom/couleur sur les autres (plan et légende incohérents).
   if (editing){
     const color = document.getElementById('currentColorPicker').value;
+    const relabeled = relabelForCodeChange(editingTypeId, editing.code, code); // v2.1-197 : les pastilles déjà posées suivent le nouveau code
     pages.forEach(pg=>{
       const t = pg.deviceTypes.find(x=>x.id===editingTypeId);
       if (t){ t.code = code; t.name = name; t.color = color; t.noNumber = noNumber; t.defaultRadius = defaultRadius; t.shape = newTypeShape; if (newTypeImage){ t.image = newTypeImage; t.imageRatio = newTypeImageRatio; } else { delete t.image; delete t.imageRatio; } if (textColor) t.textColor = textColor; else delete t.textColor; }
     });
     libLink(editingTypeId); // v2.1-182 : modification enregistrée dans la bibliothèque
-    toast(pages.length>1 ? 'Poste modifié sur toutes les pages.' : 'Poste modifié.');
+    toast((pages.length>1 ? 'Poste modifié sur toutes les pages.' : 'Poste modifié.') + (relabeled ? ' '+relabeled+' pastille'+(relabeled>1?'s':'')+' renumérotée'+(relabeled>1?'s':'')+'.' : ''));
   } else {
     const t = { id: libNewId(), code, name, color: currentColor, shape:newTypeShape, noNumber, defaultRadius };
     if (newTypeImage){ t.image = newTypeImage; t.imageRatio = newTypeImageRatio; }

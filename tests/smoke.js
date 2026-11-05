@@ -576,6 +576,24 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       await pg.waitForTimeout(500);
       ok(r.E && r.L && r.p && r.idem, 'bibliothèque : appliquée à un document rouvert (couleur, taille, nom ; ancien poste relié ; pastille gardée ; pas de doublon)');
     }
+    // v2.1-197 : renommer le code de 2 postes avec le même code : les pastilles suivent, la numérotation continue (plus de retour à 1)
+    {
+      const r = await pg.evaluate(()=>{
+        window.__snap6 = cloneDoc();
+        const A = { id:'type-a197', code:'AA', name:'Poste A', color:'#c00', shape:'circle' }, B = { id:'type-b197', code:'BB', name:'Poste B', color:'#0c0', shape:'circle' };
+        pages.forEach(pg=>{ pg.deviceTypes.push({ ...A }, { ...B }); });
+        const mk = (id, typeId, label)=>model.pastilles.push({ id, typeId, label, x:50, y:50, radius:12, rotation:0 });
+        mk('pa1','type-a197','AA1'); mk('pa2','type-a197','AA2'); mk('pb1','type-b197','BB1'); mk('pb2','type-b197','BB2'); mk('pb3','type-b197','BB3');
+        const rename = (typeId, code)=>{ startEditType(typeId); document.getElementById('newTypeCode').value = code; document.getElementById('btnAddType').click(); };
+        rename('type-a197','XX'); const l1 = model.pastilles.filter(p=>p.typeId==='type-a197').map(p=>p.label).join();
+        rename('type-b197','XX'); const l2 = model.pastilles.filter(p=>p.typeId==='type-b197').map(p=>p.label).join();
+        const next = nextPastilleLabel('type-b197');
+        const out = { l1, l2, next, ok1: l1==='XX1,XX2', ok2: l2==='XX3,XX4,XX5', ok3: next==='XX6' };
+        restoreDoc(window.__snap6); return out;
+      });
+      await pg.waitForTimeout(400);
+      ok(r.ok1 && r.ok2 && r.ok3, 'renommer le code de 2 postes avec le même code : les pastilles suivent et la série continue ('+r.l1+' | '+r.l2+' | suivant '+r.next+')');
+    }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');
