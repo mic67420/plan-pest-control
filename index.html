@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-193 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-194 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -267,6 +267,7 @@
   @keyframes ddFlash{0%{background:#2E9E6B;transform:scale(1.03);}100%{background:#bfe8d3;transform:scale(1);}}
   .dd-item.selected::before{content:'✓';position:absolute;left:3px;top:50%;margin-top:-8px;width:16px;height:16px;border-radius:50%;background:#2E9E6B;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;}
   .dd-item .code{font-weight:700;min-width:30px;flex:none;text-align:center;}
+  .dd-item .dd-sw{ width:48px; min-height:20px; flex:none; display:flex; align-items:center; justify-content:center; } /* v2.1-194 : emplacement fixe : les codes restent alignés quelle que soit la taille du poste */
   /* Nom complet : sur une seule ligne si la place le permet, sinon renvoyé à la ligne
      (petit écran) — jamais tronqué. */
   .dd-item .nm{flex:1;white-space:nowrap;}
@@ -676,7 +677,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-193</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-194</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -948,7 +949,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-193 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-194 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -4787,7 +4788,7 @@ function paintBucketAt(pos){
 // Fin d'une retouche pixel (pot de peinture, gomme) faite EN PLACE sur le canevas pleine
 // définition : on l'encode dans le modèle (pour l'historique, la sauvegarde et le fichier .json),
 // on régénère la copie réduite de l'écran, puis on redessine (v2.1-64).
-function commitPlanPixelEdit(planId){
+function commitPlanPixelEdit(planId, silent){ // silent : l'appelant fait lui-même UN seul pushHistory + render (gomme sur plusieurs plans)
   const canvas = planNaturalCanvases.get(planId);
   const pl = findPlanById(planId);
   if (!canvas || !pl) return false;
@@ -4795,7 +4796,7 @@ function commitPlanPixelEdit(planId){
   refreshPlanDisplay(planId, pl.dataURL);
   const node = planImageNodes.get(planId);
   if (node) node._forceRefresh = true;
-  pushHistory(); render();
+  if (!silent){ pushHistory(); render(); }
   return true;
 }
 function hexToRgb(hex){
@@ -4925,13 +4926,11 @@ stage.on('mousedown touchstart', (e)=>{
     cutRectStart = rawPos;
   }
   else if (activeTool==='eraser'){
-    const targetNode = cutTargetNodeAt(rawPos);
-    if (!targetNode){ toast('Cliquez sur un plan pour utiliser la gomme.'); return; }
-    eraseTargetPlanId = targetNode.id();
+    // v2.1-194 : la gomme n'a plus besoin d'un plan (ni sélectionné ni sous le doigt) : elle agit sur TOUT ce qui est sous le trait
     isErasing=true;
     eraseStart = { x:rawPos.x, y:rawPos.y }; // début du trait (v2.1-97) ; l'effacement a lieu au relâchement
     eraseEnd = null;
-    targetNode.clearCache();
+    planImageNodes.forEach(n=>n.clearCache());
     renderEraserGhost(rawPos);
   }
 });
@@ -4940,14 +4939,11 @@ stage.on('mousedown touchstart', (e)=>{
 // v2.1-97 : "origin" = point du premier contact (le début du trait est la pointe au-dessus de CE point,
 // même si le curseur n'a été créé qu'après un petit déplacement du doigt) ; aucun effacement ici.
 function startEraseAt(rawPos, origin){
-  const targetNode = planNodeAt(origin || rawPos);
-  if (!targetNode){ toast('Touchez un plan pour utiliser la gomme.'); return; }
-  eraseTargetPlanId = targetNode.id();
   eraseStart = remoteTipFromHandlePos(origin || rawPos);
   eraseEnd = null;
   remoteCursor = { tool:'eraser', tip: remoteTipFromHandlePos(rawPos) };
   isErasing = true;
-  targetNode.clearCache();
+  planImageNodes.forEach(n=>n.clearCache()); // v2.1-194 : plus de plan cible : tout ce qui est sous le trait est effacé
   drawRemoteCursor();
 }
 stage.on('mousemove touchmove', (e)=>{
@@ -5209,7 +5205,6 @@ function applyCutPolygon(pointsStage){
 
 /* ---------------------------- Gomme ------------------------------------------- */
 let isErasing = false;
-let eraseTargetPlanId = null; // plan visé par le tracé de gomme en cours (déterminé au premier contact)
 // ---------------------------------------------------------------------------------------------------
 // Gomme en TRAIT (v2.1-97) : début au premier contact, effacement au relâchement.
 let eraserShape = 'square';       // 'square' | 'round'
@@ -5237,37 +5232,90 @@ function convexHull(P){
   lo.pop(); up.pop(); return lo.concat(up);
 }
 // Efface le trait a -> b (coordonnées feuille) sur le plan visé ; a == b donne une simple tache.
-function eraseStroke(a, b){
-  if (!eraseTargetPlanId) return;
-  const planNode = planImageNodes.get(eraseTargetPlanId);
-  const canvas = planNaturalCanvases.get(eraseTargetPlanId);
-  if (!planNode || !canvas) return;
-  const { sx, sy } = planPixelScale(planNode);
-  const la = toLocal(planNode, a.x, a.y), lb = toLocal(planNode, b.x, b.y);
-  const A = {x:la.x*sx, y:la.y*sy}, B = {x:lb.x*sx, y:lb.y*sy};
-  const brush = eraserBrush(), hw = (brush*sx)/2, hh = (brush*sy)/2;
-  // La gomme peint avec la couleur de la pipette (bucketColor), pour se fondre dans le fond du plan.
-  const paint = (ctx, k)=>{
-    ctx.save();
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = bucketColor; ctx.strokeStyle = bucketColor;
+// v2.1-194 : GOMME UNIVERSELLE. Avant, elle n'agissait que sur UN plan (le plan sélectionné, sinon celui sous le doigt) : sans plan visé, rien ne se passait,
+// et pastilles, textes et dessins ne s'effaçaient pas. Maintenant un trait efface, d'un seul passage et sans rien sélectionner :
+//  - les pixels de TOUS les plans que le trait traverse ;
+//  - les pastilles, textes, dessins et logos AJOUTÉS touchés (supprimés en entier) ;
+//  jamais les 4 éléments de coin (logo Radical, logo client, adresse, « Mise à jour le », légende), ni un élément verrouillé (cadenas).
+function isCornerElement(kind, o){
+  if (kind === 'logo') return o.which === 'entreprise' || o.which === 'client';
+  if (kind === 'text') return o.id === 'text-update-date' || o.id === 'text-client-address' || /^Mise à jour le/.test(o.text || '');
+  return false;
+}
+// Le trait (de a à b, brosse ronde ou carrée) touche-t-il ce rectangle (coordonnées feuille) ?
+function eraserTouchesRect(rect, a, b){
+  const h = eraserBrush()/2, len = Math.hypot(b.x-a.x, b.y-a.y), n = Math.max(1, Math.ceil(len / Math.max(1, h/2)));
+  for (let i = 0; i <= n; i++){
+    const x = a.x + (b.x-a.x)*i/n, y = a.y + (b.y-a.y)*i/n;
     if (eraserShape === 'round'){
-      ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 2*hw*k;
-      ctx.beginPath(); ctx.moveTo(A.x*k, A.y*k); ctx.lineTo(B.x*k, B.y*k); ctx.stroke();
-      ctx.beginPath(); ctx.arc(A.x*k, A.y*k, hw*k, 0, 2*Math.PI); ctx.fill();
-      ctx.beginPath(); ctx.arc(B.x*k, B.y*k, hw*k, 0, 2*Math.PI); ctx.fill();
-    } else {
-      const hull = convexHull([A,B].flatMap(p=>[[p.x-hw,p.y-hh],[p.x+hw,p.y-hh],[p.x+hw,p.y+hh],[p.x-hw,p.y+hh]]));
-      ctx.beginPath(); hull.forEach((q,i)=> i ? ctx.lineTo(q[0]*k, q[1]*k) : ctx.moveTo(q[0]*k, q[1]*k)); ctx.closePath(); ctx.fill();
-    }
-    ctx.restore();
+      const dx = Math.max(rect.x - x, 0, x - (rect.x + rect.width)), dy = Math.max(rect.y - y, 0, y - (rect.y + rect.height));
+      if (dx*dx + dy*dy <= h*h) return true;
+    } else if (x + h >= rect.x && x - h <= rect.x + rect.width && y + h >= rect.y && y - h <= rect.y + rect.height) return true;
+  }
+  return false;
+}
+function nodeRectOf(id){
+  const node = nodeForId(id); if (!node) return null;
+  return (shapeNodes.has(id) ? node.getChildren()[0] : node).getClientRect({ relativeTo: stage });
+}
+// Efface le trait sur les plans (pixels) ; retourne les identifiants des plans touchés.
+function eraseStrokeOnPlans(a, b){
+  const brush = eraserBrush(), touched = [];
+  model.plans.forEach(pl=>{
+    const planNode = planImageNodes.get(pl.id), canvas = planNaturalCanvases.get(pl.id);
+    if (!planNode || !canvas) return;
+    const r = planNode.getClientRect({ relativeTo: stage });
+    if (!eraserTouchesRect(r, a, b)) return; // le trait ne traverse pas ce plan
+    const { sx, sy } = planPixelScale(planNode);
+    const la = toLocal(planNode, a.x, a.y), lb = toLocal(planNode, b.x, b.y);
+    const A = {x:la.x*sx, y:la.y*sy}, B = {x:lb.x*sx, y:lb.y*sy};
+    const hw = (brush*sx)/2, hh = (brush*sy)/2;
+    // La gomme peint avec la couleur de la pipette (bucketColor), pour se fondre dans le fond du plan.
+    const paint = (ctx, k)=>{
+      ctx.save();
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = bucketColor; ctx.strokeStyle = bucketColor;
+      if (eraserShape === 'round'){
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 2*hw*k;
+        ctx.beginPath(); ctx.moveTo(A.x*k, A.y*k); ctx.lineTo(B.x*k, B.y*k); ctx.stroke();
+        ctx.beginPath(); ctx.arc(A.x*k, A.y*k, hw*k, 0, 2*Math.PI); ctx.fill();
+        ctx.beginPath(); ctx.arc(B.x*k, B.y*k, hw*k, 0, 2*Math.PI); ctx.fill();
+      } else {
+        const hull = convexHull([A,B].flatMap(p=>[[p.x-hw,p.y-hh],[p.x+hw,p.y-hh],[p.x+hw,p.y+hh],[p.x-hw,p.y+hh]]));
+        ctx.beginPath(); hull.forEach((q,i)=> i ? ctx.lineTo(q[0]*k, q[1]*k) : ctx.moveTo(q[0]*k, q[1]*k)); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    };
+    paint(canvas.getContext('2d'), 1);
+    // L'écran affiche la copie RÉDUITE (makeDisplayCanvas) : même tracé à l'échelle ; elle est régénérée
+    // proprement depuis l'image pleine définition à la fin (commitPlanPixelEdit).
+    const dispCanvas = planDisplayCanvases.get(pl.id);
+    if (dispCanvas && dispCanvas !== canvas) paint(dispCanvas.getContext('2d'), dispCanvas.width/canvas.width);
+    touched.push(pl.id);
+  });
+  if (touched.length) planLayer.batchDraw();
+  return touched;
+}
+// Supprime les éléments ajoutés touchés par le trait ; retourne leur nombre.
+function eraseElementsAlong(a, b){
+  const doomed = new Set();
+  const test = (kind, o)=>{
+    if (!o || o.locked || isCornerElement(kind, o)) return;
+    const r = nodeRectOf(o.id);
+    if (r && eraserTouchesRect(r, a, b)) doomed.add(o.id);
   };
-  paint(canvas.getContext('2d'), 1);
-  // L'écran affiche la copie RÉDUITE (makeDisplayCanvas) : même tracé à l'échelle ; elle est régénérée
-  // proprement depuis l'image pleine définition à la fin (commitPlanPixelEdit).
-  const dispCanvas = planDisplayCanvases.get(eraseTargetPlanId);
-  if (dispCanvas && dispCanvas !== canvas) paint(dispCanvas.getContext('2d'), dispCanvas.width/canvas.width);
-  planLayer.batchDraw();
+  model.pastilles.forEach(o=>test('pastille', o));
+  model.textes.forEach(o=>test('text', o));
+  model.logos.forEach(o=>test('logo', o));
+  (model.shapes||[]).forEach(o=>test('shape', o));
+  if (!doomed.size) return 0;
+  model.pastilles = model.pastilles.filter(o=>!doomed.has(o.id));
+  model.textes = model.textes.filter(o=>!doomed.has(o.id));
+  model.logos = model.logos.filter(o=>!doomed.has(o.id));
+  model.shapes = (model.shapes||[]).filter(o=>!doomed.has(o.id));
+  model.lines = model.lines.filter(l=>!doomed.has(l.toPastilleId)); // comme la suppression d'une pastille
+  if (doomed.has(selectedId)) selectedId = null;
+  return doomed.size;
 }
 // Aperçu : forme de la gomme sous le pointeur, ou trait du point de départ jusqu'au pointeur pendant un appui.
 function renderEraserGhost(tip){
@@ -5292,21 +5340,23 @@ function renderEraserGhost(tip){
   }
   uiLayer.batchDraw();
 }
-// Relâchement : on efface le trait (ou une tache si le pointeur n'a pas bougé), puis un seul pushHistory.
+// Relâchement : on efface le trait (ou une tache si le pointeur n'a pas bougé), puis UN seul pushHistory (rien si rien n'a été touché).
 function finishErase(pos){
   if (!isErasing) return;
   isErasing = false;
+  let a = eraseStart, b = null;
   if (eraseStart){
-    let end = pos ? snapEraseEnd(eraseStart, pos) : (eraseEnd || eraseStart);
-    if (pos && Math.hypot(pos.x-eraseStart.x, pos.y-eraseStart.y) < 3) end = eraseStart; // simple clic = tache
-    eraseStroke(eraseStart, end);
+    b = pos ? snapEraseEnd(eraseStart, pos) : (eraseEnd || eraseStart);
+    if (pos && Math.hypot(pos.x-eraseStart.x, pos.y-eraseStart.y) < 3) b = eraseStart; // simple clic = tache
   }
   eraseStart = null; eraseEnd = null;
   closeAllTileDrawers(); // v2.1-101 : le tiroir se replie dès qu'on utilise la gomme
   ghostGroup.destroyChildren(); uiLayer.batchDraw();
-  const canvas = planNaturalCanvases.get(eraseTargetPlanId);
-  const pl = findPlanById(eraseTargetPlanId);
-  if (canvas && pl) commitPlanPixelEdit(eraseTargetPlanId);
+  if (!a || !b) return;
+  const plans = eraseStrokeOnPlans(a, b), n = eraseElementsAlong(a, b);
+  if (!plans.length && !n) return; // le trait n'a rien touché
+  plans.forEach(id=>commitPlanPixelEdit(id, true));
+  pushHistory(); render();
 }
 // Réglages de la gomme (forme, taille avec − / + et témoin) — v2.1-97.
 function updateEraserUI(){
@@ -5885,6 +5935,8 @@ function setTypeSize(typeId, r){
   // v2.1-153 : la taille du poste ne concerne QUE les prochaines pastilles posées (les existantes : fenêtre « Tailles »)
   return r;
 }
+// v2.1-194 : le poste est affiché à sa dimension RÉELLE (diamètre = 2 x sa taille, comme la pastille posée sur la feuille à 100 %), plafonnée à 48 px pour que la ligne reste lisible.
+function swatchSizeOf(t){ return Math.max(14, Math.min(48, 2*typeSizeOf(t))); }
 function refreshTypeList(){
   const prev = selectedTypeId;
   if (model.deviceTypes.length===0){ selectedTypeId = null; }
@@ -5898,7 +5950,7 @@ function refreshTypeList(){
   // v2.1-151 : la taille n'est plus dans la signature (sinon la ligne était reconstruite pendant l'appui sur − / +, le bouton disparaissait
   // sous le doigt, le relâchement n'était jamais reçu et le compteur défilait jusqu'au bout) ; les nombres sont mis à jour sur place.
   if (sig === lastTypeListSig){
-    document.querySelectorAll('#deviceTypeDropdownList .dd-item').forEach((row,i)=>{ const n = row.querySelector('.sz-n'), t = model.deviceTypes[i]; if (n && t && n.textContent !== String(typeSizeOf(t))) n.textContent = typeSizeOf(t); });
+    document.querySelectorAll('#deviceTypeDropdownList .dd-item').forEach((row,i)=>{ const n = row.querySelector('.sz-n'), t = model.deviceTypes[i]; const sw = row.querySelector('.dd-sw'); if (sw && t && sw.dataset.s !== String(swatchSizeOf(t))){ sw.innerHTML = shapeSwatchHTML(t, swatchSizeOf(t)); sw.dataset.s = String(swatchSizeOf(t)); } /* la vignette suit la taille en direct */ if (n && t && n.textContent !== String(typeSizeOf(t))) n.textContent = typeSizeOf(t); });
     updateDropdownButton(); syncColorPickerToSelectedType(); return; }
   lastTypeListSig = sig;
 
@@ -5907,7 +5959,7 @@ function refreshTypeList(){
   model.deviceTypes.forEach((t,idx)=>{
     const row = document.createElement('div');
     row.className = 'dd-item' + (t.id===selectedTypeId ? ' selected':'');
-    row.innerHTML = `${shapeSwatchHTML(t,20)}<span class="code">${escapeAttr(t.code)}</span><span class="dd-col"><span class="nm">${escapeAttr(t.name)}</span>
+    row.innerHTML = `<span class="dd-sw">${shapeSwatchHTML(t,swatchSizeOf(t))}</span><span class="code">${escapeAttr(t.code)}</span><span class="dd-col"><span class="nm">${escapeAttr(t.name)}</span>
         <span class="sz-ctl" title="Taille de ce poste"><button type="button" data-sz="-1" aria-label="Plus petit">−</button><span class="sz-n">${typeSizeOf(t)}</span><button type="button" data-sz="1" aria-label="Plus grand">+</button></span></span>
       <span class="dd-item-actions">
         <button class="dd-item-btn" data-act="up" title="Monter dans la liste" ${idx===0?'disabled':''}><svg width="13" height="13" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -6723,13 +6775,10 @@ const TILE_TOOL_CATEGORIES = {
 // ajout de poste…) est ouvert dans l'intervalle : on repousse alors de 2 s.
 const PASTILLE_DRAWER_CLOSE_MS = 10000; // v2.1-111 : tiroirs affichés 10 s (5 s à la demande de Mic : trop court)
 let pastilleDrawerTimer = null;
+// v2.1-194 : PLUS de fermeture automatique par délai (consigne de Mic) : un tiroir reste affiché jusqu'au clic sur sa tuile (ou le choix d'une autre tuile,
+// ou un appui hors du tiroir / une action qui le referme comme avant). La fonction est gardée (appelée à plusieurs endroits) mais n'arme plus de minuterie.
 function schedulePastilleDrawerClose(){
-  clearTimeout(pastilleDrawerTimer);
-  pastilleDrawerTimer = setTimeout(()=>{
-    // On repousse seulement si le choix du poste ou l'ajout de poste (tiroir Pastille) est en cours de saisie.
-    if (document.querySelector('#popAddType.open') || document.querySelector('#deviceTypeDropdownList.open')){ schedulePastilleDrawerClose(); return; }
-    closeAllTileDrawers();
-  }, PASTILLE_DRAWER_CLOSE_MS);
+  clearTimeout(pastilleDrawerTimer); pastilleDrawerTimer = null;
 }
 function closeAllTileDrawers(){
   clearTimeout(pastilleDrawerTimer); pastilleDrawerTimer = null;

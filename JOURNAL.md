@@ -1613,4 +1613,13 @@ v2.1-193 — 4e icône « Copier sur les autres pages » (texte, date, adresse, 
   Réalisation : badge bleu « deux feuilles » (badgeCopyEl) sous Réglages (sous la croix pour un logo, qui n'a pas de réglages) ; copySelectionToOtherPages : texte recopié par id, logo par id ou
   par rôle (entreprise / client), légende clonée ; mêmes x, y, taille, rotation, style, verrou ; le remplaçant garde l'identifiant de l'élément remplacé (pas de doublon au 2e appui) ;
   une seule étape d'historique (annulable) ; un seul étage = message. Aucune icône pour pastille, plan ou dessin.
+
+v2.1-194 — Tiroirs sans délai, gomme universelle, poste à sa taille réelle dans la liste
+  1) Tiroirs : le repli automatique après 10 s est supprimé (schedulePastilleDrawerClose n'arme plus de minuterie) ; un tiroir reste affiché jusqu'au clic sur sa tuile ; ils se referment
+     toujours quand on change de tuile, quand on touche en dehors ou après une action qui le faisait déjà (pose d'une pastille, gomme…) — choix de Mic : « seulement supprimer le délai ».
+  2) Gomme « bizarre » — cause : elle ne visait qu'UN plan (le plan sélectionné, sinon celui sous le doigt) : sans plan visé elle ne faisait rien (« Cliquez sur un plan »), et pastilles, textes,
+     dessins, logos ne pouvaient pas s'effacer. Correctif : un trait efface les pixels de TOUS les plans traversés + supprime les pastilles, textes, dessins et logos AJOUTÉS touchés, sans rien sélectionner ;
+     jamais les 4 éléments de coin (logo Radical, logo client, adresse, « Mise à jour le », légende) ni un élément verrouillé ; un seul pushHistory par trait (aucun si rien n'est touché).
+  3) Liste des postes : la vignette de chaque poste est à sa dimension réelle (diamètre = 2 x taille, plafonné à 48 px, emplacement fixe pour garder les codes alignés) et suit les + / − en direct.
+     Le + / − fonctionnait déjà sur une ligne non sélectionnée (vérifié téléphone et PC).
 ```

@@ -509,6 +509,41 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       ok(r.date && r.leg && r.vLeg, 'copie sur les autres pages : date remplacée, légende copiée');
       ok(r.logo && r.vLogo && r.noPastille, 'copie sur les autres pages : logo remplacé sans doublon ; pas d\'icône pour une pastille');
     }
+    // v2.1-194 : gomme universelle (tous les plans, éléments ajoutés, jamais les coins), tiroirs sans délai, poste à sa taille réelle dans la liste
+    {
+      const r = await pg.evaluate(async()=>{
+        window.__snap4 = cloneDoc(); const out = {};
+        const mk = async(name)=>{ const c=document.createElement('canvas');c.width=300;c.height=300;const x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,300,300); await importPlanImageFromDataURL(c.toDataURL(), name); return model.plans[model.plans.length-1]; };
+        const A = await mk('A.png'); A.x=100;A.y=100;A.width=600;A.height=600; A.locked=true;
+        const B = await mk('B.png'); B.x=400;B.y=100;B.width=600;B.height=600; B.locked=true;
+        selectedId = null; render();
+        setTool('eraser'); document.getElementById('rngEraserSize').value = 40; eraserShape = 'square'; updateEraserUI();
+        selectedTypeId = model.deviceTypes[0].id; const pa = addPastille(200,200); pa.locked = false;
+        model.textes.push({ id:'text-erase', text:'A effacer', x:180, y:300, fontSize:20, fontFamily:APP_FONT, color:'#000', background:null, rotation:0, align:'left', verticalAlign:'middle', locked:false });
+        model.logos.push({ id:'logo-erase', dataURL:CLIENT_LOGO_PLACEHOLDER_DATAURL, x:180, y:380, width:60, height:40, rotation:0, locked:false });
+        render();
+        const px = (pl,x,y)=>{ const c=planNaturalCanvases.get(pl.id), k=c.width/pl.width; return c.getContext('2d').getImageData(Math.round((x-pl.x)*k),Math.round((y-pl.y)*k),1,1).data[0]; };
+        const stroke = (a,b)=>{ isErasing = true; eraseStart = a; finishErase(b); };
+        const date = model.textes.find(t=>t.id==='text-update-date'), co = model.logos.find(l=>l.which==='entreprise'), cl = model.logos.find(l=>l.which==='client');
+        stroke({x:150,y:150},{x:220,y:210});                      // pastille + plan A, rien de sélectionné
+        out.pastille = !model.pastilles.some(p=>p.id===pa.id) && px(A,200,200) > 200;
+        stroke({x:150,y:290},{x:300,y:320}); stroke({x:150,y:370},{x:300,y:410}); // texte, logo ajouté
+        out.ajoutes = !model.textes.some(t=>t.id==='text-erase') && !model.logos.some(l=>l.id==='logo-erase');
+        stroke({x:450,y:500},{x:560,y:500});                      // traverse A ET B (recouvrement)
+        out.deuxPlans = px(A,500,500) > 200 && px(B,500,500) > 200;
+        stroke({x:5,y:10},{x:200,y:20}); stroke({x:0,y:date.y+5},{x:150,y:date.y+10}); // logo Radical et date : protégés
+        out.coins = model.logos.includes(co) && model.logos.includes(cl) && model.textes.includes(date) && px(A,650,650) < 50; /* pixel loin de tous les traits : le plan reste intact ailleurs */
+        const h0 = historyIndex; stroke({x:900,y:900},{x:920,y:920}); out.rien = historyIndex === h0; // ne touche rien : pas d'étape d'historique
+        restoreDoc(window.__snap4); selectedId = null; setTool('eraser'); activeTool = null; updateMobileTileActiveState();
+        return out;
+      });
+      await pg.waitForTimeout(500);
+      ok(r.pastille && r.ajoutes, 'gomme : efface pastille, texte et logo ajouté touchés, sans plan sélectionné');
+      ok(r.deuxPlans && r.coins && r.rien, 'gomme : efface tous les plans traversés ; jamais les éléments de coin ; rien touché = pas d\'historique' + ((r.deuxPlans && r.coins && r.rien) ? '' : ' ' + JSON.stringify(r)));
+      ok(await pg.evaluate(()=>{ openTileDrawer('pastille', true); schedulePastilleDrawerClose(); const open = !!document.querySelector('.tb-group[data-tile="pastille"].mobile-open'); const noTimer = pastilleDrawerTimer === null; closeAllTileDrawers(); return open && noTimer; }), 'tiroirs : aucune minuterie de fermeture (restent jusqu\'au clic sur la tuile)');
+      ok(await pg.evaluate(()=>{ const t = model.deviceTypes[0]; pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); x.defaultRadius = 20; }); lastTypeListSig = null; refreshTypeList(); const w = ()=>parseFloat(document.querySelector('#deviceTypeDropdownList .dd-item .dd-sw svg').getAttribute('width'));
+        const a = w(); pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); x.defaultRadius = 10; }); refreshTypeList(); const b = w(); pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); delete x.defaultRadius; }); lastTypeListSig = null; refreshTypeList(); return a===40 && b===20; }), 'liste des postes : la vignette est à la taille réelle du poste et suit les + / −');
+    }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

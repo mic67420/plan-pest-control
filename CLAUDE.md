@@ -32,7 +32,7 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
    en mode Plan.
 2. **Ne jamais déplacer de soi-même** un élément que l'utilisateur place à la main (logos, textes,
    légende, date). Aucun repositionnement automatique non demandé.
-3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-193**), à mettre à
+3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-194**), à mettre à
    jour aux 3 endroits : la balise `<title>`, la puce `.brand .ver` du bandeau, le commentaire
    d'en-tête du `<script>`.
    Attention : un remplacement global (`v2.1-69` → `v2.1-70` partout) modifie aussi les références
@@ -86,7 +86,7 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
 ### Interface
 - **Mode smartphone uniquement** (mode PC supprimé) : 6 tuiles (Page, Vue, Historique, Plan,
   Pastille, Texte) ouvrant des tiroirs. UNE seule tuile active à la fois (`activeTileId`, bleue, aucune au
-  démarrage) ; en toucher une autre désactive les outils de la précédente. Le tiroir se replie seul après 5 s
+  démarrage) ; en toucher une autre désactive les outils de la précédente. Le tiroir reste affiché jusqu'au clic sur sa tuile (v2.1-194 : plus de repli par délai)
   d'inactivité ou dès qu'on agit (pose d'une pastille, gomme…) ; la tuile reste bleue (v2.1-101, à l'essai).
   Survol souris = ouverture immédiate.
 - Barre de sélection et menus d'options en **pleine largeur**, étalés horizontalement.
