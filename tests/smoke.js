@@ -544,6 +544,29 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       ok(await pg.evaluate(()=>{ const t = model.deviceTypes[0]; pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); x.defaultRadius = 20; }); lastTypeListSig = null; refreshTypeList(); const w = ()=>parseFloat(document.querySelector('#deviceTypeDropdownList .dd-item .dd-sw svg').getAttribute('width'));
         const a = w(); pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); x.defaultRadius = 10; }); refreshTypeList(); const b = w(); pages.forEach(pg=>{ const x = pg.deviceTypes.find(y=>y.id===t.id); delete x.defaultRadius; }); lastTypeListSig = null; refreshTypeList(); return a===40 && b===20; }), 'liste des postes : la vignette est à la taille réelle du poste et suit les + / −');
     }
+    // v2.1-195 : la bibliothèque de postes s'applique aussi aux documents rouverts (JSON, Mes documents, version)
+    {
+      const r = await pg.evaluate(async()=>{
+        window.__snap5 = cloneDoc(); const lib0 = library; const out = {};
+        const base = TRADES[currentTradeId].defaultTypes().find(d=>d.id==='type-E');
+        library = { version:1, trades:{ 'pest-control':{ types:[ { ...base, color:'#112233', name:'E (ma version)', defaultRadius:33 }, { id:'type-lib-t195', code:'LB', name:'Extincteur lib', color:'#445566', shape:'circle', defaultRadius:25 } ] } } };
+        const m = createEmptyModel();
+        m.deviceTypes.find(t=>t.id==='type-E').color = '#999999';                     // ancien fichier : autre couleur
+        m.deviceTypes.push({ id:'type-77', code:'LB', name:'Extincteur lib', color:'#999999', shape:'circle' }); // ancien poste créé en v180, sans libId
+        m.pastilles.push({ id:'p77', typeId:'type-77', label:'1', x:50, y:50, radius:12, rotation:0 });
+        pages = [m]; currentPageIndex = 0;
+        await loadDocIntoApp('ancien', 'doc-t195');
+        const E = model.deviceTypes.find(t=>t.id==='type-E'), L = model.deviceTypes.filter(t=>t.code==='LB');
+        out.E = E.color === '#112233' && E.defaultRadius === 33 && E.name === 'E (ma version)';
+        out.L = L.length === 1 && L[0].id === 'type-77' && L[0].color === '#445566' && L[0].libId === 'type-lib-t195' && L[0].defaultRadius === 25;
+        out.p = model.pastilles[0].typeId === 'type-77' && model.pastilles[0].radius === 12;           // la pastille posée garde sa taille
+        await loadDocIntoApp('ancien2', 'doc-t195b'); out.idem = model.deviceTypes.filter(t=>t.code==='LB').length === 1;   // rouvrir ne crée pas de doublon
+        library = lib0; restoreDoc(window.__snap5);
+        return out;
+      });
+      await pg.waitForTimeout(500);
+      ok(r.E && r.L && r.p && r.idem, 'bibliothèque : appliquée à un document rouvert (couleur, taille, nom ; ancien poste relié ; pastille gardée ; pas de doublon)');
+    }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

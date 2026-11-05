@@ -32,7 +32,7 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
    en mode Plan.
 2. **Ne jamais déplacer de soi-même** un élément que l'utilisateur place à la main (logos, textes,
    légende, date). Aucun repositionnement automatique non demandé.
-3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-194**), à mettre à
+3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-195**), à mettre à
    jour aux 3 endroits : la balise `<title>`, la puce `.brand .ver` du bandeau, le commentaire
    d'en-tête du `<script>`.
    Attention : un remplacement global (`v2.1-69` → `v2.1-70` partout) modifie aussi les références
@@ -130,8 +130,9 @@ Mic prévoit de déployer la même application pour d'autres corps de métier. *
   propres au métier encore écrits en dur (légende, noms d'export, logo entreprise, `CORNER_PRESETS`). Le reste (bibliothèque, pages, exports) est commun.
 - **Bibliothèque de postes** (v2.1-182) : gardée sur l'appareil (IndexedDB, magasin `autosave`, clé `library`), structure
   `library.trades[idMétier].types`. Un poste créé reçoit un id unique `type-lib-…` ; un poste d'origine modifié est repéré par son id ;
-  un ancien poste est relié par `libId`. Nouveau document = liste d'origine + bibliothèque (`applyLibraryToModel`) ; les documents existants
-  ne sont jamais modifiés d'office. Fenêtre en tuiles (`openLibraryWindow`), export / import `.ppclib.json`.
+  un ancien poste est relié par `libId` (ou, sans libId, par code + nom). Nouveau document = liste d'origine + bibliothèque ; v2.1-195 (demande de Mic) : `applyLibraryToPages` applique
+  aussi la bibliothèque à tout document ROUVERT (fichier JSON, Mes documents, version restaurée, démarrage) : la bibliothèque GAGNE (couleur, taille, forme, image, nom), les postes
+  manquants sont ajoutés, les pastilles posées gardent leur taille propre. Fenêtre en tuiles (`openLibraryWindow`), export / import `.ppclib.json`.
 
 ## 5. Approches ABANDONNÉES (ne pas les retenter)
 

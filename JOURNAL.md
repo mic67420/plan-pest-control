@@ -1622,4 +1622,11 @@ v2.1-194 — Tiroirs sans délai, gomme universelle, poste à sa taille réelle 
      jamais les 4 éléments de coin (logo Radical, logo client, adresse, « Mise à jour le », légende) ni un élément verrouillé ; un seul pushHistory par trait (aucun si rien n'est touché).
   3) Liste des postes : la vignette de chaque poste est à sa dimension réelle (diamètre = 2 x taille, plafonné à 48 px, emplacement fixe pour garder les codes alignés) et suit les + / − en direct.
      Le + / − fonctionnait déjà sur une ligne non sélectionnée (vérifié téléphone et PC).
+
+v2.1-195 — Les postes modifiés s'appliquent aussi aux documents rouverts (JSON, Mes documents, restauration)
+  Demande de Mic : couleur, dimension, etc. des postes conservés pour tout nouveau projet ET à l'import d'anciens fichiers JSON. Réponses : JSON + Mes documents + Restaurer ; la bibliothèque gagne.
+  Cause : v2.1-182 n'appliquait la bibliothèque qu'aux NOUVEAUX documents (les anciens étaient volontairement laissés tels quels).
+  Correctif : applyLibraryToPages (appelée par loadDocIntoApp = JSON, Mes documents, version restaurée ; et au démarrage) : un poste du document correspondant à la bibliothèque (même id d'origine,
+  même libId, ou ancien poste sans libId : même code + même nom) prend exactement les réglages de la bibliothèque en gardant son identifiant (les pastilles posées gardent leur poste ET leur propre
+  taille) ; un poste de la bibliothèque absent est ajouté ; rouvrir ne crée pas de doublon. CLAUDE.md §4 ter mis à jour.
 ```

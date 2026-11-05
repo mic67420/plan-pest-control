@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-194 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-195 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -677,7 +677,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-194</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-195</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -949,7 +949,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-194 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-195 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -1362,13 +1362,26 @@ function libLink(typeId){
 }
 let libSyncTimers = {};
 function libSyncSoon(typeId){ clearTimeout(libSyncTimers[typeId]); libSyncTimers[typeId] = setTimeout(()=>libLink(typeId), 700); }
-// Nouveau document : la liste d'origine, complétée / remplacée par les postes de la bibliothèque.
-function applyLibraryToModel(m){
-  libTypes().forEach(lt=>{
-    const i = m.deviceTypes.findIndex(x=>x.id===lt.id), c = { ...lt };
-    if (i >= 0) m.deviceTypes[i] = c; else m.deviceTypes.push(c);
+// Applique la bibliothèque à des pages : un poste du document qui correspond à un poste de la bibliothèque (même id d'origine, même libId, ou — ancien poste sans libId — même code ET
+// même nom) prend EXACTEMENT les réglages de la bibliothèque (couleur, taille, forme, image, nom…) en gardant son identifiant (les pastilles posées continuent de le référencer) ;
+// un poste de la bibliothèque absent du document y est ajouté. Utilisé pour un NOUVEAU document ET (v2.1-195, demande de Mic : la bibliothèque gagne) à l'ouverture d'un fichier
+// JSON, d'un document de « Mes documents », d'une version restaurée et au démarrage.
+function applyLibraryToPages(pgs){
+  const lib = libTypes(); if (!lib.length) return;
+  pgs.forEach(pg=>{
+    if (!pg.deviceTypes) pg.deviceTypes = [];
+    lib.forEach(lt=>{
+      let i = pg.deviceTypes.findIndex(x=>x.id === lt.id || x.libId === lt.id);
+      if (i < 0 && !libIsDefaultId(lt.id)) i = pg.deviceTypes.findIndex(x=>!x.libId && !libIsDefaultId(x.id) && x.code === lt.code && x.name === lt.name);
+      if (i >= 0){
+        const keep = pg.deviceTypes[i].id, c = { ...lt, id: keep };
+        if (keep !== lt.id) c.libId = lt.id; else delete c.libId;
+        pg.deviceTypes[i] = c;
+      } else pg.deviceTypes.push({ ...lt });
+    });
   });
 }
+function applyLibraryToModel(m){ applyLibraryToPages([m]); } // nouveau document
 // Poste de la bibliothèque dans le document ouvert (toutes les pages), puis sélection.
 function libAddToDoc(lt){
   const have = model.deviceTypes.find(x=>x.id===lt.id || x.libId===lt.id);
@@ -7285,6 +7298,7 @@ document.getElementById('btnExportJSON').addEventListener('click', ()=>{ closeAl
 async function loadDocIntoApp(name, id){
   resetRemoteGesture(); // v2.1-166
   pages.forEach(migratePlanFormat);
+  applyLibraryToPages(pages); // v2.1-195 : les postes modifiés / créés s'appliquent aussi aux documents rouverts (fichier JSON, Mes documents, version restaurée)
   docName = name; docId = id;
   model = pages[currentPageIndex];
   idCounter = 100000; // évite les collisions d'ID
@@ -7823,6 +7837,7 @@ function ensureDefaultDeviceTypes(){
   if (saved && Array.isArray(saved.pages) && saved.pages.length){
     pages = saved.pages;
     pages.forEach(migratePlanFormat);
+    applyLibraryToPages(pages); // v2.1-195
     currentPageIndex = Math.min(saved.currentPageIndex||0, pages.length-1);
     docName = saved.docName || null;
     docId = saved.docId || newDocId(); // ancien format : identifiant créé maintenant
