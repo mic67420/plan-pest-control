@@ -32,7 +32,7 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
    en mode Plan.
 2. **Ne jamais déplacer de soi-même** un élément que l'utilisateur place à la main (logos, textes,
    légende, date). Aucun repositionnement automatique non demandé.
-3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-198**), à mettre à
+3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-199**), à mettre à
    jour aux 3 endroits : la balise `<title>`, la puce `.brand .ver` du bandeau, le commentaire
    d'en-tête du `<script>`.
    Attention : un remplacement global (`v2.1-69` → `v2.1-70` partout) modifie aussi les références
@@ -150,7 +150,6 @@ Mic prévoit de déployer la même application pour d'autres corps de métier. *
   pendant les glissements (cadenas, icônes de rotation, halo), taille des canevas selon la
   densité d'écran, coût des filtres d'image du plan, sauvegardes automatiques. Proposer un plan
   classé par gain attendu et par risque avant toute modification.
-- Réordonner ou supprimer un poste n'agit encore que sur la page affichée.
 - Mise en ligne sur GitHub Pages envisagée (fiabilise la sauvegarde et l'usage sur iPhone).
 - Documents anciens : leurs éléments de coin ne sont pas verrouillés automatiquement.
 - Noms exacts des postes « Rodenticide » int. / ext. à confirmer.

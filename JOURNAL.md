@@ -1648,4 +1648,19 @@ v2.1-198 — Numérotation PAR POSTE : deux postes de même code commencent chac
   Correctif : nextFreeLabelNumber(code, typeId) ne regarde que les pastilles du MÊME poste (trous comblés, toutes pages) ; relabelForCodeChange garde les numéros en changeant seulement le code ;
   « Contrôle des numéros » : une série par poste (si deux postes ont le même code, le nom du poste les distingue : « NT — NT vert ») ; plus de faux « en double » entre postes ; « Renuméroter » agit
   sur la série du poste. Deux étiquettes identiques (NT1) peuvent donc exister pour deux postes différents : la couleur / le poste les distingue.
+
+v2.1-199 — AUDIT complet (bugs + optimisation) : 6 corrections sûres
+  Méthode : tests aléatoires (≈40 actions enchaînées sur 1 à 5 pages, 24 séries, vérification de cohérence après CHAQUE action : ids uniques, postes connus, traits non orphelins, nœuds = modèle,
+  historique borné, même liste de postes sur toutes les pages), mesures de performance sur un document chargé (grand plan + 150 pastilles), essais sur d'anciens fichiers incomplets.
+  1) Identifiants en DOUBLE : « idCounter = 100000 » à chaque ouverture rejouait les mêmes identifiants (ouvrir, ajouter, enregistrer, rouvrir, ajouter → text-100000 deux fois). Correctif : syncIdCounter
+     (au-delà du plus grand numéro présent).
+  2) Pages ajoutées par « + Étage » : la date et l'adresse recevaient de nouveaux identifiants -> copier la date sur les autres pages créait un DOUBLON, et la gomme ne protégeait pas « Adresse du client ».
+     Correctif : mêmes identifiants que la page modèle ; migrateCornerTexts rend leur identifiant aux anciens documents (date reconnue par son texte, adresse par sa position de coin) ; copie : date aussi repérée par son texte.
+  3) Réordonner / supprimer un poste n'agissait que sur la page affichée (autres pages désynchronisées) et laissait des traits orphelins : maintenant sur TOUTES les pages (point ouvert retiré de CLAUDE.md).
+  4) Ancien fichier ou fichier incomplet (sans dessins, postes, textes, légende…) : l'ouverture PLANTAIT (« Fichier de projet invalide »). normalizePageFields met une valeur par défaut à chaque champ manquant ;
+     une pastille dont le poste a disparu reçoit un poste de remplacement « (retrouvé) ».
+  5) Image de plan illisible (tronquée / non décodable) : bloquait l'ouverture de tout le document ; remplacée par un cadre gris « Image du plan illisible » (donnée d'origine conservée).
+  6) Optimisation : updateTypeSwatches ne fait plus rien quand la liste des postes est fermée (appelée à chaque rendu et chaque zoom).
+  Mesures (navigateur de test, pas un téléphone) : rendu 150 pastilles 3 ms, glissement 1,4 ms, sauvegarde auto 38 ms, historique 0,1 ms, export d'une page 265 ms, import d'un plan 3000x2000 540 ms ;
+  point lourd restant : chaque trait de gomme ré-encode tout le plan en PNG (≈190 ms ici, plus sur téléphone) -> à étudier (risque moyen).
 ```

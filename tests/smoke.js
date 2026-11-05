@@ -608,6 +608,42 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       await pg.waitForTimeout(400);
       ok(r.ok && r.nSeries===2 && r.noDup && r.named, 'deux postes de même code : chacun sa série qui commence à 1 ('+r.a+' | '+r.b+' | suivant '+r.c+') ; contrôle des numéros : 2 séries distinctes, sans faux doublon');
     }
+    // v2.1-199 (audit) : identifiants, textes de coin des pages ajoutées, postes sur toutes les pages, anciens fichiers incomplets
+    {
+      const r = await pg.evaluate(async()=>{
+        window.__snap8 = cloneDoc(); const out = {};
+        // 1. compteur d'identifiants : après réouverture d'un document qui contient déjà text-100000, le suivant est plus grand
+        pages = [createEmptyModel()]; currentPageIndex = 0; pages[0].textes.push({ id:'text-100000', text:'x', x:1, y:1, fontSize:16, fontFamily:APP_FONT, color:'#000', background:null, rotation:0, align:'left', verticalAlign:'middle', locked:false });
+        await loadDocIntoApp('t1','d-t1'); const nid = nextId('text-'); out.id = parseInt(nid.split('-')[1],10) > 100000;
+        // 2. page ajoutée par « + Étage » : la date et l'adresse gardent leur identifiant ; copier la date ne crée pas de doublon ; la gomme protège l'adresse
+        addBlankPage(0); await new Promise(r=>setTimeout(r,500));
+        out.ids = pages[1].textes.map(t=>t.id).sort().join() === 'text-client-address,text-update-date' || pages[1].textes.map(t=>t.id).join().includes('text-update-date');
+        switchToPage(1); await new Promise(r=>setTimeout(r,400));
+        const d = model.textes.find(t=>t.id==='text-update-date'); selectedId = d.id; render(); updateLockIndicator(); const n0 = pages[0].textes.length; copySelectionToOtherPages(); out.noDup = pages[0].textes.length === n0;
+        const ad = model.textes.find(t=>t.id==='text-client-address'); out.addrProtected = !!ad && isCornerElement('text', ad);
+        // 3. migration d'un ancien fichier : date et adresse aux identifiants quelconques retrouvées
+        const old = createEmptyModel(); old.textes[0].id = 'text-3'; old.textes[1].id = 'text-4'; pages = [old]; currentPageIndex = 0; await loadDocIntoApp('t3','d-t3');
+        out.migrated = model.textes.some(t=>t.id==='text-update-date') && model.textes.some(t=>t.id==='text-client-address');
+        // 4. supprimer / réordonner un poste agit sur TOUTES les pages
+        pages = [createEmptyModel(), createEmptyModel()]; currentPageIndex = 0; await loadDocIntoApp('t4','d-t4');
+        const a = model.deviceTypes[0].id, b = model.deviceTypes[1].id; swapTypesAllPages(a, b);
+        out.swap = pages.every(pg=>pg.deviceTypes[0].id===b && pg.deviceTypes[1].id===a);
+        pages[1].pastilles.push({ id:'past-x1', typeId:b, label:'X1', x:5, y:5, radius:12, rotation:0 }); pages[1].anchors.push({ id:'anc-x1', x:1, y:1 }); pages[1].lines.push({ id:'ln-x1', fromAnchorId:'anc-x1', toPastilleId:'past-x1' });
+        editingTypeId = b; selectedTypeId = b; document.getElementById('btnDelType').click();
+        out.del = pages.every(pg=>!pg.deviceTypes.some(t=>t.id===b) && !pg.pastilles.some(p=>p.typeId===b) && !pg.lines.some(l=>l.toPastilleId==='past-x1'));
+        // 5. ancien fichier incomplet (aucun champ récent) et plan à image illisible : le document s'ouvre
+        pages = [{ orientation:'portrait', pastilles:[{ id:'p1', typeId:'type-inconnu', label:'Q1', x:10, y:10, radius:16 }] }]; currentPageIndex = 0;
+        try{ await loadDocIntoApp('t5','d-t5'); render(); out.oldOk = model.legend && Array.isArray(model.textes) && model.deviceTypes.some(t=>t.id==='type-inconnu'); }catch(e){ out.oldOk = false; }
+        pages = [{ orientation:'portrait', plans:[{ id:'plan-bad', dataURL:'data:image/png;base64,AAAA', x:0, y:0, width:100, height:100, rotation:0 }] }]; currentPageIndex = 0;
+        try{ await loadDocIntoApp('t6','d-t6'); out.badImg = model.plans.length === 1; }catch(e){ out.badImg = false; }
+        restoreDoc(window.__snap8); selectedId = null; return out;
+      });
+      await pg.waitForTimeout(500);
+      ok(r.id, 'identifiants : après réouverture, les nouveaux identifiants ne reprennent pas ceux déjà présents');
+      ok(r.ids && r.noDup && r.addrProtected && r.migrated, 'pages « + Étage » : date et adresse gardent leur identifiant (copie sans doublon, gomme protège l\'adresse) ; anciens fichiers migrés');
+      ok(r.swap && r.del, 'poste : réordonner et supprimer agissent sur toutes les pages (traits orphelins retirés)');
+      ok(r.oldOk && r.badImg, 'ancien fichier incomplet et plan à image illisible : le document s\'ouvre quand même');
+    }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');
