@@ -1663,4 +1663,13 @@ v2.1-199 — AUDIT complet (bugs + optimisation) : 6 corrections sûres
   6) Optimisation : updateTypeSwatches ne fait plus rien quand la liste des postes est fermée (appelée à chaque rendu et chaque zoom).
   Mesures (navigateur de test, pas un téléphone) : rendu 150 pastilles 3 ms, glissement 1,4 ms, sauvegarde auto 38 ms, historique 0,1 ms, export d'une page 265 ms, import d'un plan 3000x2000 540 ms ;
   point lourd restant : chaque trait de gomme ré-encode tout le plan en PNG (≈190 ms ici, plus sur téléphone) -> à étudier (risque moyen).
+
+v2.1-200 — Poser des postes les uns sur les autres (superposition)
+  Demande de Mic : pouvoir superposer les postes ; ils ne doivent pas « disparaître » quand on s'approche d'un autre. Réponses : un toucher sur une pastille en pose une nouvelle dessus (appui long =
+  sélectionner) ; l'aperçu toujours visible.
+  Cause : (1) l'aperçu de pose était masqué dès que le pointeur était à moins de rayon + 9 px d'une pastille (pastilleUnderPointer) ; (2) un toucher sur une pastille la sélectionnait toujours
+  (le clic doit viser le plan : « e.target ») : impossible d'en poser une dessus.
+  Correctif : aperçu masqué seulement pendant un glissement commencé SUR une pastille ; avec un outil de pose (classique ou, à la souris, déporté), un toucher bref sur une pastille appelle la pose
+  (placeClassicAt / placeRemoteMouseAt, communs au clic sur le plan) ; appui long (450 ms) = sélection ; glisser = déplacer, comme avant ; le double-clic « verrouiller » est désactivé pendant la pose
+  (deux touchers = deux pastilles ; verrou par l'icône cadenas). Sans outil de pose : inchangé. Placement déporté AU DOIGT : inchangé (curseur dédié).
 ```

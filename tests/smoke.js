@@ -644,6 +644,21 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       ok(r.swap && r.del, 'poste : réordonner et supprimer agissent sur toutes les pages (traits orphelins retirés)');
       ok(r.oldOk && r.badImg, 'ancien fichier incomplet et plan à image illisible : le document s\'ouvre quand même');
     }
+    // v2.1-200 : superposer les postes : l'aperçu ne disparaît pas près d'une pastille, un toucher dessus en pose une autre, un appui long la sélectionne
+    {
+      await pg.evaluate(()=>{ window.__snap9 = cloneDoc(); closeOtherWindows(''); closeAllPopovers(); closeAllTileDrawers(); hideBubble(); justPannedPlan = false; isPinching = false; selectedId = null; model.legend.visible = false; model.textes = model.textes.filter(t=>t.locked===true && t.y > 900); model.logos = model.logos.filter(l=>l.y < 200); /* rien d'autre sous le point de test (la légende s'y trouve parfois) */ selectedTypeId = model.deviceTypes[0].id; if (activeTool !== 'place-classic') setTool('place-classic'); model.pastilles = []; const p = addPastille(300, 300); p.locked = false; window.__p9 = p.id; render(); });
+      const pt = await pg.evaluate(()=>{ const r = sheetShadowHostEl.getBoundingClientRect(); return { x:r.left+300*zoom, y:r.top+300*zoom }; });
+      const diag = await pg.evaluate(([x,y])=>{ const e = document.elementFromPoint(x,y); return { el: e ? (e.tagName+'#'+e.id+'.'+(e.className&&e.className.baseVal!==undefined?e.className.baseVal:e.className)).slice(0,60) : null, tool: activeTool, jp: justPannedPlan, pin: isPinching }; }, [pt.x, pt.y]);
+      const near = await pg.evaluate(()=>{ ghostGroup.destroyChildren(); updateGhost({ x:305, y:300 }); return ghostGroup.children.length > 0; });  // 5 px d'une pastille : aperçu visible
+      await pg.mouse.move(pt.x, pt.y); await pg.mouse.down(); await pg.mouse.up(); await pg.waitForTimeout(250);          // toucher SUR la pastille
+      const a = await pg.evaluate(()=>({ n:model.pastilles.length, same:model.pastilles.filter(p=>Math.abs(p.x-300)<=6 && Math.abs(p.y-300)<=6).length, sel:selectedId }));
+      await pg.mouse.move(pt.x, pt.y); await pg.mouse.down(); await pg.waitForTimeout(650); await pg.mouse.up(); await pg.waitForTimeout(250);   // appui long
+      const b = await pg.evaluate(()=>({ n:model.pastilles.length, sel:selectedId, top: model.pastilles[model.pastilles.length-1].id }));
+      ok(near && a.n===2 && a.same===2, 'superposer : l\'aperçu reste visible près d\'une pastille et un toucher dessus en pose une autre ('+a.n+' pastilles) '+((near && a.n===2 && a.same===2) ? '' : JSON.stringify({ near, a, diag })));
+      ok(b.n===2 && b.sel && b.sel !== null, 'superposer : un appui long sur une pastille la sélectionne sans en poser une autre');
+      await pg.evaluate(()=>{ activeTool = null; updateMobileTileActiveState(); restoreDoc(window.__snap9); selectedId = null; });
+      await pg.waitForTimeout(400);
+    }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

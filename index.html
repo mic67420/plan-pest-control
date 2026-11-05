@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-199 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-200 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -677,7 +677,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-199</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-200</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -949,7 +949,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-199 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-200 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -2728,8 +2728,20 @@ function renderContent(){
         // Les gestionnaires relisent le modèle via p.id à chaque appel (jamais une
         // référence capturée), pour rester corrects même après un undo/redo qui remplace
         // l'objet model entier, ou si la pastille a depuis été supprimée.
-        group.on('click tap', ()=>selectNode(group, p.id));
+        // v2.1-200 : avec un outil de POSE actif, un simple toucher SUR une pastille en pose une NOUVELLE par-dessus (on peut superposer les postes) ; pour SÉLECTIONNER une pastille
+        // existante : appui long (0,45 s) sur elle ; la glisser la déplace comme avant. Sans outil de pose : toucher = sélectionner, comme avant.
+        group.on('click tap', (e)=>{
+          const placing = activeTool === 'place-classic' || (activeTool === 'place-remote' && !isRealTouch(e));
+          const held = Date.now() - (group._pressAt || 0) >= PASTILLE_SELECT_HOLD_MS;
+          if (placing && !held && !justPannedPlan){
+            const pos = stagePointer(); if (!pos) return;
+            if (activeTool === 'place-classic') placeClassicAt(pos); else placeRemoteMouseAt(pos);
+            return;
+          }
+          selectNode(group, p.id);
+        });
         group.on('mousedown touchstart', ()=>{
+          group._pressAt = Date.now();
           const pp = model.pastilles.find(x=>x.id===p.id);
           if (pp && pp.locked) showTimedBubble('Pastille verrouillée : touchez le cadenas pour la déverrouiller');
         });
@@ -2749,6 +2761,7 @@ function renderContent(){
           pushHistory(); render();
         });
         group.on('dblclick dbltap', ()=>{
+          if (activeTool === 'place-classic' || activeTool === 'place-remote') return; // v2.1-200 : avec un outil de pose, deux toucher = deux pastilles (verrouiller : icône cadenas)
           const pp = model.pastilles.find(x=>x.id===p.id); if (!pp) return;
           // Le renommage se fait déjà via le champ dédié dans la barre de sélection (un
           // simple clic suffit) : le double-clic sert donc plutôt à verrouiller/déverrouiller
@@ -4009,8 +4022,9 @@ function updateGhost(pos){
   if (ghostGroup.children.length === 0 && !pastilleLongPressActive && activeTool!=='place-classic' && activeTool!=='place-remote' && activeTool!=='eraser') return;
   ghostGroup.destroyChildren();
   if (pastilleLongPressActive){ uiLayer.batchDraw(); return; } // en cours de déplacement du plan : pas d'aperçu de pastille
-  if (pos && (activeTool==='place-classic' || activeTool==='place-remote') && (ghostBlockedByPastille || pastilleUnderPointer(pos))){
-    uiLayer.batchDraw(); return; // sur une pastille existante : aucun aperçu de pose (v2.1-76)
+  // v2.1-200 : l'aperçu reste TOUJOURS visible (on peut superposer des postes) ; seul un appui commencé SUR une pastille (glissement de CETTE pastille) le masque jusqu'au relâchement (v2.1-76)
+  if (pos && (activeTool==='place-classic' || activeTool==='place-remote') && ghostBlockedByPastille){
+    uiLayer.batchDraw(); return;
   }
   if (activeTool==='place-classic' || activeTool==='place-remote'){
     const type = model.deviceTypes.find(t=>t.id===selectedTypeId);
@@ -4445,6 +4459,10 @@ stage.on('touchend touchcancel', (e)=>{
 });
 
 /* ---------------------------- Placement des pastilles ----------------------- */
+function placeClassicAt(pos){
+  if (!selectedTypeId){ toast('Sélectionnez d\'abord un type de dispositif.'); return; }
+  addPastille(pos.x, pos.y);
+}
 stage.on('click tap', (e)=>{
   if (isPinching) return;
   if (justPannedPlan) return; // appui long relâché après avoir déplacé le plan : ne pas coller de pastille (le drapeau s'efface tout seul après coup, voir endPastilleLongPress)
@@ -4454,8 +4472,7 @@ stage.on('click tap', (e)=>{
   if (e.target !== stage && e.target.getLayer() !== planLayer) return; // clic doit toucher la feuille/plan, pas un élément déjà présent
 
   if (activeTool==='place-classic'){
-    if (!selectedTypeId){ toast('Sélectionnez d\'abord un type de dispositif.'); return; }
-    addPastille(pos.x, pos.y);
+    placeClassicAt(pos);
   } else if (activeTool==='pipette'){
     pickColorAt(pos); closeAllTileDrawers();
   } else if (activeTool==='paint-bucket'){
@@ -4475,6 +4492,7 @@ stage.on('click tap', (e)=>{
 // pastille déportée, découpes, gomme — ont leur propre équivalent, voir plus bas.)
 const TAP_TOOLS_WITH_LONGPRESS_PAN = ['place-classic','pipette','paint-bucket', null];
 const PASTILLE_LONGPRESS_MS = 380;
+const PASTILLE_SELECT_HOLD_MS = 450; // v2.1-200 : appui long sur une pastille (outil de pose actif) = la sélectionner au lieu d'en poser une autre dessus
 const PASTILLE_LONGPRESS_MOVE_PX = 10; // au-delà, on bascule aussi en déplacement avant même la fin du délai
 let pastilleLongPressTimer = null;
 let pastilleLongPressActive = false;
@@ -4560,6 +4578,10 @@ stage.on('click', (e)=>{
   const pos = stagePointer();
   if (!pos) return;
   if (e.target !== stage && e.target.getLayer() !== planLayer) return;
+  placeRemoteMouseAt(pos);
+});
+// Souris, placement déporté : 1er clic = point réel, 2e clic = pastille (commun au clic sur le plan ET au clic sur une pastille existante, v2.1-200).
+function placeRemoteMouseAt(pos){
   if (!remoteAnchor){
     remoteAnchor = {x:snapToGrid(pos.x), y:snapToGrid(pos.y)};
     toast('Point réel placé. Cliquez à présent où afficher la pastille.');
@@ -4571,7 +4593,7 @@ stage.on('click', (e)=>{
     remoteAnchor = null;
     pushHistory(); render();
   }
-});
+}
 
 function addPastille(x,y, commit=true){
   x = snapToGrid(x); y = snapToGrid(y); // v2.1-89 : centre sur une intersection de la grille si elle est affichée
