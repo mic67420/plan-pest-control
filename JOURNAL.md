@@ -1672,4 +1672,10 @@ v2.1-200 — Poser des postes les uns sur les autres (superposition)
   Correctif : aperçu masqué seulement pendant un glissement commencé SUR une pastille ; avec un outil de pose (classique ou, à la souris, déporté), un toucher bref sur une pastille appelle la pose
   (placeClassicAt / placeRemoteMouseAt, communs au clic sur le plan) ; appui long (450 ms) = sélection ; glisser = déplacer, comme avant ; le double-clic « verrouiller » est désactivé pendant la pose
   (deux touchers = deux pastilles ; verrou par l'icône cadenas). Sans outil de pose : inchangé. Placement déporté AU DOIGT : inchangé (curseur dédié).
+
+v2.1-201 — Édition d'un texte : le bouton « Valider » ne cache plus le cadre
+  Cause : à l'ouverture de l'édition d'un texte (date, adresse…), le bouton « Valider » était posé SOUS le cadre ; quand le texte était près du bas de l'écran, keepFixedBarInViewport le remontait
+  pour qu'il reste visible, donc PAR-DESSUS le cadre édité (photo de Mic : cadre de la date masqué).
+  Correctif : placeTextEditConfirm : sous le cadre s'il y a la place, sinon AU-DESSUS ; si le cadre est très haut : sur le côté ; dernier recours : coin haut droit ; replacé si l'écran change
+  (clavier virtuel, rotation). Vérifié avec des écrans de 900, 640, 520 et 400 px de haut : jamais de chevauchement. L'icône bleue ⇧ vue sur la photo ne vient pas de l'application (clavier / système).
 ```

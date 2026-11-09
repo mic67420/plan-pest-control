@@ -659,6 +659,21 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       await pg.evaluate(()=>{ activeTool = null; updateMobileTileActiveState(); restoreDoc(window.__snap9); selectedId = null; });
       await pg.waitForTimeout(400);
     }
+    // v2.1-201 : édition d'un texte près du bas de l'écran : le bouton « Valider » ne recouvre pas le cadre (il passe au-dessus)
+    {
+      const vp = pg.viewportSize(); await pg.setViewportSize({ width:vp.width, height:520 }); await pg.waitForTimeout(300);
+      const r = await pg.evaluate(()=>{
+        const t = model.textes.find(x=>x.id==='text-update-date'), n = t && textNodes.get(t.id); if (!n) return { ok:false, why:'pas de date' };
+        const wrap = document.getElementById('canvasWrap'), host = sheetShadowHostEl.getBoundingClientRect(); wrap.scrollTop += host.top + (t.y+20)*zoom - (window.innerHeight - 30);
+        openTextEditor(t, n);
+        const a = document.getElementById('textEditArea').getBoundingClientRect(), b = document.getElementById('textEditConfirm').getBoundingClientRect();
+        const inter = !(b.right <= a.left || b.left >= a.right || b.bottom <= a.top || b.top >= a.bottom);
+        const out = { ok: !inter && b.bottom <= window.innerHeight, a:[a.top|0,a.bottom|0], b:[b.top|0,b.bottom|0] };
+        document.getElementById('textEditConfirm').click(); return out;
+      });
+      await pg.setViewportSize(vp); await pg.waitForTimeout(300);
+      ok(r.ok, 'texte près du bas de l\'écran : le bouton Valider ne cache pas le cadre en cours d\'édition ('+JSON.stringify(r)+')');
+    }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');
