@@ -1678,4 +1678,10 @@ v2.1-201 — Édition d'un texte : le bouton « Valider » ne cache plus le cadr
   pour qu'il reste visible, donc PAR-DESSUS le cadre édité (photo de Mic : cadre de la date masqué).
   Correctif : placeTextEditConfirm : sous le cadre s'il y a la place, sinon AU-DESSUS ; si le cadre est très haut : sur le côté ; dernier recours : coin haut droit ; replacé si l'écran change
   (clavier virtuel, rotation). Vérifié avec des écrans de 900, 640, 520 et 400 px de haut : jamais de chevauchement. L'icône bleue ⇧ vue sur la photo ne vient pas de l'application (clavier / système).
+
+v2.1-202 — Double-clic sur un texte : l'éditeur ne « zoome » plus
+  Cause : l'éditeur (zone de saisie) avait un cadre minimal de 120 x 30 px et une police d'au moins 16 px : pour la date affichée en 87 x 11 px, police 7,5 px (feuille entière à l'écran), l'éditeur
+  apparaissait 2 fois plus gros = impression de zoom. (Le zoom de l'application, lui, ne bougeait pas : vérifié.)
+  Correctif : l'éditeur épouse le cadre du texte (position, largeur, hauteur, police = taille x zoom, marge intérieure = TEXT_PAD x zoom, une ligne reste une ligne pour un texte ajusté au contenu) et grandit
+  avec la frappe ; seul iPhone / iPad garde la police minimale de 16 px (Safari zoome sinon la page au focus). Le bouton « Valider » se replace (v2.1-201).
 ```

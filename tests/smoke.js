@@ -674,6 +674,17 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       await pg.setViewportSize(vp); await pg.waitForTimeout(300);
       ok(r.ok, 'texte près du bas de l\'écran : le bouton Valider ne cache pas le cadre en cours d\'édition ('+JSON.stringify(r)+')');
     }
+    // v2.1-202 : éditeur de texte = même taille et même police que le texte affiché (plus d'effet « zoom » au double-clic)
+    {
+      const r = await pg.evaluate(()=>{
+        const t = model.textes.find(x=>x.id==='text-update-date'), n = t && textNodes.get(t.id); if (!n) return { ok:false };
+        const box = n.getClientRect({ relativeTo:stage }), z0 = zoom; openTextEditor(t, n);
+        const a = document.getElementById('textEditArea'), ar = a.getBoundingClientRect();
+        const out = { ok: Math.abs(ar.width - box.width*z0) <= 3 && Math.abs(parseFloat(a.style.fontSize) - t.fontSize*z0) < 0.5 && ar.height <= box.height*z0 + 6 && zoom === z0, w:[Math.round(ar.width), Math.round(box.width*z0)], f:[a.style.fontSize, +(t.fontSize*z0).toFixed(2)] };
+        document.getElementById('textEditConfirm').click(); return out;
+      });
+      ok(r.ok, 'éditeur de texte : même taille et même police que le texte affiché, aucun zoom ('+JSON.stringify(r)+')');
+    }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

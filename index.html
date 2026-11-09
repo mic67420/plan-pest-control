@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-201 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-202 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -677,7 +677,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-201</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-202</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -949,7 +949,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-201 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-202 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -5935,11 +5935,25 @@ function openTextEditor(t, node){
   const confirmBtn = document.getElementById('textEditConfirm');
   const rect = sheetShadowHostEl.getBoundingClientRect();
   const box = node.getClientRect({relativeTo:stage});
+  // v2.1-201 : l'éditeur ÉPOUSE le cadre du texte (même position, même taille, même police à l'écran) : avant, un cadre minimal de 120 x 30 px et une police d'au moins 16 px le faisaient
+  // paraître « zoomé » dès le double-clic (date 87 x 11 px, police 7,5 px -> cadre 120 x 30, police 16 px). Seul iPhone / iPad garde la police minimale de 16 px : en dessous, Safari
+  // zoome la page entière au focus.
+  const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   area.style.left = (rect.left + box.x*zoom) + 'px';
   area.style.top = (rect.top + box.y*zoom) + 'px';
-  area.style.width = Math.max(120, box.width*zoom) + 'px';
-  area.style.height = Math.max(30, box.height*zoom) + 'px';
-  area.style.fontSize = Math.max(16, t.fontSize*zoom) + 'px'; // jamais sous 16px : Safari iOS zoome sinon la page entière au focus
+  if (ios){
+    area.style.width = Math.max(120, box.width*zoom) + 'px';
+    area.style.height = Math.max(30, box.height*zoom) + 'px';
+    area.style.fontSize = Math.max(16, t.fontSize*zoom) + 'px'; // jamais sous 16px : Safari iOS zoome sinon la page entière au focus
+    area.style.padding = ''; area.style.borderWidth = ''; area.style.lineHeight = ''; area.style.overflow = ''; area.style.whiteSpace = ''; area.wrap = 'soft';
+  } else {
+    const fs = t.fontSize*zoom, pad = Math.max(1, (typeof TEXT_PAD !== 'undefined' ? TEXT_PAD : 4)*zoom);
+    area.style.boxSizing = 'border-box'; area.style.borderWidth = '1px'; area.style.padding = pad + 'px'; area.style.lineHeight = '1'; area.style.overflow = 'hidden';
+    area.style.whiteSpace = t.autoFit ? 'pre' : 'pre-wrap'; area.wrap = t.autoFit ? 'off' : 'soft'; // texte ajusté au contenu : une ligne = une ligne (comme à l'écran), sans retour automatique
+    area.style.fontSize = fs + 'px';
+    area.style.width = Math.max(24, box.width*zoom) + 'px';
+    area.style.height = Math.max(box.height*zoom, fs + 2*pad + 2) + 'px';
+  }
   area.style.fontFamily = APP_FONT;
   area.style.color = t.color;
   area.style.textAlign = t.align || 'left';
@@ -5949,6 +5963,9 @@ function openTextEditor(t, node){
   const onViewportChange = ()=>placeTextEditConfirm(area, confirmBtn); // clavier virtuel qui s'ouvre, rotation de l'écran : le bouton se replace
   window.addEventListener('resize', onViewportChange);
   if (window.visualViewport) window.visualViewport.addEventListener('resize', onViewportChange);
+  const onInput = ()=>{ if (ios) return; area.style.height = 'auto'; area.style.height = Math.max(parseFloat(area.dataset.h0 || '0'), area.scrollHeight + 2) + 'px'; placeTextEditConfirm(area, confirmBtn); };
+  area.dataset.h0 = String(parseFloat(area.style.height) || 0);
+  area.addEventListener('input', onInput);
   area.focus(); area.select();
   let done = false;
   function commit(){
@@ -5958,6 +5975,7 @@ function openTextEditor(t, node){
     confirmBtn.style.display='none';
     area.removeEventListener('blur', onBlur);
     confirmBtn.removeEventListener('click', onConfirmClick);
+    area.removeEventListener('input', onInput);
     window.removeEventListener('resize', onViewportChange);
     if (window.visualViewport) window.visualViewport.removeEventListener('resize', onViewportChange);
     // le texte reste sélectionné : la case est de nouveau librement déplaçable/redimensionnable
