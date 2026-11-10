@@ -702,9 +702,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       await pg.mouse.move(P.minus.x, P.minus.y); await pg.mouse.down(); await pg.mouse.up(); await pg.mouse.down(); await pg.mouse.up(); await pg.waitForTimeout(200);
       const minus2 = await rotNow();
       const before = await rotNow();
-      await pg.mouse.move(P.arc.x, P.arc.y); await pg.mouse.down(); await pg.mouse.move(P.arc.x+80, P.arc.y+40, { steps:6 }); await pg.mouse.up(); await pg.waitForTimeout(200);
-      const noHold = (await rotNow()) === before;                                  // glisser tout de suite, sans maintien : rien ne tourne
-      await pg.mouse.move(P.arc.x, P.arc.y); await pg.mouse.down(); await pg.waitForTimeout(600);
+            await pg.mouse.move(P.arc.x, P.arc.y); await pg.mouse.down(); await pg.waitForTimeout(60); // v2.1-207 : immédiat, sans maintien
       const armed = await pg.evaluate(()=>!!planRotate.active && rotHandleEl.querySelector('.rot-arc-line').getAttribute('stroke') === '#0E6FA8');
       const cc = await pg.evaluate(()=>{ const pl = findPlanById(window.__rotPl), c = planCenter(pl), r = sheetShadowHostEl.getBoundingClientRect(); return { x:r.left+c.x*zoom, y:r.top+c.y*zoom }; });
       await pg.mouse.move(cc.x+120, cc.y, { steps:10 }); await pg.waitForTimeout(150);
@@ -713,8 +711,8 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       const free = await rotNow();
       const hist = await pg.evaluate(()=>historyIndex);
       ok(r.visible && r.unique, 'rotation : une seule icône (flèche entre − et +) inclinée à 45° au coin du plan, plus de fenêtre orange');
-      ok(Math.abs(plus1 - 0.1) < 0.05 && Math.abs(minus2 - 359.9) < 0.05, 'rotation fine : « + » = +0,1°, « − » = −0,1° par appui ('+plus1+' puis '+minus2+')');
-      ok(noHold && armed && label && Math.abs(free - 0) > 20, 'rotation libre : seulement après un maintien long sur la flèche (armée en bleu), angle affiché ('+Math.round(free)+'°)');
+      ok(Math.abs(plus1 - 0.5) < 0.05 && Math.abs(minus2 - 359.5) < 0.05, 'rotation fine : « + » = +0,5°, « − » = −0,5° par appui ('+plus1+' puis '+minus2+')');
+      ok(armed && label && Math.abs(free - 0) > 20, 'rotation libre : immédiate dès le toucher de la flèche (armée en bleu), angle affiché ('+Math.round(free)+'°)');
       ok(hist > r.n0, 'rotation : chaque geste est enregistré dans l\'historique (annulable)');
       await pg.evaluate(()=>{ selectedId = null; render(); updateLockIndicator(); restoreDoc(window.__snap10); });
       await pg.waitForTimeout(400);

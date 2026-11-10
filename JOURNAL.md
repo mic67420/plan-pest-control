@@ -1713,4 +1713,8 @@ v2.1-204 — Rotation : icône unique retravaillée (suite de l'essai v2.1-203, 
 - Cause racine : la position de l'icône (HTML, fixe à l'écran) n'était recalculée qu'à la sélection, au zoom ou au déplacement ; le défilement de la zone (barres, doigt) ne la recalait pas, elle restait en place pendant que le plan bougeait.
 - Correctif : écoute de `scroll` (zone de dessin) et `resize` → `scheduleRotPlace()` (une image d'écran).
 
+## v2.1-207 — Rotation immédiate ; pas fin de 0,5°
+- Demande de Mic : supprimer le maintien de 0,4 s ; pas fin de 0,5° avec répétition immédiate si l'appui dépasse 0,2 s.
+- Correctif : la rotation libre démarre au toucher de la flèche (plus de minuterie) ; `ROT_FINE_STEP` = 0,5° ; répétition après 200 ms (puis 1° par pas si l'appui dure longtemps).
+
 ```
