@@ -1733,4 +1733,8 @@ v2.1-204 — Rotation : icône unique retravaillée (suite de l'essai v2.1-203, 
 - Cause racine : sa visibilité dépendait de `rotatableObj()`, qui renvoie null pour un plan verrouillé.
 - Correctif : visible dès qu'un plan est sélectionné ; verrouillé, un appui indique de déverrouiller ; si le plan se verrouille pendant que l'outil est allumé, l'outil s'éteint.
 
+## v2.1-212 — Croix de fermeture sur la fenêtre « Outils image »
+- Cause racine : la fenêtre des réglages (pipette, pot, gomme, curseurs) masque les outils du plan et ne se refermait qu'en retouchant son bouton.
+- Correctif : bouton ✕ rouge (44 px) en haut à droite de `#popPlanSettings`, qui appelle `closeAllPopovers()`.
+
 ```

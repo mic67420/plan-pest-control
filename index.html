@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-211 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-212 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -126,6 +126,8 @@
 
   /* ---------- Popovers (reglages secondaires, ouverts au clic sur une icone) ---------- */
   .pop-wrap{position:relative;flex:none;}
+  /* v2.1-212 : croix de fermeture de la fenêtre Outils image (elle masque les outils du plan) */
+  .pop-close{ position:absolute; top:6px; right:8px; width:44px; height:44px; border-radius:50%; border:2px solid #D6493E; background:#fff; color:#D6493E; font:700 22px/1 'IBM Plex Sans',sans-serif; display:flex; align-items:center; justify-content:center; padding:0; cursor:pointer; touch-action:manipulation; z-index:2; }
   .popover{
     position:fixed;min-width:230px;max-width:calc(100vw - 16px);box-sizing:border-box;
     background:#fff;border:1px solid #d8dce3;border-radius:10px;box-shadow:0 12px 30px rgba(20,26,40,.22);
@@ -677,7 +679,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-211</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-212</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -759,6 +761,7 @@
     <div class="pop-wrap">
       <button class="tb-icon" id="btnPlanSettings" title="Outils image : pipette, pot de peinture, gomme, réglages"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="541 853 99.1 99.1"><path fill="#222331" d="M555.5 933.3C555.7 933 555.8 932.8 556 932.5C559 924 571.4 922.1 574.9 931.2C575.2 931.9 575.4 932.7 575.7 933.4C595.1 933.7 614.5 933.3 634 933.4C634.6 933.4 635.2 933.5 635.5 934.2C636.4 936.7 634.4 937.2 632.5 937.2C613.6 937 594.7 936.9 575.8 937.3C575.8 937.3 575.5 937.9 575.5 938.0C574.4 941.2 572.3 943.4 569 944.3C562.1 946.2 558.8 942.8 555.7 937.2C554 937.2 552.2 937.2 550.4 937.1C544.6 936.9 545.4 933.6 550.4 933.5C552.1 933.4 553.8 933.4 555.5 933.3Z"/><path fill="white" d="M565.7 928.6C568 928.6 570.1 929.7 571.2 931.7C572.4 933.6 572.4 936.1 571.2 938.0C570.1 940 568 941.1 565.7 941.1C562.3 941 559.7 938.2 559.7 934.8C559.7 931.5 562.3 928.7 565.7 928.6Z"/><path fill="#222331" d="M555.6 900.6C555.9 900.2 556 900 556.2 899.5C558 893.3 565 890.4 570.7 893.4C574.3 895.4 574.4 897.4 576.1 900.5C595.2 900.7 614.3 900.6 633.5 900.6C634 900.6 634.2 900.6 634.7 900.6C635.8 900.7 635.9 902.4 635.6 903.2C634.9 905 630.7 904.3 629.7 904.3C613.9 904.1 592.3 904 576.2 904.3C575.7 905.1 575.3 905.9 574.8 906.7C571.3 912.1 564.4 913.7 559.3 909.2C557.4 907.5 557 905.4 555.8 904.2C553.8 904.2 551.9 904.2 549.9 904.2C548.6 904.2 546.6 904.3 546.6 902.5C546.5 900 548 900.5 549.9 900.6C551.8 900.6 553.7 900.6 555.6 900.6Z"/><path fill="white" d="M565.2 895.7C567.5 895.5 569.7 896.6 571 898.5C572.3 900.5 572.4 902.9 571.2 905.0C570.1 907 568 908.3 565.7 908.3C562.3 908.3 559.6 905.6 559.4 902.2C559.3 898.9 561.8 896 565.2 895.7Z"/><path fill="#222331" d="M610.7 868.8C611.2 867.9 611.4 866.9 611.9 866.0C615.2 859.6 624.1 858.8 628.7 864.6C629.6 865.7 630.3 867.9 630.9 868.5C631.7 869.4 635.7 868.4 635.4 870.9C635.1 874.2 631.4 871.5 630.3 873.8C628.3 877.7 625 880.2 620.4 880.0C614.6 879.8 613.4 876.9 610.7 872.5C590.5 872.3 570.2 872.5 550 872.5C545.2 872.5 545.4 869 550.4 868.9C570.5 868.8 590.6 869.1 610.7 868.8Z"/><path fill="white" d="M620.7 864.1C624.1 864.1 626.8 866.7 627 870.1C627.1 873.4 624.6 876.3 621.2 876.5C619 876.6 616.8 875.6 615.6 873.7C614.4 871.8 614.3 869.4 615.3 867.4C616.4 865.4 618.5 864.1 620.7 864.1Z"/></svg></button>
       <div class="popover" id="popPlanSettings">
+        <button type="button" class="pop-close" id="popPlanClose" aria-label="Fermer la fenêtre" title="Fermer">✕</button>
         <div class="pop-section-title">Outils</div>
         <div class="pop-row" style="gap:6px;">
           <button class="pop-tool-btn" id="toolPipette" title="Pipette (récupérer une couleur)">
@@ -948,7 +951,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-207 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-212 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -6830,6 +6833,7 @@ function bindPopover(triggerId, popId){
 document.addEventListener('click', closeAllPopovers);
 bindPopover('btnExportMenu','popExport');
 bindPopover('btnPlanSettings','popPlanSettings');
+document.getElementById('popPlanClose').addEventListener('click', (e)=>{ e.stopPropagation(); closeAllPopovers(); if (typeof schedulePlaceBadges === 'function') schedulePlaceBadges(); });
 bindPopover('btnDocs','popDocs');
 // v2.1-126 : « Mes documents » — les 5 derniers documents rangés automatiquement (voir idbSave / idbMaintain).
 async function renderDocsList(){
