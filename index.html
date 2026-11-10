@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-204 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-205 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -677,7 +677,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-204</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-205</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -949,7 +949,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-204 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-205 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -3239,16 +3239,16 @@ const ROT_HANDLE_W = 124, ROT_HANDLE_H = 85, ROT_CORNER_GAP = 40; // taille de l
 // v2.1-204 : dessin vectoriel soigné (arc parfait + pointe de flèche, deux boutons ronds « − » et « + », liseré blanc pour rester lisible sur un plan chargé), à la place du croquis à main levée.
 const ROT_HANDLE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 96" width="${ROT_HANDLE_W}" height="${ROT_HANDLE_H}" style="overflow:visible;display:block">
   <g fill="none" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none">
-    <path d="M24 56 A46 46 0 0 1 116 56" stroke="#fff" stroke-opacity=".92" stroke-width="14"/>
-    <path d="M104 46 L116 59 L128 46" stroke="#fff" stroke-opacity=".92" stroke-width="14"/>
-    <path class="rot-arc-line" d="M24 56 A46 46 0 0 1 116 56" stroke="#1c2230" stroke-width="7"/>
-    <path class="rot-arc-line" d="M104 46 L116 59 L128 46" stroke="#1c2230" stroke-width="7"/>
+    <path d="M38.9 48.9 A44 44 0 0 1 101.1 48.9" stroke="#fff" stroke-opacity=".92" stroke-width="14"/>
+    <path d="M99.9 34.9 L101.1 48.9 L87.2 47.7" stroke="#fff" stroke-opacity=".92" stroke-width="14"/>
+    <path class="rot-arc-line" d="M38.9 48.9 A44 44 0 0 1 101.1 48.9" stroke="#1c2230" stroke-width="7"/>
+    <path class="rot-arc-line" d="M99.9 34.9 L101.1 48.9 L87.2 47.7" stroke="#1c2230" stroke-width="7"/>
     <circle cx="24" cy="77" r="17" fill="#fff" stroke="#1c2230" stroke-width="4"/>
     <circle cx="116" cy="77" r="17" fill="#fff" stroke="#1c2230" stroke-width="4"/>
     <g class="rot-glyph-minus"><path d="M16 77 H32" stroke="#0E6FA8" stroke-width="6.5"/></g>
     <g class="rot-glyph-plus"><path d="M107 77 H125 M116 68 V86" stroke="#0E6FA8" stroke-width="6.5"/></g>
   </g>
-  <path class="rot-hit rot-hit-arc" d="M24 56 A46 46 0 0 1 116 56" fill="none" stroke="transparent" stroke-width="34" stroke-linecap="round" style="pointer-events:stroke;cursor:grab"/>
+  <path class="rot-hit rot-hit-arc" d="M38.9 48.9 A44 44 0 0 1 101.1 48.9" fill="none" stroke="transparent" stroke-width="34" stroke-linecap="round" style="pointer-events:stroke;cursor:grab"/>
   <circle class="rot-hit rot-hit-minus" cx="24" cy="77" r="26" fill="transparent" style="pointer-events:all;cursor:pointer"/>
   <circle class="rot-hit rot-hit-plus" cx="116" cy="77" r="26" fill="transparent" style="pointer-events:all;cursor:pointer"/>
 </svg>`;
@@ -3304,6 +3304,8 @@ function ensureRotHandle(){
     }, ROT_HOLD_MS);
   });
   rotArcEl.addEventListener('contextmenu', e=>e.preventDefault());
+  rotArcEl.style.touchAction = 'none';
+  rotArcEl.addEventListener('touchstart', e=>{ if (e.cancelable) e.preventDefault(); }, { passive:false }); // v2.1-205 : pas de défilement / sélection de texte pendant le maintien
 }
 // Étiquette d'angle près de l'icône, pendant l'action puis masquée après un court délai.
 function showRotAngle(keep){
@@ -3401,6 +3403,10 @@ function beginPlanRotation(cx, cy){
   window.addEventListener('pointermove', onPlanRotateMove);
   window.addEventListener('pointerup', onPlanRotateEnd);
   window.addEventListener('pointercancel', onPlanRotateEnd);
+  // v2.1-205 : secours tactile (certains téléphones n'envoient pas tous les pointermove au doigt) ; les deux voies donnent la même position.
+  window.addEventListener('touchmove', onPlanRotateMove, { passive:false });
+  window.addEventListener('touchend', onPlanRotateEnd);
+  window.addEventListener('touchcancel', onPlanRotateEnd);
   showRotAngle(true);
   updateRotateIcons();
 }

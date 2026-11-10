@@ -1702,4 +1702,11 @@ v2.1-204 — Rotation : icône unique retravaillée (suite de l'essai v2.1-203, 
   Correctif : dessin vectoriel propre (arc parfait, pointe de flèche, deux boutons ronds à liseré, liseré blanc de lisibilité) ; rotation CSS = angle du plan − 45° : l'icône tourne avec le plan et reste collée à son coin
   haut-gauche (écart 40 px en diagonale, dans le repère du plan) ; signes « − » et « + » redressés par rotation inverse ; plus de recentrage dans l'écran ; fonctionnement inchangé : maintien long sur la flèche = rotation
   libre (aimant), « − » / « + » = rotation fine (0,1°, accélère si maintenu), angle affiché près de l'icône.
+
+## v2.1-205 — Flèche de rotation : quart de cercle exact, séparée du − / +, maintien au doigt fiabilisé
+- Demande de Mic : le maintien sur la flèche ne faisait pas tourner le bloc au doigt ; la flèche doit être exactement un quart de cercle et ne pas toucher les « − » et « + ».
+- Cause racine (dessin) : l'arc était un demi-cercle dont les extrémités touchaient le haut des deux boutons ronds.
+- Correctif : arc de 90° exact (rayon 44, de 225° à 315°), pointe à l'extrémité, écart visible avec les deux boutons.
+- Rotation tactile : le test automatique montre que le nœud tourne bien pendant le glissement (le modèle n'est écrit qu'au relâchement) ; pour les téléphones qui n'envoient pas tous les `pointermove`, ajout d'écouteurs de secours `touchmove` / `touchend` / `touchcancel` pendant la rotation, et `touch-action:none` + `touchstart` annulé sur la flèche (aucun défilement ni sélection pendant le maintien).
+
 ```
