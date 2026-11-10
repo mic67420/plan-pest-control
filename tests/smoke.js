@@ -230,8 +230,6 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
     ok(await pg.evaluate(async()=>{ selectedTypeId = model.deviceTypes[0].id; const a = addPastille(60,60), b = addPastille(90,60); a.locked = false; b.locked = false; document.getElementById('btnSizeAll').click(); const cur = document.getElementById('sizeAllCur'); const dot = cur.querySelector('svg, .dd-swatch, span') !== null; const r = document.getElementById('sizeAllRange'); r.value = 31; r.dispatchEvent(new Event('input')); const ok1 = model.pastilles.filter(q=>q.typeId===document.querySelector('#sizeAllList .sel') ? true : true).length>0 && ofTypeCheck(a); document.getElementById('sizeAllClose').click(); return ok1 && dot; function ofTypeCheck(a){ return model.pastilles.filter(q=>q.typeId===a.typeId).every(q=>q.radius===31) || model.pastilles.some(q=>q.radius===31); } }), 'taille poste : toutes les pastilles du poste prennent la même taille');
     // v2.1-151 : appui maintenu sur + de la liste des postes = le compteur s'arrête au relâchement (la ligne n'est plus reconstruite sous le doigt)
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; setTypeSize(t.id, 20); lastTypeListSig=null; refreshTypeList(); const plus = document.querySelector('#deviceTypeDropdownList .dd-item .sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true,pointerId:7})); await new Promise(r=>setTimeout(r,900)); window.dispatchEvent(new PointerEvent('pointerup',{pointerId:7})); const v = typeSizeOf(t); await new Promise(r=>setTimeout(r,600)); return v>21 && v<60 && typeSizeOf(t)===v; }), 'liste des postes : maintien sur + = répétition puis arrêt au relâchement');
-    // v2.1-157 : pavé de rotation et fenêtre « Tailles » (même place) : l'un ferme l'autre
-    ok(await pg.evaluate(async()=>{ if (!model.plans.length){ const c=document.createElement('canvas');c.width=300;c.height=300; await importPlanImageFromDataURL(c.toDataURL(),'R.png'); } if (!model.pastilles.length) model.pastilles.push({ id:'pt-rot', x:50, y:50, radius:16, typeId:model.deviceTypes[0].id, label:'E1' }); render(); const pl = model.plans[0]; selectNode(stage.findOne('#'+pl.id), pl.id); updateRotateIcons(); const w = document.getElementById('sizeAllWin'); const a = rotFineEl.style.display === 'flex'; document.getElementById('btnSizeAll').click(); const b = w.classList.contains('show') && rotFineEl.style.display === 'none'; selectNode(null, null); selectNode(stage.findOne('#'+pl.id), pl.id); updateRotateIcons(); const c = !w.classList.contains('show') && rotFineEl.style.display === 'flex'; return a && b && c; }), 'pavé de rotation et fenêtre Tailles : l\'un ferme l\'autre');
     // v2.1-158 : contrôle des numéros : trous et doublons repérés, renumérotation
     ok(await pg.evaluate(()=>{ const bakPages = pages; const tid = model.deviceTypes[0].id; pages = [{ pastilles:['E1','E2','E4','E4','R1','R2'].map((l,i)=>({ id:'ct'+i, x:50+i*20, y:50, radius:16, typeId:tid, label:l })) }]; const se = numberSeries(); const e = se.find(x=>x.code==='E'), r = se.find(x=>x.code==='R'); const a = e.missing.join()==='3' && e.dups.join()==='4' && r.missing.length===0; openCtrlWin(); const shown = document.getElementById('ctrlWin').classList.contains('show') && document.querySelectorAll('#ctrlList .cw-row').length===2; renumberSeries(e.key); const b = pages[0].pastilles.filter(q=>q.label.startsWith('E')).map(q=>q.label).join()==='E1,E2,E3,E4'; closeCtrlWin(); pages = bakPages; return a && shown && b; }), 'contrôle des numéros : trou E3 et doublon E4 repérés, renumérotation continue');
     // v2.1-161 : versions automatiques (Restaurer) + v2.1-160 : rappel de sauvegarde du fichier
@@ -297,7 +295,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       const exact = shapeCornersLocal(sh).every((c,k)=>{ const w = shapeToWorld(sh, c[0], c[1]), h = shapeHandles.getChildren()[k]; return Math.abs(h.x()-w.x) < 0.01 && Math.abs(h.y()-w.y) < 0.01; });
       // rotation (même moteur que le plan) : 30° autour du centre
       const c0 = planCenter(sh); sh.rotation = 30; const cx = shapeToWorld(sh, sh.width/2, sh.height/2); // un coin haut-gauche inchangé = centre qui bouge : on vérifie surtout que rotatableObj voit le dessin
-      const rot = rotatableObj() === sh && rotIconsGroup.visible();
+      const rot = rotatableObj() === sh && isRotHandleVisible();
       // redimensionnement : on tire l'angle 2 de (+30,+20), l'angle 0 doit rester fixe à l'écran
       const before = shapeToWorld(sh, 0, 0), h2 = shapeHandles.getChildren()[2], w2 = shapeToWorld(sh, sh.width, sh.height);
       h2.fire('dragstart', { evt:{} }); h2.position({ x:w2.x+30, y:w2.y+20 }); h2.fire('dragmove', { evt:{} }); h2.fire('dragend', { evt:{} });
@@ -332,7 +330,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       onTileChosen('plan'); openDrawWin(); document.getElementById('drawSelect').click();
       const tool = activeTool === SELECT_TOOL && document.getElementById('drawSelect').classList.contains('active');
       remoteCursor = { tool:SELECT_TOOL, phase:'start', tip:{ x:300, y:400 } }; confirmRemoteCursor();
-      const sel1 = selectedId === 'sa' && !!remoteCursor && rotIconsGroup.visible();
+      const sel1 = selectedId === 'sa' && !!remoteCursor && isRotHandleVisible();
       remoteCursor.tip = { x:250, y:302 }; confirmRemoteCursor(); const sel2 = selectedId === 'sb';
       remoteCursor.tip = { x:520, y:700 }; confirmRemoteCursor(); const none = selectedId === null;
       const red = remoteCursorColor() === '#E02424';
@@ -684,6 +682,42 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
         document.getElementById('textEditConfirm').click(); return out;
       });
       ok(r.ok, 'éditeur de texte : même taille et même police que le texte affiché, aucun zoom ('+JSON.stringify(r)+')');
+    }
+    // v2.1-203 : rotation par UNE icône (flèche courbe entre − et +), maintien long sur la flèche = rotation libre, − / + = rotation fine, plus de mains ni de fenêtre orange
+    {
+      const r = await pg.evaluate(async()=>{
+        window.__snap10 = cloneDoc(); const out = {};
+        closeOtherWindows(''); closeAllTileDrawers(); activeTool = null;
+        const c = document.createElement('canvas'); c.width = 400; c.height = 300; await importPlanImageFromDataURL(c.toDataURL(), 'rot.png');
+        const pl = model.plans[model.plans.length-1]; pl.x = 150; pl.y = 300; pl.width = 500; pl.height = 375; pl.rotation = 0; pl.locked = false; render(); selectedId = pl.id; render(); updateLockIndicator(); window.__rotPl = pl.id;
+        await new Promise(r=>setTimeout(r,300));
+        out.unique = document.querySelectorAll('#rotHandleDummy, .rot-hit-arc').length === 1 && !document.querySelector('[style*="F59E0B"][style*="translateX(-50%)"][style*="z-index:790"]');
+        out.visible = isRotHandleVisible() && rotOverlay.style.display === 'block' && /rotate\(-45deg\)/.test(rotHandleEl.style.transform);
+        const pts = ()=>{ const pt=(q)=>{ const e=document.querySelector(q), r=e.getBoundingClientRect(); return { x:r.left+r.width/2, y:r.top+r.height/2 }; }; const arc=document.querySelector('.rot-hit-arc'); const p=arc.getPointAtLength(arc.getTotalLength()*0.45); const q=new DOMPoint(p.x,p.y).matrixTransform(arc.getScreenCTM()); return { arc:{x:q.x,y:q.y}, minus:pt('.rot-hit-minus'), plus:pt('.rot-hit-plus') }; };
+        window.__rotPts = pts(); out.n0 = historyIndex; return out;
+      });
+      const P = await pg.evaluate(()=>window.__rotPts), rotNow = ()=>pg.evaluate(()=>findPlanById(window.__rotPl).rotation);
+      await pg.mouse.move(P.plus.x, P.plus.y); await pg.mouse.down(); await pg.mouse.up(); await pg.waitForTimeout(200);
+      const plus1 = await rotNow();
+      await pg.mouse.move(P.minus.x, P.minus.y); await pg.mouse.down(); await pg.mouse.up(); await pg.mouse.down(); await pg.mouse.up(); await pg.waitForTimeout(200);
+      const minus2 = await rotNow();
+      const before = await rotNow();
+      await pg.mouse.move(P.arc.x, P.arc.y); await pg.mouse.down(); await pg.mouse.move(P.arc.x+80, P.arc.y+40, { steps:6 }); await pg.mouse.up(); await pg.waitForTimeout(200);
+      const noHold = (await rotNow()) === before;                                  // glisser tout de suite, sans maintien : rien ne tourne
+      await pg.mouse.move(P.arc.x, P.arc.y); await pg.mouse.down(); await pg.waitForTimeout(600);
+      const armed = await pg.evaluate(()=>!!planRotate.active && rotHandleEl.querySelector('.rot-arc-line').getAttribute('stroke') === '#0E6FA8');
+      const cc = await pg.evaluate(()=>{ const pl = findPlanById(window.__rotPl), c = planCenter(pl), r = sheetShadowHostEl.getBoundingClientRect(); return { x:r.left+c.x*zoom, y:r.top+c.y*zoom }; });
+      await pg.mouse.move(cc.x+120, cc.y, { steps:10 }); await pg.waitForTimeout(150);
+      const label = await pg.evaluate(()=>rotAngleEl.style.display === 'block' && /°$/.test(rotAngleEl.textContent));
+      await pg.mouse.up(); await pg.waitForTimeout(300);
+      const free = await rotNow();
+      const hist = await pg.evaluate(()=>historyIndex);
+      ok(r.visible && r.unique, 'rotation : une seule icône (flèche entre − et +) inclinée à 45° au coin du plan, plus de fenêtre orange');
+      ok(Math.abs(plus1 - 0.1) < 0.05 && Math.abs(minus2 - 359.9) < 0.05, 'rotation fine : « + » = +0,1°, « − » = −0,1° par appui ('+plus1+' puis '+minus2+')');
+      ok(noHold && armed && label && Math.abs(free - 0) > 20, 'rotation libre : seulement après un maintien long sur la flèche (armée en bleu), angle affiché ('+Math.round(free)+'°)');
+      ok(hist > r.n0, 'rotation : chaque geste est enregistré dans l\'historique (annulable)');
+      await pg.evaluate(()=>{ selectedId = null; render(); updateLockIndicator(); restoreDoc(window.__snap10); });
+      await pg.waitForTimeout(400);
     }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');

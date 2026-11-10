@@ -32,7 +32,7 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
    en mode Plan.
 2. **Ne jamais déplacer de soi-même** un élément que l'utilisateur place à la main (logos, textes,
    légende, date). Aucun repositionnement automatique non demandé.
-3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-202**), à mettre à
+3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-203**), à mettre à
    jour aux 3 endroits : la balise `<title>`, la puce `.brand .ver` du bandeau, le commentaire
    d'en-tête du `<script>`.
    Attention : un remplacement global (`v2.1-69` → `v2.1-70` partout) modifie aussi les références
@@ -54,7 +54,7 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
 - `tests/smoke.js` (Playwright, sans réseau) : démarrage, éléments de coin, tuile unique active, hauteur des
   tiroirs, plan verrouillé / déplaçable, gomme, placement déporté, noms des exports. À lancer avant et après
   chaque gros changement (voir l'en-tête du fichier pour les variables LIBS / PLAYWRIGHT / CHROME).
-- Référence fonctionnelle actuelle : **v2.1-163** (audit complet v2.1-156 puis contrôle des numéros, aperçu d'export, restauration ; commit : voir `git log`). Précédentes : v2.1-114 `2dc9e79`, v2.1-115 `96f2e37`.
+- Référence fonctionnelle de la rotation à 4 mains : **v2.1-202, commit `4d0a7a0`**. Référence fonctionnelle générale : **v2.1-163** (audit complet v2.1-156 puis contrôle des numéros, aperçu d'export, restauration ; commit : voir `git log`). Précédentes : v2.1-114 `2dc9e79`, v2.1-115 `96f2e37`.
 - Dernière version validée avant le grand nettoyage (v2.1-102+) : v2.1-101, commit `cbad9f7` (les étiquettes git ne
   sont pas acceptées par le dépôt distant : retrouver la version par ce numéro de commit).
 
@@ -105,8 +105,9 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
   et cadre ensemble ; couleur de police + fond (∅ = transparent).
 - **Légende** : couleur de police + fond ; pastilles de légende de taille fixe 10 ; échelle
   bornée 0,3–8 et recentrée si elle sort de la feuille.
-- **Plan importé** : rotation par **4 icônes main** (Main.svg de l'utilisateur, intégrées) au
-  milieu de chaque côté ; aimant à 0/90/180/270° ; pas de ligne de mire. Au doigt, le plan ne se
+- **Plan importé** : rotation par **UNE icône** (v2.1-203, style fourni par Mic : flèche courbe entre un « − » et un « + », inclinée à 45°) au coin haut-gauche du plan, qui suit sa rotation :
+  MAINTIEN LONG (0,38 s) sur la flèche puis glisser = rotation libre ; « − » / « + » = rotation fine (0,1° par appui, accélère si maintenu) ; aimant à 0/90/180/270° ; angle affiché près de l'icône ;
+  plus de fenêtre orange ni de mains. **Dernière version avec les 4 mains + fenêtre orange − / + : v2.1-202, commit `4d0a7a0` (référence fonctionnelle : y revenir si l'essai ne convient pas).** Pas de ligne de mire. Au doigt, le plan ne se
   déplace que s'il est SÉLECTIONNÉ et DÉVERROUILLÉ (outil « Déplacer le plan » supprimé en v2.1-78 ; la
   v2.1-77, étiquette git `ref-v2.1-77`, est la référence fonctionnelle).
 - **Navigation au doigt** : maintenir puis glisser sur le plan ou une zone vide = faire défiler

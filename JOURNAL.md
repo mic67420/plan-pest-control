@@ -1684,4 +1684,13 @@ v2.1-202 — Double-clic sur un texte : l'éditeur ne « zoome » plus
   apparaissait 2 fois plus gros = impression de zoom. (Le zoom de l'application, lui, ne bougeait pas : vérifié.)
   Correctif : l'éditeur épouse le cadre du texte (position, largeur, hauteur, police = taille x zoom, marge intérieure = TEXT_PAD x zoom, une ligne reste une ligne pour un texte ajusté au contenu) et grandit
   avec la frappe ; seul iPhone / iPad garde la police minimale de 16 px (Safari zoome sinon la page au focus). Le bouton « Valider » se replace (v2.1-201).
+
+v2.1-203 — ESSAI : rotation par UNE icône (flèche entre « − » et « + ») à la place des 4 mains et de la fenêtre orange
+  Demande de Mic (dessin fourni) : une seule icône en haut à gauche de l'image à tourner, orientée à 45°, suppression de la fenêtre orange ; « − » / « + » = rotation fine ; la rotation elle-même = MAINTIEN LONG
+  sur la flèche. La v2.1-202 (commit 4d0a7a0) reste la référence qui fonctionne bien : revenir dessus si l'essai ne convient pas.
+  Réalisation : poignée HTML (ensureRotHandle / placeRotHandle) : dessin vectoriel dans le style fourni ; placée au coin haut-gauche (origine) du plan ou du dessin sélectionné, à 34 px en diagonale vers l'extérieur,
+  inclinée de −45° (signes « − » et « + » redressés), suit la rotation de l'élément, gardée dans la zone visible ; flèche : maintien long 0,38 s -> « armée » (bleue, vibration) puis glisser = rotation libre autour du centre
+  (aimant 0/90/180/270°, mêmes calculs qu'avant : applyPlanRotationFrame / onPlanRotateEnd, événements pointeur) ; un glissement avant le maintien ne fait rien ; « − » / « + » : 0,1° par appui, maintenu = répétition qui accélère
+  (0,5° puis 1°) ; étiquette d'angle près de l'icône pendant l'action ; un pushHistory par geste. Supprimés : les 4 mains Konva (images HAND_*), la fenêtre orange − angle + (refreshRotFine reste une fonction vide pour ses appelants),
+  le curseur « main fermée ». Concerne aussi les dessins (même moteur).
 ```

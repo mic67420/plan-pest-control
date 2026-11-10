@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-202 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-203 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -677,7 +677,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-202</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-203</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -949,7 +949,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-202 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-203 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -3206,18 +3206,8 @@ stage.on('click tap', (e)=>{
    (0°, 90°, 180°, 270°), le plan s'y cale. Rien d'autre ne s'affiche pendant la rotation.
    Icônes de main : fournies par l'utilisateur (v2.1-58). */
 const ROT_SNAP_DEG = 4;      // force de l'aimant, en degrés de part et d'autre de l'angle droit
-const ROT_ICON_PX = 38;      // diamètre (pixels écran) d'une icône de rotation
-const ROT_ICON_GAP_PX = 10;  // écart (pixels écran) entre le cadre du plan et l'icône
-// Icônes de rotation fournies par l'utilisateur (v2.1-58, fichier Main.svg) : main ouverte
-// (repos, grisée) et main fermée (pendant la rotation), arc à double flèche inclus. Le
-// fichier d'origine contenait les deux mains : elles ont été séparées et recadrées.
-const HAND_OPEN_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"71.0 88.0 310 310\" width=\"128\" height=\"128\"><g fill=\"#9aa1ab\"><path d=\"M215.47 244.195C231.65 242.963 247.91 244.42 263.61 248.506C266.81 249.317 275.33 250.957 276.14 254.512C275.06 255.849 265.92 258.992 262.48 260.933C258.41 263.205 254.66 266.01 251.34 269.28C242.7 277.83 236.98 290.14 236.95 302.45C236.94 304.56 237.17 304.96 238.51 306.25L239.67 306.16C241.03 304.46 241.18 297.59 241.97 294.2C243.73 286.37 247.52 279.14 252.97 273.25C260.83 264.75 267.87 262.228 278.42 258.843C278.78 258.728 280.4 255.56 280.86 254.891C288.57 256.355 305.64 267.49 311.27 272.8C305.08 302.96 284.93 329.07 252.73 334.61C250.26 335.04 247.26 334.76 247.1 337.82L248.15 338.56C252.22 339.27 256.74 338.09 260.71 337.13C266.4 335.39 271.4 332.75 276.67 330.07C276.75 332.73 276.81 335.4 276.85 338.07C277.36 374.42 250.2 369.48 223.53 369.76C210.05 369.89 192.39 371.99 182.24 361.47C173.4 352.32 175.15 337.84 175.32 326.11C181.81 331.18 189.16 335.04 197.01 337.5C199.23 338.18 203.39 339.58 205.43 338.5L205.47 337.52C205.03 336.68 204.64 335.53 203.6 335.28C169.64 327.4 153.08 298.46 152.74 264.12C172.16 251.906 192.81 246.023 215.47 244.195Z\"/><path d=\"M229.4 112.45C248.18 113.139 244.66 132.733 244.61 146.37L244.48 190.957C244.47 196.218 243.16 215.473 246.58 218.135L247.6 217.656C249.97 213.585 247.42 192.77 248.52 187.159C251.38 172.456 239.3 130.268 264.32 131.568C270.74 131.902 277.4 138.391 277.32 145.135C276.97 173.101 279.32 203.425 276.43 231.151C235.04 217.483 191.84 221.438 152.91 240.467L152.87 232.492C152.75 221.308 151.31 171.16 154.33 163.997C155.71 160.725 158.59 158.252 161.83 156.926C165.65 155.367 170.12 155.282 173.89 157.02C177.7 158.776 179.96 162.313 181.05 166.261C185.03 180.573 178.5 204.975 183.59 219.061L184.79 218.978L184.93 218.58L183.72 219.144C184.18 218.737 184.75 218.43 185.1 217.924C188.36 213.219 182.56 150.072 186.94 137.535C188.09 134.236 189.88 131.641 193.15 130.226C196.68 128.698 200.87 128.508 204.46 129.955C207.17 131.049 209.48 133.135 210.54 135.897C213.7 144.176 211.97 191.101 211.93 203.812C211.92 207.32 211.09 213.519 212.54 216.563C212.97 217.472 212.74 217.179 213.72 217.55C217.08 214.809 215.86 198.811 215.83 193.97L215.78 148.798C215.79 142.016 215.3 134.113 215.96 127.418C216.85 118.378 220.49 114.12 229.4 112.45Z\"/><path d=\"M224.05 227.635C273.22 227.808 322.76 247.24 347.72 292.08C352.48 289.72 357.28 287.44 362.11 285.23C359.55 298.96 356.9 312.66 354.16 326.35C343.25 317.51 332.43 308.58 321.68 299.56C325.93 298.36 332.33 297.14 336.78 296.15C314.86 257.869 271.53 240.974 229.3 239.05C213.55 238.897 197.87 241.12 182.78 245.641C155.58 253.834 129.12 270.62 115.4 296.18C120.47 297.2 125.68 298.4 130.74 299.5C119.94 308.44 109.08 317.32 98.1699 326.14C95.21 312.58 92.5701 298.97 90.23 285.29C94.72 287.19 100.03 289.92 104.49 292.07C108.83 283.92 114.25 276.39 120.62 269.71C147.73 241.038 185.5 228.863 224.05 227.635Z\"/><path d=\"M305.71 205.964L311.77 205.762C312.16 218.997 312.04 234.633 311.75 247.895C306.09 244.324 301.25 241.63 295.34 238.565C290.7 236.227 284.87 234.225 279.93 232.38C281.83 216.491 289.68 208.203 305.71 205.964Z\"/></g></svg>";
-const HAND_CLOSED_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"66.0 618.0 310 310\" width=\"128\" height=\"128\"><g fill=\"#1c2230\"><path d=\"M191.56 713.88C194.74 713.72 198.28 713.89 201.43 713.64C215.57 712.51 235.75 713.96 233.15 733.81C230.54 753.74 207.14 749.81 192.86 749.98C189.42 750.03 185.63 750.14 182.81 752.31C181.54 752.42 180.15 757.33 180.63 757.5C200.41 764.48 215.96 774.61 220.97 796.38C221.74 799.72 222.01 807.66 224.24 810.37L225 810.24C231.19 797.35 215.53 771.32 204.47 764.54C200.82 762.3 187.23 756.05 186.5 754.85C190.05 752.93 210.18 754.72 215.88 753.81C225.04 752.35 228.53 750.11 234.19 742.82C243.28 756.81 257.18 755.83 266.71 742.96C274.74 757.84 288.3 757.25 298.96 745.56C301.27 773.16 303.22 795.03 285.34 818.49C278.21 827.25 267.77 834.16 256.92 837.27C253.9 838.14 250.06 838.97 247.97 841.35L248.1 842.26C254.78 845.35 272.64 834.78 278.21 831.11C278.81 859.87 276.94 875.71 243.29 875.93L216.89 875.95C204.14 875.94 189.29 877.69 179.86 868C170.4 858.28 171.82 845.4 171.97 832.89C176.72 835.63 199.46 846.46 203.53 841.94C203.14 839.67 200.19 839.23 197.78 838.77C150.01 829.75 118.27 773.92 152.23 733.25C161.84 721.75 175.85 714.88 191.56 713.88Z\"/><path d=\"M249.41 674.55C252.09 674.7 254.6 674.94 257.08 676.07C260.15 677.46 262.77 679.97 263.85 683.21C266.36 690.73 266.61 734.46 263.15 740.84C260.65 745.45 257.08 747.46 252.2 748.81C244 748.72 240.15 746.2 236.98 738.79C237.28 736.5 237.75 733.41 237.41 731.18C235.6 719.26 235.75 707.49 235.71 695.5C235.68 683.92 236.4 676.5 249.41 674.55Z\"/><path d=\"M280.11 686.07C301.53 685.29 296.88 705.88 297.28 720.59C297.62 732.97 299.46 744.34 286.55 749.9C270.15 751.49 267.92 737.58 269.38 724.88C271.03 710.47 263.13 691.91 280.11 686.07Z\"/><path d=\"M149.36 729.23L149.61 729.69C147.64 732.19 144.64 735.78 143.05 738.44C141.3 741.11 139.16 747.51 136.9 749.65C125.31 760.61 117.35 767.93 109.42 782.35C114.38 783.57 119.29 784.94 124.17 786.44C115.92 793.48 101.42 804.13 92.3999 810.58L91.27 810.96C90.3501 809.53 85.8101 776.08 84.97 770.78C89.4299 772.97 94.3799 775.81 98.8 778.19C109.87 756.59 128.03 740.35 149.36 729.23Z\"/><path d=\"M301.56 734.42C303.84 735.56 308.26 738.79 310.42 740.35C325.7 751.42 334.32 762.18 343.25 778.35C347.78 775.69 352.44 773.28 357.09 770.82L350.97 811.47C340.42 803.99 328.25 794.12 317.92 786.16L332.51 782.52C325.71 768.12 314.07 757.28 301.56 747.9C301.42 743.55 301.54 738.81 301.56 734.42Z\"/><path d=\"M214.53 668.41C221.73 667.93 230.33 671.43 231.24 679.48C232.57 691.25 231.88 704.26 231.83 716.22C228.7 713.74 227.78 712.94 224.2 711.24C216.48 709.03 210.07 709.52 202.02 709.46C201.93 694.49 196.79 672.53 214.53 668.41Z\"/><path d=\"M180.2 674.46C181.32 674.4 182.44 674.36 183.56 674.35C202.03 674.2 198.17 697.1 198.01 709.74C192.51 709.73 187.02 710.19 181.59 711.09C177.14 712.03 172.38 713.89 168.21 715.67C168.21 700.85 162.97 678.94 180.2 674.46Z\"/></g></svg>";
-function svgToImage(svg){ const img = new Image(); img.src = 'data:image/svg+xml;utf8,'+encodeURIComponent(svg); return img; }
-const ROT_IMG_OPEN = svgToImage(HAND_OPEN_SVG);     // repos : main ouverte grisée
-const ROT_IMG_CLOSED = svgToImage(HAND_CLOSED_SVG); // en rotation : main fermée
-[ROT_IMG_OPEN, ROT_IMG_CLOSED].forEach(img=>{ img.onload = ()=>{ if (typeof updateRotateIcons==='function') updateRotateIcons(); }; });
-const CURSOR_HAND_CLOSED = 'url("data:image/svg+xml;utf8,'+encodeURIComponent(HAND_CLOSED_SVG.replace('width="128" height="128"','width="32" height="32"'))+'") 16 16, grabbing';
+// v2.1-203 : plus de mains ni de cadran : UNE icône (flèche courbe entre un « − » et un « + »), voir ensureRotHandle.
+const ROT_HOLD_MS = 380;      // maintien long sur la flèche avant que la rotation libre ne démarre
 const planRotate = { active:null, justEnded:false };
 // Plan actuellement sélectionné ET rotatif (non verrouillé, outil compatible), ou null.
 function rotatablePlan(){
@@ -3238,134 +3228,146 @@ function planCenter(pl){
   const rad = (pl.rotation||0)*Math.PI/180, cos = Math.cos(rad), sin = Math.sin(rad);
   return { x: pl.x + (pl.width/2)*cos - (pl.height/2)*sin, y: pl.y + (pl.width/2)*sin + (pl.height/2)*cos };
 }
-// Les 4 icônes de rotation sont créées UNE SEULE FOIS puis simplement déplacées (v2.1-61).
-// Avant, updateRotateIcons() détruisait et recréait les 4 groupes (cercle + ombre + image) à
-// CHAQUE mouvement du doigt, ce qui alourdissait fortement la rotation sur smartphone.
-// Ici, seuls la position, l'échelle et l'apparence (repos / main fermée) sont mis à jour.
-let rotIconsGroup = null;
-let rotIconNodes = null; // [{ group, circle, img, active }] x4
-function ensureRotIcons(){
-  if (rotIconsGroup) return;
-  rotIconsGroup = new Konva.Group({ visible:false });
-  const imgSize = ROT_ICON_PX*0.8;
-  rotIconNodes = [0,1,2,3].map(i=>{
-    const g = new Konva.Group({ name:'rot-icon' });
-    const circle = new Konva.Circle({
-      radius:ROT_ICON_PX/2, fill:'rgba(255,255,255,0.88)', stroke:'#c3c8cf', strokeWidth:1.2,
-      shadowColor:'rgba(0,0,0,0.25)', shadowBlur:4, shadowOffset:{x:0,y:1},
-      shadowForStrokeEnabled:false, perfectDrawEnabled:false
+// v2.1-203 : ROTATION PAR UNE SEULE ICÔNE (demande de Mic, style fourni : flèche courbe entre un « − » et un « + »), au coin haut-gauche de l'élément (plan ou dessin), inclinée
+// à 45°, qui suit sa rotation. Remplace les 4 mains (v2.1-57) ET la fenêtre orange « − angle + » (v2.1-82). Éléments HTML (nets, faciles à toucher), pas des nœuds Konva.
+//  - MAINTIEN LONG (0,38 s) sur la flèche, puis glisser : rotation libre autour du centre, aimant à 0 / 90 / 180 / 270° (ROT_SNAP_DEG) ; la flèche passe en bleu quand elle est « armée » ;
+//  - « − » / « + » : rotation FINE par petits pas (0,1° ; appui maintenu = répétition, qui accélère) ; l'angle s'affiche près de l'icône pendant l'action.
+// Les signes « − » et « + » sont redressés (rotation inverse dans le dessin) : l'icône est inclinée à 45° mais se lit droite.
+// Dernière version avec les mains : v2.1-202, commit 4d0a7a0 (référence fonctionnelle, voir CLAUDE.md).
+let rotOverlay = null, rotHandleEl = null, rotArcEl = null, rotAngleEl = null, rotAngleHide = 0, rotHandleRAF = 0, rotGeom = null, rotHoldTimer = null;
+const ROT_HANDLE_W = 120, ROT_HANDLE_H = 92, ROT_CORNER_GAP = 34; // taille de l'icône et écart (px écran) entre le coin du plan et le centre de l'icône
+const ROT_HANDLE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 92" width="${ROT_HANDLE_W}" height="${ROT_HANDLE_H}" style="overflow:visible;display:block">
+  <g fill="none" stroke="#111" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none">
+    <path class="rot-arc-line" d="M22 48 C 26 14, 66 2, 98 36"/>
+    <path class="rot-arc-line" d="M84 38 L100 40 L97 22"/>
+    <ellipse cx="22" cy="72" rx="17" ry="15" transform="rotate(-10 22 72)" fill="rgba(255,255,255,.93)"/>
+    <ellipse cx="98" cy="72" rx="18" ry="15" transform="rotate(6 98 72)" fill="rgba(255,255,255,.93)"/>
+    <path d="M14 72 L30 71.5" transform="rotate(45 22 72)"/>
+    <path d="M89 72 L107 72 M98 63 L98 81" transform="rotate(45 98 72)"/>
+  </g>
+  <path class="rot-hit rot-hit-arc" d="M22 48 C 26 14, 66 2, 98 36" fill="none" stroke="transparent" stroke-width="30" stroke-linecap="round" style="pointer-events:stroke;cursor:grab"/>
+  <circle class="rot-hit rot-hit-minus" cx="22" cy="72" r="25" fill="transparent" style="pointer-events:all;cursor:pointer"/>
+  <circle class="rot-hit rot-hit-plus" cx="98" cy="72" r="25" fill="transparent" style="pointer-events:all;cursor:pointer"/>
+</svg>`;
+function ensureRotHandle(){
+  if (rotHandleEl) return;
+  rotOverlay = document.createElement('div');
+  rotOverlay.style.cssText = 'position:fixed;overflow:hidden;pointer-events:none;z-index:421;display:none;';
+  rotHandleEl = document.createElement('div');
+  rotHandleEl.setAttribute('aria-label', 'Rotation : maintenir la flèche puis glisser ; − / + pour affiner');
+  rotHandleEl.style.cssText = `position:absolute;left:0;top:0;width:${ROT_HANDLE_W}px;height:${ROT_HANDLE_H}px;transform-origin:50% 50%;touch-action:none;user-select:none;-webkit-user-select:none;pointer-events:none;`
+    + 'filter:drop-shadow(0 1px 3px rgba(0,0,0,.4));';
+  rotHandleEl.innerHTML = ROT_HANDLE_SVG;
+  rotAngleEl = document.createElement('div');
+  rotAngleEl.style.cssText = 'position:absolute;left:0;top:0;display:none;background:#1c2230;color:#fff;font:600 13px/1 "IBM Plex Sans",sans-serif;padding:5px 9px;border-radius:12px;white-space:nowrap;pointer-events:none;font-variant-numeric:tabular-nums;';
+  rotOverlay.append(rotHandleEl, rotAngleEl);
+  document.body.appendChild(rotOverlay);
+  rotArcEl = rotHandleEl.querySelector('.rot-hit-arc');
+  const arcLines = rotHandleEl.querySelectorAll('.rot-arc-line');
+  const setArmed = (on)=>arcLines.forEach(l=>{ l.setAttribute('stroke', on ? '#0E6FA8' : '#111'); l.setAttribute('stroke-width', on ? '8' : '6'); });
+  rotHandleEl.__setArmed = setArmed;
+  // — « − » / « + » : rotation fine, répétition en maintenant (d'abord 0,1° par appui, puis 0,5° et 1° si on maintient longtemps)
+  let fineTimer = null, fineN = 0;
+  const fineStep = (dir)=>{ fineN++; nudgePlanRotation(dir*(fineN > 40 ? 1 : fineN > 15 ? 0.5 : ROT_FINE_STEP)); showRotAngle(); };
+  const fineStop = ()=>{ clearTimeout(fineTimer); fineTimer = null; if (rotFineChanged){ rotFineChanged = false; pushHistory(); render(); } };
+  [['.rot-hit-minus', -1], ['.rot-hit-plus', 1]].forEach(([q, dir])=>{
+    const el = rotHandleEl.querySelector(q);
+    el.addEventListener('pointerdown', (e)=>{
+      e.preventDefault(); e.stopPropagation();
+      try{ el.setPointerCapture(e.pointerId); }catch(err){ /* sans conséquence */ }
+      fineN = 0; fineStep(dir);
+      const rep = ()=>{ fineStep(dir); fineTimer = setTimeout(rep, 85); };
+      fineTimer = setTimeout(rep, 420);
     });
-    const img = new Konva.Image({ image:ROT_IMG_OPEN, x:-imgSize/2, y:-imgSize/2, width:imgSize, height:imgSize, listening:false });
-    g.add(circle); g.add(img);
-    g.on('mouseenter', ()=>{ if (!planRotate.active) stage.container().style.cursor = 'pointer'; });
-    g.on('mouseleave', ()=>{ if (!planRotate.active) stage.container().style.cursor = ''; });
-    g.on('mousedown touchstart', (e)=>startPlanRotation(e, i));
-    rotIconsGroup.add(g);
-    return { group:g, circle, img, active:null };
+    ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>el.addEventListener(ev, fineStop));
+    el.addEventListener('contextmenu', e=>e.preventDefault());
   });
-  uiLayer.add(rotIconsGroup);
+  // — flèche : maintien long puis glissement = rotation libre
+  rotArcEl.addEventListener('pointerdown', (e)=>{
+    e.preventDefault(); e.stopPropagation();
+    try{ rotArcEl.setPointerCapture(e.pointerId); }catch(err){ /* sans conséquence */ }
+    let lx = e.clientX, ly = e.clientY; const x0 = lx, y0 = ly;
+    clearTimeout(rotHoldTimer);
+    const track = (ev)=>{ lx = ev.clientX; ly = ev.clientY; if (rotHoldTimer && Math.hypot(lx - x0, ly - y0) > 16){ clearTimeout(rotHoldTimer); rotHoldTimer = null; } }; // geste trop vif avant le maintien : pas armé
+    const stopTrack = ()=>{ clearTimeout(rotHoldTimer); rotHoldTimer = null; rotArcEl.removeEventListener('pointermove', track); ['pointerup','pointercancel'].forEach(t=>rotArcEl.removeEventListener(t, stopTrack)); if (!planRotate.active) setArmed(false); };
+    rotArcEl.addEventListener('pointermove', track);
+    ['pointerup','pointercancel'].forEach(t=>rotArcEl.addEventListener(t, stopTrack));
+    rotHoldTimer = setTimeout(()=>{
+      rotHoldTimer = null;
+      if (!rotatableObj()) return;
+      setArmed(true);
+      try{ if (navigator.vibrate) navigator.vibrate(18); }catch(err){ /* sans conséquence */ }
+      beginPlanRotation(lx, ly);
+    }, ROT_HOLD_MS);
+  });
+  rotArcEl.addEventListener('contextmenu', e=>e.preventDefault());
 }
-// Positionne les 4 icônes autour du plan donné (ou du plan sélectionné), à partir de sa
-// position/rotation du moment — appelée à la sélection, au redimensionnement, au déplacement,
-// au zoom et à chaque image d'une rotation, pour que les icônes suivent toujours le cadre.
+// Étiquette d'angle près de l'icône, pendant l'action puis masquée après un court délai.
+function showRotAngle(keep){
+  ensureRotHandle();
+  const o = rotGeom; if (!o) return;
+  const a = (((o.rotation||0)%360)+360)%360;
+  rotAngleEl.textContent = (Math.round(a*10)/10).toFixed(1).replace('.',',')+'°';
+  rotAngleEl.style.display = 'block';
+  scheduleRotPlace();
+  clearTimeout(rotAngleHide);
+  if (!keep) rotAngleHide = setTimeout(()=>{ if (!planRotate.active) rotAngleEl.style.display = 'none'; }, 1100);
+}
+function scheduleRotPlace(){ if (!rotHandleRAF) rotHandleRAF = requestAnimationFrame(()=>{ rotHandleRAF = 0; placeRotHandle(); }); }
+function placeRotHandle(){
+  if (!rotHandleEl) return;
+  const o = rotGeom;
+  if (!o){ rotOverlay.style.display = 'none'; return; }
+  const wrap = document.getElementById('canvasWrap').getBoundingClientRect(), host = sheetShadowHostEl.getBoundingClientRect();
+  Object.assign(rotOverlay.style, { left:wrap.left+'px', top:wrap.top+'px', width:wrap.width+'px', height:wrap.height+'px', display:'block' });
+  const rad = (o.rotation||0)*Math.PI/180, cos = Math.cos(rad), sin = Math.sin(rad), g = ROT_CORNER_GAP/zoom;
+  // coin haut-gauche de l'élément (son origine) + écart en diagonale VERS L'EXTÉRIEUR, dans le repère de l'élément (l'icône suit sa rotation)
+  const sx = o.x + (-g)*cos - (-g)*sin, sy = o.y + (-g)*sin + (-g)*cos;
+  let cx = host.left - wrap.left + sx*zoom, cy = host.top - wrap.top + sy*zoom;
+  const r = 62; // l'icône inclinée tient dans un cercle d'environ 62 px : on la garde entièrement visible
+  cx = Math.min(Math.max(cx, r), Math.max(r, wrap.width - r)); cy = Math.min(Math.max(cy, r), Math.max(r, wrap.height - r));
+  rotHandleEl.style.left = (cx - ROT_HANDLE_W/2) + 'px'; rotHandleEl.style.top = (cy - ROT_HANDLE_H/2) + 'px';
+  rotHandleEl.style.transform = 'rotate(-45deg)'; // orientation 45° : la flèche enveloppe le coin, « − » le long du côté gauche, « + » le long du côté haut
+  rotHandleEl.querySelectorAll('.rot-hit').forEach(h=>{ h.style.pointerEvents = h.classList.contains('rot-hit-arc') ? 'stroke' : 'all'; });
+  rotHandleEl.style.pointerEvents = 'none';
+  if (rotAngleEl.style.display !== 'none'){
+    const w = rotAngleEl.offsetWidth || 56, left = cx + 62 + w + 6 <= wrap.width ? cx + 62 : cx - 62 - w;
+    rotAngleEl.style.left = Math.max(4, left) + 'px'; rotAngleEl.style.top = Math.max(4, cy - 12) + 'px';
+  }
+}
+function isRotHandleVisible(){ return !!rotGeom; } // l'icône doit s'afficher (position calculée à l'image suivante)
+// Positionne l'icône pour l'élément donné (ou le plan / dessin sélectionné), à partir de sa position/rotation du moment — appelée à la sélection, au déplacement, au zoom
+// et à chaque image d'une rotation (nom conservé : de nombreux appelants).
 function updateRotateIcons(livePl){
-  ensureRotIcons();
+  ensureRotHandle();
   let pl = livePl || rotatableObj();
-  refreshRotFine(pl && findPlanById(pl.id) ? pl : null); // le pavé − / + ne concerne que les plans
-  if (!pl){
-    if (rotIconsGroup.visible()){ rotIconsGroup.visible(false); uiLayer.batchDraw(); }
-    return;
-  }
+  if (!pl){ if (rotGeom){ rotGeom = null; placeRotHandle(); rotAngleEl.style.display = 'none'; } return; }
   if (!livePl){
-    // Lecture sur le node affiché : suit le plan PENDANT un déplacement ou un redimensionnement,
-    // avant même que le modèle ne soit mis à jour (en fin de geste).
+    // Lecture sur le node affiché : suit l'élément PENDANT un déplacement ou un redimensionnement, avant même que le modèle ne soit mis à jour.
     const node = planImageNodes.get(pl.id), shNode = shapeNodes.get(pl.id);
-    if (node) pl = { ...pl, x:node.x(), y:node.y(), rotation:node.rotation(),
-                     width:node.width()*node.scaleX(), height:node.height()*node.scaleY() };
-    else if (shNode) pl = { ...pl, x:shNode.x(), y:shNode.y(), rotation:shNode.rotation() }; // dessin : largeur / hauteur = celles du modèle
+    if (node) pl = { ...pl, x:node.x(), y:node.y(), rotation:node.rotation(), width:node.width()*node.scaleX(), height:node.height()*node.scaleY() };
+    else if (shNode) pl = { ...pl, x:shNode.x(), y:shNode.y(), rotation:shNode.rotation() };
   }
-  rotIconsGroup.visible(true);
-  const sc = 1/zoom, d = (ROT_ICON_PX/2 + ROT_ICON_GAP_PX)/zoom; // taille constante à l'écran quel que soit le zoom
-  const rad = (pl.rotation||0)*Math.PI/180, cos = Math.cos(rad), sin = Math.sin(rad);
-  // Milieu de chaque côté, décalé vers l'extérieur (dans le repère du plan, donc il suit sa rotation).
-  const spots = [[pl.width/2, -d], [pl.width+d, pl.height/2], [pl.width/2, pl.height+d], [-d, pl.height/2]];
-  const rotating = !!planRotate.active;
-  rotIconNodes.forEach((n,i)=>{
-    const lx = spots[i][0], ly = spots[i][1];
-    n.group.position({ x: pl.x + lx*cos - ly*sin, y: pl.y + lx*sin + ly*cos });
-    n.group.scale({ x:sc, y:sc });
-    const active = rotating && planRotate.active.icon === i;
-    if (n.active !== active){
-      n.active = active;
-      n.circle.fill(active ? '#ffffff' : 'rgba(255,255,255,0.88)');
-      n.circle.stroke(active ? '#0E6FA8' : '#c3c8cf');
-      n.circle.strokeWidth(active ? 2 : 1.2);
-      n.img.image(active ? ROT_IMG_CLOSED : ROT_IMG_OPEN);
-    }
-    // Les ombres floues coûtent cher à redessiner : coupées pendant la rotation (image par
-    // image), rétablies au repos.
-    n.circle.shadowEnabled(!rotating);
-    n.img.visible(!!(n.img.image() && n.img.image().complete));
-  });
-  if (rotIconsGroup.getZIndex() !== uiLayer.children.length-1) rotIconsGroup.moveToTop();
-  uiLayer.batchDraw();
+  rotGeom = { x:pl.x, y:pl.y, rotation:pl.rotation||0, width:pl.width, height:pl.height };
+  if (planRotate.active && rotAngleEl) showRotAngle(true);
+  scheduleRotPlace();
 }
-/* ---------------------------- Rotation fine − / + (v2.1-82) ------------------------------ */
+/* ---------------------------- Rotation fine − / + (v2.1-82 ; v2.1-203 : sur l'icône unique, plus de fenêtre orange) ------------------------------ */
 const ROT_FINE_STEP = 0.1; // degrés par appui
-let rotFinePlanId = null;
-let rotFineEl = null, rotFineLabel = null, rotFineTimer = null, rotFineChanged = false;
-function ensureRotFine(){
-  if (rotFineEl) return;
-  rotFineEl = document.createElement('div');
-  rotFineEl.style.cssText = 'position:fixed;left:50%;top:calc(var(--topbar-h,96px) + 8px);transform:translateX(-50%);z-index:790;display:none;align-items:center;gap:6px;'
-    + 'background:#F59E0B;color:#1c2230;padding:5px 8px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.25);'
-    + 'font-size:13px;font-weight:600;touch-action:none;user-select:none;-webkit-user-select:none;';
-  const mk = (txt, dir)=>{
-    const b = document.createElement('button');
-    b.type = 'button'; b.textContent = txt;
-    b.style.cssText = 'font:inherit;font-size:20px;line-height:1;width:44px;height:36px;border:none;border-radius:18px;background:#1c2230;color:#fff;touch-action:none;';
-    const stop = ()=>{
-      clearTimeout(rotFineTimer); rotFineTimer = null;
-      if (rotFineChanged){ rotFineChanged = false; pushHistory(); render(); }
-    };
-    b.addEventListener('pointerdown', (e)=>{
-      e.preventDefault();
-      nudgePlanRotation(dir*ROT_FINE_STEP);
-      // Appui long : répétition (d'abord après 400 ms, puis toutes les 90 ms).
-      const rep = ()=>{ nudgePlanRotation(dir*ROT_FINE_STEP); rotFineTimer = setTimeout(rep, 90); };
-      rotFineTimer = setTimeout(rep, 400);
-    });
-    ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev, stop));
-    return b;
-  };
-  rotFineLabel = document.createElement('span');
-  rotFineLabel.style.cssText = 'min-width:62px;text-align:center;font-variant-numeric:tabular-nums;';
-  rotFineEl.append(mk('−',-1), rotFineLabel, mk('+',1));
-  document.body.appendChild(rotFineEl);
-}
-function refreshRotFine(pl){
-  ensureRotFine();
-  const sizeWin = document.getElementById('sizeAllWin');
-  if (!pl){ rotFineEl.style.display = 'none'; rotFinePlanId = null; return; }
-  // v2.1-157 : pavé de rotation et fenêtre « Tailles » partagent la même place : l'un ferme l'autre. Plan nouvellement sélectionné ->
-  // « Tailles » se ferme ; « Tailles » ouverte ensuite (plan déjà sélectionné) -> le pavé se masque.
-  if (pl.id !== rotFinePlanId){ rotFinePlanId = pl.id; sizeWin.classList.remove('show'); document.getElementById('ctrlWin').classList.remove('show'); }
-  if (sizeWin.classList.contains('show') || document.getElementById('ctrlWin').classList.contains('show') || document.getElementById('drawWin').classList.contains('show') || (activeTool && activeTool.startsWith('cut'))){ rotFineEl.style.display = 'none'; return; } // v2.1-151 : en haut comme les autres fenêtres, donc masqué pendant la découpe (fenêtres de découpe au même endroit)
-  const a = (((pl.rotation||0)%360)+360)%360;
-  rotFineLabel.textContent = (Math.round(a*10)/10).toFixed(1).replace('.',',')+'°';
-  rotFineEl.style.display = 'flex';
-}
-// Tourne le plan sélectionné de "delta" degrés autour de son CENTRE (même calcul que la rotation à la main).
+let rotFineEl = null, rotFineChanged = false; // rotFineEl : ancienne fenêtre orange, supprimée (variable gardée pour les appelants qui la masquaient)
+function refreshRotFine(){ /* v2.1-203 : la fenêtre orange − / + n'existe plus (appelants conservés) */ }
+// Tourne l'élément sélectionné (plan OU dessin) de "delta" degrés autour de son CENTRE (même calcul que la rotation libre).
 function nudgePlanRotation(delta){
-  const pl = rotatablePlan(); if (!pl) return;
+  const pl = rotatableObj(); if (!pl) return;
   const c = planCenter(pl);
   const rot = Math.round(((((pl.rotation||0)+delta)%360)+360)%360*10)/10 % 360; // arrondi au dixième, sans dérive
   const rad = rot*Math.PI/180, cos = Math.cos(rad), sin = Math.sin(rad);
   pl.rotation = rot;
   pl.x = c.x - ((pl.width/2)*cos - (pl.height/2)*sin);
   pl.y = c.y - ((pl.width/2)*sin + (pl.height/2)*cos);
-  const node = planImageNodes.get(pl.id);
+  const node = planImageNodes.get(pl.id), shNode = shapeNodes.get(pl.id);
   if (node){ node.position({x:pl.x, y:pl.y}); node.rotation(rot); planLayer.batchDraw(); }
+  else if (shNode){ shNode.position({x:pl.x, y:pl.y}); shNode.rotation(rot); contentLayer.batchDraw(); }
   rotFineChanged = true;
   updateRotateIcons();
   if (typeof updateLockIndicator === 'function') updateLockIndicator(true);
@@ -3375,32 +3377,26 @@ function pointerClient(e){
   const t = e.touches && e.touches[0] ? e.touches[0] : (e.changedTouches && e.changedTouches[0]) || e;
   return { x:t.clientX, y:t.clientY };
 }
-function startPlanRotation(e, iconIndex){
-  if (isPinching) return;
-  if (e.evt.touches && e.evt.touches.length > 1) return;
+function beginPlanRotation(cx, cy){
+  if (isPinching || planRotate.active) return;
   const pl = rotatableObj(); if (!pl) return;
-  e.cancelBubble = true;
-  if (e.evt.cancelable) e.evt.preventDefault();
-  const c = pointerClient(e.evt);
-  // Position de la feuille à l'écran lue UNE SEULE FOIS ici (v2.1-61) : pendant la rotation
-  // la feuille ne bouge pas (le doigt est capturé par le geste), inutile de la relire à chaque
+  // Position de la feuille à l'écran lue UNE SEULE FOIS ici (v2.1-61) : pendant la rotation la feuille ne bouge pas (le doigt est capturé par le geste), inutile de la relire à chaque
   // mouvement — getBoundingClientRect() force le navigateur à recalculer toute la page.
   const rect = sheetShadowHostEl.getBoundingClientRect(); // la FEUILLE (et non la zone de dessin, plus large : v2.1-118)
-  const pos = { x:(c.x-rect.left)/zoom, y:(c.y-rect.top)/zoom };
+  const pos = { x:(cx-rect.left)/zoom, y:(cy-rect.top)/zoom };
   const center = planCenter(pl);
   planRotate.active = {
-    pl, center, icon:iconIndex, isTouch: !!e.evt.touches, rect,
+    pl, center, icon:0, isTouch:true, rect,
     startRot: pl.rotation||0,
     startAngle: Math.atan2(pos.y-center.y, pos.x-center.x)*180/Math.PI,
-    rot:null, x:0, y:0, cx:c.x, cy:c.y, dirty:false, raf:0, uiHidden:false,
+    rot:null, x:0, y:0, cx, cy, dirty:false, raf:0, uiHidden:false,
   };
-  stage.container().style.cursor = CURSOR_HAND_CLOSED;
-  updateRotateIcons(); // l'icône touchée passe en main fermée
-  window.addEventListener('mousemove', onPlanRotateMove);
-  window.addEventListener('touchmove', onPlanRotateMove, {passive:false});
-  window.addEventListener('mouseup', onPlanRotateEnd);
-  window.addEventListener('touchend', onPlanRotateEnd);
-  window.addEventListener('touchcancel', onPlanRotateEnd);
+  stage.container().style.cursor = 'grabbing';
+  window.addEventListener('pointermove', onPlanRotateMove);
+  window.addEventListener('pointerup', onPlanRotateEnd);
+  window.addEventListener('pointercancel', onPlanRotateEnd);
+  showRotAngle(true);
+  updateRotateIcons();
 }
 // Le navigateur peut envoyer plusieurs événements tactiles par image : on ne fait que
 // mémoriser la dernière position ici, et le vrai travail (calcul + dessin) est regroupé en UN
@@ -3452,13 +3448,18 @@ function onPlanRotateEnd(){
   window.removeEventListener('mouseup', onPlanRotateEnd);
   window.removeEventListener('touchend', onPlanRotateEnd);
   window.removeEventListener('touchcancel', onPlanRotateEnd);
+  window.removeEventListener('pointermove', onPlanRotateMove);
+  window.removeEventListener('pointerup', onPlanRotateEnd);
+  window.removeEventListener('pointercancel', onPlanRotateEnd);
+  if (rotHandleEl && rotHandleEl.__setArmed) rotHandleEl.__setArmed(false);
+  showRotAngle(); // l'angle reste affiché un instant puis disparaît
   stage.container().style.cursor = '';
   if (st.uiHidden) transformer.visible(true); // le cadre bleu réapparaît (render() le recale ensuite)
   // Empêche le "clic" qui suit la fin du geste de désélectionner le plan.
   planRotate.justEnded = true; setTimeout(()=>{ planRotate.justEnded = false; }, 350);
   const pl = findPlanById(st.pl.id) || (model.shapes||[]).find(x=>x.id===st.pl.id);
   if (st.rot != null && pl){ pl.rotation = ((st.rot%360)+360)%360; pl.x = st.x; pl.y = st.y; pushHistory(); render(); }
-  else updateRotateIcons(); // simple clic sans mouvement : l'icône repasse en main ouverte
+  else updateRotateIcons(); // maintien sans mouvement : rien ne change
 }
 // Petit cadenas ROUGE affiché au coin supérieur droit de l'élément sélectionné, ouvert ou
 // fermé selon son état verrouillé/déverrouillé — pour être certain en un coup d'œil que le
