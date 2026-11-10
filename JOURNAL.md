@@ -1721,4 +1721,8 @@ v2.1-204 — Rotation : icône unique retravaillée (suite de l'essai v2.1-203, 
 - Demande de Mic : la 4e ligne (Teinte) ne sert à rien ; la goutte bleue (saturation) n'était pas parlante.
 - Correctif : ligne et curseur `rngHue` retirés (le champ `hue` des anciens documents reste lu et appliqué à l'affichage) ; icône de saturation = barre grise à gauche, dégradé arc-en-ciel à droite (proposition B choisie).
 
+## v2.1-209 — Rotation : petite icône (5e) qui affiche le grand outil ; icônes de travail bleues / oranges
+- Demande de Mic : une petite icône de rotation sous les 4 autres, à droite du plan ; le grand outil n'apparaît qu'au clic (comme les ciseaux), reste affiché jusqu'à ce qu'on désactive la petite icône ; l'état actif se voit par un CHANGEMENT DE COULEUR (jeu 1 : bleu → orange) sur les 3 icônes de travail (ciseaux, réglages, rotation), en remplacement de l'anneau orange des ciseaux.
+- Correctif : `badgeRotEl` (5e badge ; 3e de la rangée pour un dessin), état `rotToolOn` / `rotToolFor` (éteint si la sélection change), `updateRotateIcons` n'affiche plus le grand outil que s'il est activé ; `paintWorkBadges()` colore les disques (`data-disc`) : ciseaux actifs = outil découpe, réglages = fenêtre ouverte (observateur de classe sur les fenêtres), rotation = outil allumé.
+
 ```

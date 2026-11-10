@@ -295,7 +295,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       const exact = shapeCornersLocal(sh).every((c,k)=>{ const w = shapeToWorld(sh, c[0], c[1]), h = shapeHandles.getChildren()[k]; return Math.abs(h.x()-w.x) < 0.01 && Math.abs(h.y()-w.y) < 0.01; });
       // rotation (même moteur que le plan) : 30° autour du centre
       const c0 = planCenter(sh); sh.rotation = 30; const cx = shapeToWorld(sh, sh.width/2, sh.height/2); // un coin haut-gauche inchangé = centre qui bouge : on vérifie surtout que rotatableObj voit le dessin
-      const rot = rotatableObj() === sh && isRotHandleVisible();
+      setRotTool(true); const rot = rotatableObj() === sh && isRotHandleVisible();
       // redimensionnement : on tire l'angle 2 de (+30,+20), l'angle 0 doit rester fixe à l'écran
       const before = shapeToWorld(sh, 0, 0), h2 = shapeHandles.getChildren()[2], w2 = shapeToWorld(sh, sh.width, sh.height);
       h2.fire('dragstart', { evt:{} }); h2.position({ x:w2.x+30, y:w2.y+20 }); h2.fire('dragmove', { evt:{} }); h2.fire('dragend', { evt:{} });
@@ -330,7 +330,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       onTileChosen('plan'); openDrawWin(); document.getElementById('drawSelect').click();
       const tool = activeTool === SELECT_TOOL && document.getElementById('drawSelect').classList.contains('active');
       remoteCursor = { tool:SELECT_TOOL, phase:'start', tip:{ x:300, y:400 } }; confirmRemoteCursor();
-      const sel1 = selectedId === 'sa' && !!remoteCursor && isRotHandleVisible();
+      const sel1 = selectedId === 'sa' && !!remoteCursor && (setRotTool(true), isRotHandleVisible());
       remoteCursor.tip = { x:250, y:302 }; confirmRemoteCursor(); const sel2 = selectedId === 'sb';
       remoteCursor.tip = { x:520, y:700 }; confirmRemoteCursor(); const none = selectedId === null;
       const red = remoteCursorColor() === '#E02424';
@@ -691,6 +691,14 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
         const c = document.createElement('canvas'); c.width = 400; c.height = 300; await importPlanImageFromDataURL(c.toDataURL(), 'rot.png');
         const pl = model.plans[model.plans.length-1]; pl.x = 150; pl.y = 300; pl.width = 500; pl.height = 375; pl.rotation = 0; pl.locked = false; render(); selectedId = pl.id; render(); updateLockIndicator(); window.__rotPl = pl.id;
         await new Promise(r=>setTimeout(r,300));
+        // v2.1-209 : à la sélection le grand outil est CACHÉ ; la 5e petite icône (bleue) l'affiche (elle devient orange), un 2e appui le masque
+        const bd = badgeRotEl, disc = ()=>bd.querySelector('[data-disc]').getAttribute('fill');
+        out.offAtSelect = !isRotHandleVisible() && bd.style.display === 'flex' && disc() === '#3962F5';
+        bd.click(); await new Promise(r=>setTimeout(r,120));
+        out.onAfterClick = isRotHandleVisible() && disc() === '#F59E0B';
+        bd.click(); await new Promise(r=>setTimeout(r,120));
+        out.offAfter2 = !isRotHandleVisible() && disc() === '#3962F5';
+        bd.click(); await new Promise(r=>setTimeout(r,120));
         out.unique = document.querySelectorAll('#rotHandleDummy, .rot-hit-arc').length === 1 && !document.querySelector('[style*="F59E0B"][style*="translateX(-50%)"][style*="z-index:790"]');
         out.visible = isRotHandleVisible() && rotOverlay.style.display === 'block' && /rotate\(-45deg\)/.test(rotHandleEl.style.transform);
         const pts = ()=>{ const pt=(q)=>{ const e=document.querySelector(q), r=e.getBoundingClientRect(); return { x:r.left+r.width/2, y:r.top+r.height/2 }; }; const arc=document.querySelector('.rot-hit-arc'); const p=arc.getPointAtLength(arc.getTotalLength()*0.45); const q=new DOMPoint(p.x,p.y).matrixTransform(arc.getScreenCTM()); return { arc:{x:q.x,y:q.y}, minus:pt('.rot-hit-minus'), plus:pt('.rot-hit-plus') }; };
@@ -710,6 +718,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       await pg.mouse.up(); await pg.waitForTimeout(300);
       const free = await rotNow();
       const hist = await pg.evaluate(()=>historyIndex);
+      ok(r.offAtSelect && r.onAfterClick && r.offAfter2, 'rotation : petite icône (5e, sous les autres) bleue au repos, orange et grand outil affiché au clic, masqué au 2e clic');
       ok(r.visible && r.unique, 'rotation : une seule icône (flèche entre − et +) inclinée à 45° au coin du plan, plus de fenêtre orange');
       ok(Math.abs(plus1 - 0.5) < 0.05 && Math.abs(minus2 - 359.5) < 0.05, 'rotation fine : « + » = +0,5°, « − » = −0,5° par appui ('+plus1+' puis '+minus2+')');
       ok(armed && label && Math.abs(free - 0) > 20, 'rotation libre : immédiate dès le toucher de la flèche (armée en bleu), angle affiché ('+Math.round(free)+'°)');
@@ -722,7 +731,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       const r = await pg.evaluate(async()=>{
         window.__snap11 = cloneDoc(); closeOtherWindows(''); closeAllTileDrawers(); activeTool = null; const out = { ok:true, d:[] };
         const c = document.createElement('canvas'); c.width = 400; c.height = 300; await importPlanImageFromDataURL(c.toDataURL(), 'rot2.png');
-        const pl = model.plans[model.plans.length-1]; pl.width = 440; pl.height = 330; pl.locked = false; selectedId = pl.id;
+        const pl = model.plans[model.plans.length-1]; pl.width = 440; pl.height = 330; pl.locked = false; selectedId = pl.id; setRotTool(true);
         for (const rot of [0, 30, 90, 180]){
           const cc = { x:300, y:500 }, rad = rot*Math.PI/180; pl.rotation = rot; pl.x = cc.x - ((pl.width/2)*Math.cos(rad) - (pl.height/2)*Math.sin(rad)); pl.y = cc.y - ((pl.width/2)*Math.sin(rad) + (pl.height/2)*Math.cos(rad));
           render(); updateLockIndicator(); await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); await new Promise(r=>setTimeout(r,60));
