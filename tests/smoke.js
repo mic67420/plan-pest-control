@@ -719,6 +719,13 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       const free = await rotNow();
       const hist = await pg.evaluate(()=>historyIndex);
       ok(r.offAtSelect && r.onAfterClick && r.offAfter2, 'rotation : petite icône (5e, sous les autres) bleue au repos, orange et grand outil affiché au clic, masqué au 2e clic');
+      ok(await pg.evaluate(async()=>{ const w=()=>new Promise(r=>setTimeout(r,150)); const col=(b)=>b.querySelector('[data-disc]').getAttribute('fill'); selectedId = window.__rotPl; render(); updateLockIndicator(); await w(); setRotTool(false); closeAllTileDrawers(); closeAllPopovers();
+        badgeSetEl.click(); await w(); const a = isSettingsOpen() && col(badgeSetEl)==='#F59E0B';
+        badgeCutEl.click(); await w(); const b = activeTool==='cut-rect' && !isSettingsOpen() && col(badgeSetEl)==='#3962F5' && col(badgeCutEl)==='#F59E0B';
+        badgeSetEl.click(); await w(); const c = activeTool!=='cut-rect' && isSettingsOpen() && col(badgeCutEl)==='#3962F5';
+        badgeRotEl.click(); await w(); const d = rotToolOn && !isSettingsOpen() && col(badgeSetEl)==='#3962F5' && col(badgeRotEl)==='#F59E0B';
+        badgeCutEl.click(); await w(); const e = activeTool==='cut-rect' && !rotToolOn && col(badgeRotEl)==='#3962F5';
+        badgeCutEl.click(); await w(); return a&&b&&c&&d&&e; }), 'icônes de travail : une seule active à la fois (ciseaux, réglages, rotation s\'annulent)');
       ok(r.visible && r.unique, 'rotation : une seule icône (flèche entre − et +) inclinée à 45° au coin du plan, plus de fenêtre orange');
       ok(Math.abs(plus1 - 0.5) < 0.05 && Math.abs(minus2 - 359.5) < 0.05, 'rotation fine : « + » = +0,5°, « − » = −0,5° par appui ('+plus1+' puis '+minus2+')');
       ok(armed && label && Math.abs(free - 0) > 20, 'rotation libre : immédiate dès le toucher de la flèche (armée en bleu), angle affiché ('+Math.round(free)+'°)');

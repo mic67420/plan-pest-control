@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-209 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-210 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -677,7 +677,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-209</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-210</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -3556,6 +3556,13 @@ function isSettingsOpen(){
     || (!!document.querySelector('.tb-group[data-tile="texte"].mobile-open') && model.textes.some(t=>t.id===selectedId))
     || (!!document.querySelector('.tb-group[data-tile="pastille"].mobile-open') && model.pastilles.some(p=>p.id===selectedId));
 }
+// v2.1-209 : UNE seule icône de travail active à la fois (ciseaux, réglages, rotation) : en activer une éteint les deux autres.
+function deactivateWorkTools(except){
+  if (except !== 'rot') setRotTool(false);
+  if (except !== 'cut' && activeTool === 'cut-rect') setTool('cut-rect'); // 2e appui = annule la découpe
+  if (except !== 'set' && isSettingsOpen()){ closeSelectionSettings(); closeAllPopovers(); closeAllTileDrawers(); }
+  schedulePlaceBadges();
+}
 function paintWorkBadges(){
   const paint = (el, on)=>{ if (!el) return; const c = on ? BADGE_ORANGE : BADGE_BLUE; if (el.__col === c) return; el.__col = c; el.querySelectorAll('[data-disc]').forEach(n=>n.setAttribute('fill', c)); };
   paint(badgeCutEl, activeTool === 'cut-rect');
@@ -3598,6 +3605,7 @@ function ensureLockBadge(){
   const toolBtn = (label, svg, onClick)=>{ const b = mk(label, svg, onClick); b.style.display = 'none'; return b; };
   badgeCutEl = toolBtn('Découpe rectangulaire', '<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="716.3 663.9 102.2 102.2"><path fill="#25212D" d="M767.2 667.7C793.3 667.6 814.5 688.8 814.5 714.9C814.5 741 793.3 762.2 767.2 762.2C741.1 762.1 720 741 720 714.9C720 688.9 741.1 667.7 767.2 667.7Z"/><path fill="#3962F5" d="M767.2 671.2C791.3 671.1 810.9 690.7 810.9 714.8C810.9 739 791.3 758.5 767.2 758.5C743.1 758.5 723.6 738.9 723.6 714.8C723.6 690.7 743.1 671.2 767.2 671.2Z"/><path fill="white" d="M754.9 691.0L758.7 687.2C762.1 692.7 764.8 698.7 766.9 704.9C768.8 698.8 771.7 693 774.5 687.3L778.9 691.2L771.7 715.1C773.1 717.5 774.4 719.9 775.6 722.5C775.7 722.6 775.8 722.8 776 722.8C776.1 722.8 778.9 721.4 779.7 721.2C787.3 719.8 794.2 726.2 793.3 733.9C791.7 747.3 770.9 747.5 770.9 730.7C770.9 729 771 727.3 771.1 725.6C772 726.7 769.6 723.3 768.5 722.4C767.7 721.7 766.9 721.1 766.1 720.4L761.7 725.7C761.7 726 761.8 726.2 761.9 726.4C764.7 732.5 761.2 741.6 754.5 743.4C742.5 746.5 735.7 729.2 745.9 722.7C749.9 720.2 753.7 721.4 757.9 722.3L762.3 715.9L754.9 691.0Z"/><path fill="#3962F5" d="M752.2 725.4C761 725.3 760 738.6 751.7 739.2C744.2 739.8 743.7 725.5 752.2 725.4Z"/><path fill="#3962F5" d="M782.2 725.4C784.6 725.4 786.9 726.7 788 728.8C789.2 731 789.1 733.5 787.8 735.6C786.5 737.6 784.1 738.8 781.7 738.6C778.2 738.3 775.5 735.3 775.7 731.7C775.8 728.2 778.7 725.4 782.2 725.4Z"/></svg>', ()=>{
     if (activeTool === 'cut-rect'){ setTool('cut-rect'); schedulePlaceBadges(); return; } // second appui : annule la découpe
+    deactivateWorkTools('cut');
     onTileChosen('plan'); setTool('cut-rect');
     showBubble('Tracez le rectangle à découper');
     schedulePlaceBadges();
@@ -3610,6 +3618,7 @@ function ensureLockBadge(){
     if (popSel.classList.contains('open') || popPlan.classList.contains('open') || (texteOuvert && model.textes.some(t=>t.id===selectedId)) || (pastilleOuvert && model.pastilles.some(p=>p.id===selectedId))){
       closeSelectionSettings(); closeAllPopovers(); closeAllTileDrawers(); return;
     }
+    deactivateWorkTools('set'); // v2.1-209 : les ciseaux et la rotation s'éteignent
     if (!findPlanById(selectedId)){ openSelectionSettings(); return; } // pastille / légende / texte (v2.1-124)
     onTileChosen('plan');
     openTileDrawer('plan', false);
@@ -3618,7 +3627,7 @@ function ensureLockBadge(){
   // v2.1-209 : les fonds bleus des ciseaux et des réglages deviennent orange quand l'outil est actif (paintWorkBadges)
   [badgeCutEl, badgeSetEl].forEach(b=>{ b.innerHTML = b.innerHTML.replace(/fill="#3962F5"/g, 'fill="#3962F5" data-disc="1"'); });
   // v2.1-209 : 5e icône = rotation (flèche circulaire blanche sur disque bleu) ; un appui affiche / masque le grand outil de rotation
-  badgeRotEl = toolBtn('Rotation', '<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#25212D"/><circle cx="50" cy="50" r="42.5" fill="#3962F5" data-disc="1"/><g transform="translate(-1 -1) scale(3.85)"><path d="M5 13a8 8 0 1 1 3 6.2" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/><path d="M2 19l3.5-6.5 5.5 3z" fill="#fff"/></g></svg>', ()=>{ setRotTool(!rotToolOn); });
+  badgeRotEl = toolBtn('Rotation', '<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#25212D"/><circle cx="50" cy="50" r="42.5" fill="#3962F5" data-disc="1"/><g transform="translate(-1 -1) scale(3.85)"><path d="M5 13a8 8 0 1 1 3 6.2" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/><path d="M2 19l3.5-6.5 5.5 3z" fill="#fff"/></g></svg>', ()=>{ if (!rotToolOn) deactivateWorkTools('rot'); setRotTool(!rotToolOn); });
   const mo = new MutationObserver(()=>schedulePlaceBadges());
   ['#popSelSettings','#popPlanSettings','.tb-group[data-tile="texte"]','.tb-group[data-tile="pastille"]'].forEach(q=>{ const el = document.querySelector(q); if (el) mo.observe(el, { attributes:true, attributeFilter:['class'] }); }); // réglages ouverts / fermés : la couleur de l'icône suit
   // v2.1-142 : icône bleue « renommer » (crayon blanc) pour la pastille : ouvre une petite carte de saisie du nom

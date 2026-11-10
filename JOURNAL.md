@@ -1725,4 +1725,8 @@ v2.1-204 — Rotation : icône unique retravaillée (suite de l'essai v2.1-203, 
 - Demande de Mic : une petite icône de rotation sous les 4 autres, à droite du plan ; le grand outil n'apparaît qu'au clic (comme les ciseaux), reste affiché jusqu'à ce qu'on désactive la petite icône ; l'état actif se voit par un CHANGEMENT DE COULEUR (jeu 1 : bleu → orange) sur les 3 icônes de travail (ciseaux, réglages, rotation), en remplacement de l'anneau orange des ciseaux.
 - Correctif : `badgeRotEl` (5e badge ; 3e de la rangée pour un dessin), état `rotToolOn` / `rotToolFor` (éteint si la sélection change), `updateRotateIcons` n'affiche plus le grand outil que s'il est activé ; `paintWorkBadges()` colore les disques (`data-disc`) : ciseaux actifs = outil découpe, réglages = fenêtre ouverte (observateur de classe sur les fenêtres), rotation = outil allumé.
 
+## v2.1-210 — Icônes de travail exclusives
+- Cause racine : ciseaux et réglages pouvaient être oranges (actifs) en même temps, car chacun ignorait l'état des autres (la fenêtre des réglages restait ouverte pendant une découpe).
+- Correctif : `deactivateWorkTools(except)` appelée au clic de chaque icône : activer l'une annule la découpe, ferme les réglages et éteint la rotation. Test ajouté.
+
 ```
