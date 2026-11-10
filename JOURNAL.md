@@ -1717,4 +1717,8 @@ v2.1-204 — Rotation : icône unique retravaillée (suite de l'essai v2.1-203, 
 - Demande de Mic : supprimer le maintien de 0,4 s ; pas fin de 0,5° avec répétition immédiate si l'appui dépasse 0,2 s.
 - Correctif : la rotation libre démarre au toucher de la flèche (plus de minuterie) ; `ROT_FINE_STEP` = 0,5° ; répétition après 200 ms (puis 1° par pas si l'appui dure longtemps).
 
+## v2.1-208 — Réglages de l'image : ligne Teinte supprimée, nouvelle icône de saturation
+- Demande de Mic : la 4e ligne (Teinte) ne sert à rien ; la goutte bleue (saturation) n'était pas parlante.
+- Correctif : ligne et curseur `rngHue` retirés (le champ `hue` des anciens documents reste lu et appliqué à l'affichage) ; icône de saturation = barre grise à gauche, dégradé arc-en-ciel à droite (proposition B choisie).
+
 ```
