@@ -1709,4 +1709,8 @@ v2.1-204 — Rotation : icône unique retravaillée (suite de l'essai v2.1-203, 
 - Correctif : arc de 90° exact (rayon 44, de 225° à 315°), pointe à l'extrémité, écart visible avec les deux boutons.
 - Rotation tactile : le test automatique montre que le nœud tourne bien pendant le glissement (le modèle n'est écrit qu'au relâchement) ; pour les téléphones qui n'envoient pas tous les `pointermove`, ajout d'écouteurs de secours `touchmove` / `touchend` / `touchcancel` pendant la rotation, et `touch-action:none` + `touchstart` annulé sur la flèche (aucun défilement ni sélection pendant le maintien).
 
+## v2.1-206 — L'icône de rotation reste au coin pendant le défilement
+- Cause racine : la position de l'icône (HTML, fixe à l'écran) n'était recalculée qu'à la sélection, au zoom ou au déplacement ; le défilement de la zone (barres, doigt) ne la recalait pas, elle restait en place pendant que le plan bougeait.
+- Correctif : écoute de `scroll` (zone de dessin) et `resize` → `scheduleRotPlace()` (une image d'écran).
+
 ```
