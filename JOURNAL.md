@@ -1693,4 +1693,13 @@ v2.1-203 — ESSAI : rotation par UNE icône (flèche entre « − » et « + »
   (aimant 0/90/180/270°, mêmes calculs qu'avant : applyPlanRotationFrame / onPlanRotateEnd, événements pointeur) ; un glissement avant le maintien ne fait rien ; « − » / « + » : 0,1° par appui, maintenu = répétition qui accélère
   (0,5° puis 1°) ; étiquette d'angle près de l'icône pendant l'action ; un pushHistory par geste. Supprimés : les 4 mains Konva (images HAND_*), la fenêtre orange − angle + (refreshRotFine reste une fonction vide pour ses appelants),
   le curseur « main fermée ». Concerne aussi les dessins (même moteur).
+
+v2.1-204 — Rotation : icône unique retravaillée (suite de l'essai v2.1-203, rejeté par Mic : « pas bon du tout »)
+  Retours de Mic : le dessin fourni n'était qu'un croquis à main levée -> faire une icône vectorielle plus jolie ; l'icône doit rester fixée près du coin supérieur de l'image et tourner EN MÊME TEMPS que l'image ;
+  « + » et « − » = rotation fine. (La v2.1-202, commit 4d0a7a0, reste la version de référence avec les 4 mains.)
+  Causes de l'échec de la v2.1-203 : croquis tel quel (laid) ; l'icône gardait une inclinaison fixe à l'écran (elle ne tournait pas avec le plan) ; elle était recentrée dans l'écran quand le coin sortait de la vue,
+  donc décollée du coin.
+  Correctif : dessin vectoriel propre (arc parfait, pointe de flèche, deux boutons ronds à liseré, liseré blanc de lisibilité) ; rotation CSS = angle du plan − 45° : l'icône tourne avec le plan et reste collée à son coin
+  haut-gauche (écart 40 px en diagonale, dans le repère du plan) ; signes « − » et « + » redressés par rotation inverse ; plus de recentrage dans l'écran ; fonctionnement inchangé : maintien long sur la flèche = rotation
+  libre (aimant), « − » / « + » = rotation fine (0,1°, accélère si maintenu), angle affiché près de l'icône.
 ```

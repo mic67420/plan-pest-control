@@ -719,6 +719,26 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
       await pg.evaluate(()=>{ selectedId = null; render(); updateLockIndicator(); restoreDoc(window.__snap10); });
       await pg.waitForTimeout(400);
     }
+    // v2.1-204 : l'icône de rotation reste collée au coin haut-gauche du plan ET tourne avec lui (0°, 30°, 90°, 180°), sans être recentrée dans l'écran
+    {
+      const r = await pg.evaluate(async()=>{
+        window.__snap11 = cloneDoc(); closeOtherWindows(''); closeAllTileDrawers(); activeTool = null; const out = { ok:true, d:[] };
+        const c = document.createElement('canvas'); c.width = 400; c.height = 300; await importPlanImageFromDataURL(c.toDataURL(), 'rot2.png');
+        const pl = model.plans[model.plans.length-1]; pl.width = 440; pl.height = 330; pl.locked = false; selectedId = pl.id;
+        for (const rot of [0, 30, 90, 180]){
+          const cc = { x:300, y:500 }, rad = rot*Math.PI/180; pl.rotation = rot; pl.x = cc.x - ((pl.width/2)*Math.cos(rad) - (pl.height/2)*Math.sin(rad)); pl.y = cc.y - ((pl.width/2)*Math.sin(rad) + (pl.height/2)*Math.cos(rad));
+          render(); updateLockIndicator(); await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); await new Promise(r=>setTimeout(r,60));
+          const h = rotHandleEl.getBoundingClientRect(), host = sheetShadowHostEl.getBoundingClientRect();
+          const corner = { x:host.left + pl.x*zoom, y:host.top + pl.y*zoom };
+          const d = Math.hypot((h.left+h.width/2) - corner.x, (h.top+h.height/2) - corner.y), expect = ROT_CORNER_GAP*Math.SQRT2;
+          const tiltOk = rotHandleEl.style.transform === 'rotate(' + (rot-45) + 'deg)';
+          out.d.push(Math.round(d)); if (Math.abs(d - expect) > 6 || !tiltOk) out.ok = false;
+        }
+        selectedId = null; render(); updateLockIndicator(); restoreDoc(window.__snap11); return out;
+      });
+      await pg.waitForTimeout(300);
+      ok(r.ok, 'icône de rotation : collée au coin haut-gauche du plan et tournant avec lui à 0°, 30°, 90°, 180° (distances '+r.d.join('/')+' px)');
+    }
     // règle commune : ouvrir une fenêtre referme les autres
     ok(await pg.evaluate(()=>{ closeOtherWindows(''); openTileDrawer('plan', false); document.getElementById('sizeAllWin').classList.add('show'); closeOtherWindows('sizeAll'); const a = !document.querySelector('.tb-group.mobile-open'); openTileDrawer('vue', false); const b = !document.getElementById('sizeAllWin').classList.contains('show'); closeAllTileDrawers(); return a && b; }), 'fenêtres : en ouvrir une referme les autres');
     ok(await pg.evaluate(async()=>{ const t = model.deviceTypes[0]; const r0 = typeSizeOf(t); const row = [...document.querySelectorAll('#deviceTypeDropdownList .dd-item')].find(x=>x.querySelector('.sz-ctl')); if (!row) return false; const plus = row.querySelector('.sz-ctl button[data-sz="1"]'); plus.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); plus.dispatchEvent(new PointerEvent('pointerup',{bubbles:true})); return typeSizeOf(model.deviceTypes[0]) === r0+1; }), 'liste des postes : bouton + règle la taille du poste');

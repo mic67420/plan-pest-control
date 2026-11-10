@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PLAN PEST CONTROL v2.1-203 — Éditeur de plans de lutte antiparasitaire</title>
+<title>PLAN PEST CONTROL v2.1-204 — Éditeur de plans de lutte antiparasitaire</title>
 <!-- Application installable sur l'écran d'accueil du téléphone (v2.1-66) -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E6FA8">
@@ -677,7 +677,7 @@
 <div id="topbar">
 
   <div class="topbar-row1">
-  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-203</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
+  <div class="brand">PLAN <span>PEST CONTROL</span><span class="ver">v2.1-204</span><span id="saveBadge" class="mono" title="Sauvegarde automatique sur cet appareil"></span></div>
   <div class="sep"></div>
   </div>
 
@@ -949,7 +949,7 @@
 
 <script>
 /* =========================================================================
-   PLAN PEST CONTROL v2.1-203 — Éditeur de plans de lutte antiparasitaire
+   PLAN PEST CONTROL v2.1-204 — Éditeur de plans de lutte antiparasitaire
    Architecture : modèle de données central (source de vérité) + rendu Konva.
    Chaque mutation du modèle -> pushHistory() -> render().
    Numéro de version v{majeur}.{mineur}-{build} à maintenir ensemble à 3 endroits : le <title>, le chip
@@ -3232,22 +3232,25 @@ function planCenter(pl){
 // à 45°, qui suit sa rotation. Remplace les 4 mains (v2.1-57) ET la fenêtre orange « − angle + » (v2.1-82). Éléments HTML (nets, faciles à toucher), pas des nœuds Konva.
 //  - MAINTIEN LONG (0,38 s) sur la flèche, puis glisser : rotation libre autour du centre, aimant à 0 / 90 / 180 / 270° (ROT_SNAP_DEG) ; la flèche passe en bleu quand elle est « armée » ;
 //  - « − » / « + » : rotation FINE par petits pas (0,1° ; appui maintenu = répétition, qui accélère) ; l'angle s'affiche près de l'icône pendant l'action.
-// Les signes « − » et « + » sont redressés (rotation inverse dans le dessin) : l'icône est inclinée à 45° mais se lit droite.
+// v2.1-204 : l'icône est inclinée de 45° PAR RAPPORT À L'ÉLÉMENT et tourne avec lui ; les signes « − » et « + » restent droits (rotation inverse).
 // Dernière version avec les mains : v2.1-202, commit 4d0a7a0 (référence fonctionnelle, voir CLAUDE.md).
 let rotOverlay = null, rotHandleEl = null, rotArcEl = null, rotAngleEl = null, rotAngleHide = 0, rotHandleRAF = 0, rotGeom = null, rotHoldTimer = null;
-const ROT_HANDLE_W = 120, ROT_HANDLE_H = 92, ROT_CORNER_GAP = 34; // taille de l'icône et écart (px écran) entre le coin du plan et le centre de l'icône
-const ROT_HANDLE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 92" width="${ROT_HANDLE_W}" height="${ROT_HANDLE_H}" style="overflow:visible;display:block">
-  <g fill="none" stroke="#111" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none">
-    <path class="rot-arc-line" d="M22 48 C 26 14, 66 2, 98 36"/>
-    <path class="rot-arc-line" d="M84 38 L100 40 L97 22"/>
-    <ellipse cx="22" cy="72" rx="17" ry="15" transform="rotate(-10 22 72)" fill="rgba(255,255,255,.93)"/>
-    <ellipse cx="98" cy="72" rx="18" ry="15" transform="rotate(6 98 72)" fill="rgba(255,255,255,.93)"/>
-    <path d="M14 72 L30 71.5" transform="rotate(45 22 72)"/>
-    <path d="M89 72 L107 72 M98 63 L98 81" transform="rotate(45 98 72)"/>
+const ROT_HANDLE_W = 124, ROT_HANDLE_H = 85, ROT_CORNER_GAP = 40; // taille de l'icône et écart (px écran) entre le coin du plan et le centre de l'icône
+// v2.1-204 : dessin vectoriel soigné (arc parfait + pointe de flèche, deux boutons ronds « − » et « + », liseré blanc pour rester lisible sur un plan chargé), à la place du croquis à main levée.
+const ROT_HANDLE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 96" width="${ROT_HANDLE_W}" height="${ROT_HANDLE_H}" style="overflow:visible;display:block">
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none">
+    <path d="M24 56 A46 46 0 0 1 116 56" stroke="#fff" stroke-opacity=".92" stroke-width="14"/>
+    <path d="M104 46 L116 59 L128 46" stroke="#fff" stroke-opacity=".92" stroke-width="14"/>
+    <path class="rot-arc-line" d="M24 56 A46 46 0 0 1 116 56" stroke="#1c2230" stroke-width="7"/>
+    <path class="rot-arc-line" d="M104 46 L116 59 L128 46" stroke="#1c2230" stroke-width="7"/>
+    <circle cx="24" cy="77" r="17" fill="#fff" stroke="#1c2230" stroke-width="4"/>
+    <circle cx="116" cy="77" r="17" fill="#fff" stroke="#1c2230" stroke-width="4"/>
+    <g class="rot-glyph-minus"><path d="M16 77 H32" stroke="#0E6FA8" stroke-width="6.5"/></g>
+    <g class="rot-glyph-plus"><path d="M107 77 H125 M116 68 V86" stroke="#0E6FA8" stroke-width="6.5"/></g>
   </g>
-  <path class="rot-hit rot-hit-arc" d="M22 48 C 26 14, 66 2, 98 36" fill="none" stroke="transparent" stroke-width="30" stroke-linecap="round" style="pointer-events:stroke;cursor:grab"/>
-  <circle class="rot-hit rot-hit-minus" cx="22" cy="72" r="25" fill="transparent" style="pointer-events:all;cursor:pointer"/>
-  <circle class="rot-hit rot-hit-plus" cx="98" cy="72" r="25" fill="transparent" style="pointer-events:all;cursor:pointer"/>
+  <path class="rot-hit rot-hit-arc" d="M24 56 A46 46 0 0 1 116 56" fill="none" stroke="transparent" stroke-width="34" stroke-linecap="round" style="pointer-events:stroke;cursor:grab"/>
+  <circle class="rot-hit rot-hit-minus" cx="24" cy="77" r="26" fill="transparent" style="pointer-events:all;cursor:pointer"/>
+  <circle class="rot-hit rot-hit-plus" cx="116" cy="77" r="26" fill="transparent" style="pointer-events:all;cursor:pointer"/>
 </svg>`;
 function ensureRotHandle(){
   if (rotHandleEl) return;
@@ -3321,18 +3324,21 @@ function placeRotHandle(){
   const wrap = document.getElementById('canvasWrap').getBoundingClientRect(), host = sheetShadowHostEl.getBoundingClientRect();
   Object.assign(rotOverlay.style, { left:wrap.left+'px', top:wrap.top+'px', width:wrap.width+'px', height:wrap.height+'px', display:'block' });
   const rad = (o.rotation||0)*Math.PI/180, cos = Math.cos(rad), sin = Math.sin(rad), g = ROT_CORNER_GAP/zoom;
-  // coin haut-gauche de l'élément (son origine) + écart en diagonale VERS L'EXTÉRIEUR, dans le repère de l'élément (l'icône suit sa rotation)
+  // coin haut-gauche de l'élément (son origine) + écart en diagonale VERS L'EXTÉRIEUR, dans le repère de l'élément : l'icône reste collée au coin quand l'élément tourne
   const sx = o.x + (-g)*cos - (-g)*sin, sy = o.y + (-g)*sin + (-g)*cos;
-  let cx = host.left - wrap.left + sx*zoom, cy = host.top - wrap.top + sy*zoom;
-  const r = 62; // l'icône inclinée tient dans un cercle d'environ 62 px : on la garde entièrement visible
-  cx = Math.min(Math.max(cx, r), Math.max(r, wrap.width - r)); cy = Math.min(Math.max(cy, r), Math.max(r, wrap.height - r));
+  const cx = host.left - wrap.left + sx*zoom, cy = host.top - wrap.top + sy*zoom; // v2.1-204 : plus de recentrage dans l'écran (il décollait l'icône du coin)
   rotHandleEl.style.left = (cx - ROT_HANDLE_W/2) + 'px'; rotHandleEl.style.top = (cy - ROT_HANDLE_H/2) + 'px';
-  rotHandleEl.style.transform = 'rotate(-45deg)'; // orientation 45° : la flèche enveloppe le coin, « − » le long du côté gauche, « + » le long du côté haut
+  // orientation : inclinée de −45° PAR RAPPORT À L'ÉLÉMENT, donc elle tourne avec lui (angle de l'élément − 45°) ; les signes « − » et « + » sont redressés (rotation inverse) pour rester lisibles
+  const tilt = (o.rotation||0) - 45;
+  rotHandleEl.style.transform = 'rotate(' + tilt + 'deg)';
+  const gm = rotHandleEl.querySelector('.rot-glyph-minus'), gp = rotHandleEl.querySelector('.rot-glyph-plus');
+  if (gm) gm.setAttribute('transform', 'rotate(' + (-tilt) + ' 24 77)');
+  if (gp) gp.setAttribute('transform', 'rotate(' + (-tilt) + ' 116 77)');
   rotHandleEl.querySelectorAll('.rot-hit').forEach(h=>{ h.style.pointerEvents = h.classList.contains('rot-hit-arc') ? 'stroke' : 'all'; });
   rotHandleEl.style.pointerEvents = 'none';
   if (rotAngleEl.style.display !== 'none'){
-    const w = rotAngleEl.offsetWidth || 56, left = cx + 62 + w + 6 <= wrap.width ? cx + 62 : cx - 62 - w;
-    rotAngleEl.style.left = Math.max(4, left) + 'px'; rotAngleEl.style.top = Math.max(4, cy - 12) + 'px';
+    const w = rotAngleEl.offsetWidth || 56, r = 70, left = cx + r + w + 6 <= wrap.width ? cx + r : cx - r - w;
+    rotAngleEl.style.left = Math.min(Math.max(4, left), Math.max(4, wrap.width - w - 4)) + 'px'; rotAngleEl.style.top = Math.min(Math.max(4, cy - 12), Math.max(4, wrap.height - 30)) + 'px';
   }
 }
 function isRotHandleVisible(){ return !!rotGeom; } // l'icône doit s'afficher (position calculée à l'image suivante)
