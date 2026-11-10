@@ -726,6 +726,7 @@ const ok = (cond, msg)=>{ console.log((cond ? 'OK   ' : 'ÉCHEC ') + msg); if (!
         badgeRotEl.click(); await w(); const d = rotToolOn && !isSettingsOpen() && col(badgeSetEl)==='#3962F5' && col(badgeRotEl)==='#F59E0B';
         badgeCutEl.click(); await w(); const e = activeTool==='cut-rect' && !rotToolOn && col(badgeRotEl)==='#3962F5';
         badgeCutEl.click(); await w(); return a&&b&&c&&d&&e; }), 'icônes de travail : une seule active à la fois (ciseaux, réglages, rotation s\'annulent)');
+      ok(await pg.evaluate(async()=>{ const w=()=>new Promise(r=>setTimeout(r,150)); const pl=findPlanById(window.__rotPl); setRotTool(false); pl.locked=true; render(); updateLockIndicator(); await w(); const vis = badgeRotEl.style.display==='flex'; badgeRotEl.click(); await w(); const off = !rotToolOn && !isRotHandleVisible(); pl.locked=false; render(); updateLockIndicator(); await w(); return vis && off && badgeRotEl.style.display==='flex'; }), 'rotation : petite icône toujours visible, même plan verrouillé');
       ok(r.visible && r.unique, 'rotation : une seule icône (flèche entre − et +) inclinée à 45° au coin du plan, plus de fenêtre orange');
       ok(Math.abs(plus1 - 0.5) < 0.05 && Math.abs(minus2 - 359.5) < 0.05, 'rotation fine : « + » = +0,5°, « − » = −0,5° par appui ('+plus1+' puis '+minus2+')');
       ok(armed && label && Math.abs(free - 0) > 20, 'rotation libre : immédiate dès le toucher de la flèche (armée en bleu), angle affiché ('+Math.round(free)+'°)');

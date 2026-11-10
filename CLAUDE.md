@@ -32,7 +32,7 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
    en mode Plan.
 2. **Ne jamais déplacer de soi-même** un élément que l'utilisateur place à la main (logos, textes,
    légende, date). Aucun repositionnement automatique non demandé.
-3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-210**), à mettre à
+3. **Numéro de version à CHAQUE itération**, format `v2.1-NN` (actuellement **v2.1-211**), à mettre à
    jour aux 3 endroits : la balise `<title>`, la puce `.brand .ver` du bandeau, le commentaire
    d'en-tête du `<script>`.
    Attention : un remplacement global (`v2.1-69` → `v2.1-70` partout) modifie aussi les références
@@ -105,7 +105,7 @@ rapport (PDF, PPTX, PNG, JPEG). Un document peut contenir plusieurs pages (une p
   et cadre ensemble ; couleur de police + fond (∅ = transparent).
 - **Légende** : couleur de police + fond ; pastilles de légende de taille fixe 10 ; échelle
   bornée 0,3–8 et recentrée si elle sort de la feuille.
-- **Plan importé** : (v2.1-209) le grand outil de rotation est CACHÉ à la sélection ; une 5e petite icône (sous cadenas / croix / ciseaux / réglages, aussi pour un dessin) l'affiche, un 2e appui ou la désélection le masque (`setRotTool`, `rotToolOn`). Les 3 icônes de travail (ciseaux, réglages, rotation) sont bleues au repos et ORANGES (`BADGE_ORANGE`) quand actives (`paintWorkBadges`, plus d'anneau orange) ; UNE seule active à la fois (`deactivateWorkTools`, v2.1-210). Rotation par **UNE icône** (v2.1-204 ; l'essai v2.1-203 a été rejeté par Mic : croquis laid, icône décollée du coin) : dessin vectoriel soigné (arc + pointe de flèche entre un « − » et un « + »), collée au coin haut-gauche du plan, inclinée de 45° PAR RAPPORT au plan et qui TOURNE AVEC LUI (signes toujours droits), jamais recentrée dans l'écran :
+- **Plan importé** : (v2.1-209) le grand outil de rotation est CACHÉ à la sélection ; une 5e petite icône (sous cadenas / croix / ciseaux / réglages, aussi pour un dessin) l'affiche, un 2e appui ou la désélection le masque (`setRotTool`, `rotToolOn`). Les 3 icônes de travail (ciseaux, réglages, rotation) sont bleues au repos et ORANGES (`BADGE_ORANGE`) quand actives (`paintWorkBadges`, plus d'anneau orange) ; UNE seule active à la fois (`deactivateWorkTools`, v2.1-210) ; la petite icône de rotation reste visible même si le plan est verrouillé (v2.1-211 : un appui affiche alors « plan verrouillé »). Rotation par **UNE icône** (v2.1-204 ; l'essai v2.1-203 a été rejeté par Mic : croquis laid, icône décollée du coin) : dessin vectoriel soigné (arc + pointe de flèche entre un « − » et un « + »), collée au coin haut-gauche du plan, inclinée de 45° PAR RAPPORT au plan et qui TOURNE AVEC LUI (signes toujours droits), jamais recentrée dans l'écran :
   toucher la flèche puis glisser = rotation libre IMMÉDIATE (v2.1-207, plus de maintien) ; « − » / « + » = rotation fine (0,5° par appui, répétition dès 0,2 s d'appui) ; aimant à 0/90/180/270° ; angle affiché près de l'icône ;
   plus de fenêtre orange ni de mains. **Dernière version avec les 4 mains + fenêtre orange − / + : v2.1-202, commit `4d0a7a0` (référence fonctionnelle : y revenir si l'essai ne convient pas).** Pas de ligne de mire. Au doigt, le plan ne se
   déplace que s'il est SÉLECTIONNÉ et DÉVERROUILLÉ (outil « Déplacer le plan » supprimé en v2.1-78 ; la

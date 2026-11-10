@@ -1729,4 +1729,8 @@ v2.1-204 — Rotation : icône unique retravaillée (suite de l'essai v2.1-203, 
 - Cause racine : ciseaux et réglages pouvaient être oranges (actifs) en même temps, car chacun ignorait l'état des autres (la fenêtre des réglages restait ouverte pendant une découpe).
 - Correctif : `deactivateWorkTools(except)` appelée au clic de chaque icône : activer l'une annule la découpe, ferme les réglages et éteint la rotation. Test ajouté.
 
+## v2.1-211 — Petite icône de rotation toujours visible
+- Cause racine : sa visibilité dépendait de `rotatableObj()`, qui renvoie null pour un plan verrouillé.
+- Correctif : visible dès qu'un plan est sélectionné ; verrouillé, un appui indique de déverrouiller ; si le plan se verrouille pendant que l'outil est allumé, l'outil s'éteint.
+
 ```
